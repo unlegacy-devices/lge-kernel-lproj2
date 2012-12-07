@@ -396,14 +396,10 @@ obj-$(CONFIG_MSM_VP_REGULATOR) += msm_vp.o
 ifdef CONFIG_MSM_CPR
 obj-$(CONFIG_DEBUG_FS) += msm_cpr-debug.o
 endif
-# LGE_CHANGE : bohyun.jung@lge.com 
-# MSM_FIQ is only supported on msm8625. Do you include below files for all msm7x chipset.
 obj-$(CONFIG_MSM_FIQ) += msm7k_fiq.o
 obj-$(CONFIG_MSM_FIQ) += msm7k_fiq_handler.o
 obj-$(CONFIG_MSM_FIQ) += msm_watchdog7k.o
-
-### [LGE_BSP_S] jihyun2.jang@lge.com, 20130212 - RT8966A miniABB regulator
 obj-$(CONFIG_MINIABB_REGULATOR) += miniabb-regulator.o
-### [LGE_BSP_E] jihyun2.jang@lge.com, 20130212 - RT8966A miniABB regulator
-
 obj-$(CONFIG_ARCH_RANDOM) += early_random.o
+
+obj-$(CONFIG_MSM_CPU_PWRCTL) +=  msm_cpu_pwrctl.o
