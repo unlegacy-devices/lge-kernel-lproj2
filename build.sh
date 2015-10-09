@@ -61,7 +61,7 @@ unset zippackagecheck adbcopycheck
 cleankernel() {
 make clean mrproper &> /dev/null | echo "Cleaning..."
 cleankernelcheck="Done"
-unset buildprocesscheck codename ramdiskaddr name variant namevariant maindevicecheck BUILDTIME
+unset buildprocesscheck name variant namevariant maindevicecheck BUILDTIME
 }
 
 # Clean - End
@@ -84,16 +84,16 @@ echo "9) L7 II Dual        (P715/P716)"
 unset errorchoice
 read -p "Choice: " -n 1 -s choice
 case "$choice" in
-	0 ) defconfig="cyanogenmod_m4_defconfig"; codename="m4"; ramdiskaddr="14"; name="L5"; variant="NFC";;
-	1 ) defconfig="cyanogenmod_m4_nonfc_defconfig"; codename="m4"; ramdiskaddr="14"; name="L5"; variant="NoNFC";;
-	2 ) defconfig="cyanogenmod_u0_defconfig"; codename="u0"; ramdiskaddr="14"; name="L7"; variant="NFC";;
-	3 ) defconfig="cyanogenmod_u0_nonfc_defconfig"; codename="u0"; ramdiskaddr="14"; name="L7"; variant="NoNFC";;
-	4 ) defconfig="cyanogenmod_u0_8m_defconfig"; codename="u0"; ramdiskaddr="14"; name="L7"; variant="NFc-8m";;
-	5 ) defconfig="cyanogenmod_v1_defconfig"; codename="v1"; ramdiskaddr="15"; name="L1II"; variant="SingleAndDual";;
-	6 ) defconfig="cyanogenmod_vee3_defconfig"; codename="vee3"; ramdiskaddr="15"; name="L3II"; variant="SingleAndDual";;
-	7 ) defconfig="cyanogenmod_vee7_defconfig"; codename="vee7"; ramdiskaddr="15"; name="L7II"; variant="NFC";;
-	8 ) defconfig="cyanogenmod_vee7_nonfc_defconfig"; codename="vee7"; ramdiskaddr="15"; name="L7II"; variant="NFC";;
-	9 ) defconfig="cyanogenmod_vee7ds_defconfig"; codename="vee7"; ramdiskaddr="15"; name="L7II"; variant="Dual";;
+	0 ) defconfig="cyanogenmod_m4_defconfig"; name="L5"; variant="NFC";;
+	1 ) defconfig="cyanogenmod_m4_nonfc_defconfig"; name="L5"; variant="NoNFC";;
+	2 ) defconfig="cyanogenmod_u0_defconfig"; name="L7"; variant="NFC";;
+	3 ) defconfig="cyanogenmod_u0_nonfc_defconfig"; name="L7"; variant="NoNFC";;
+	4 ) defconfig="cyanogenmod_u0_8m_defconfig"; name="L7"; variant="NFc-8m";;
+	5 ) defconfig="cyanogenmod_v1_defconfig"; name="L1II"; variant="SingleAndDual";;
+	6 ) defconfig="cyanogenmod_vee3_defconfig"; name="L3II"; variant="SingleAndDual";;
+	7 ) defconfig="cyanogenmod_vee7_defconfig"; name="L7II"; variant="NFC";;
+	8 ) defconfig="cyanogenmod_vee7_nonfc_defconfig"; name="L7II"; variant="NFC";;
+	9 ) defconfig="cyanogenmod_vee7ds_defconfig"; name="L7II"; variant="Dual";;
 	* ) echo "$choice - This option is not valid"; sleep .5; errorchoice="ON";;
 esac
 if ! [ "$errorchoice" == "ON" ]; then
@@ -182,18 +182,11 @@ fi
 zippackage() {
 # Variables
 zipdaytime=$(date +%d" "%m" "%Y)
-filekernelflash="zip-creator/tools/kernel_flash.sh"
-filekernelflashtemp="zip-creator/tools/kernel_flash-temp.sh"
 fileupdaterscript="zip-creator/META-INF/com/google/android/updater-script"
 fileupdaterscripttemp="zip-creator/META-INF/com/google/android/updater-script-temp"
-stockcodename="m4"
-stockramdiskaddr="14"
 stockname="L5"
 stockvariant="NFC"
 
-# Kernel Flash
-sed "s/$stockcodename/$codename/; s/$stockramdiskaddr/$ramdiskaddr/" $filekernelflash > $filekernelflashtemp
-mv $filekernelflashtemp $filekernelflash
 # Updater-script
 sed "s/$stockname/$name/; s/$stockvariant/$variant/" $fileupdaterscript > $fileupdaterscripttemp
 mv $fileupdaterscripttemp $fileupdaterscript
@@ -213,9 +206,6 @@ cd ..
 sed "s/Release Day $zipdaytime/Today/" $fileupdaterscript > $fileupdaterscripttemp
 mv $fileupdaterscripttemp $fileupdaterscript
 # Updater-script
-sed "s/$codename/$stockcodename/; s/$ramdiskaddr/$stockramdiskaddr/" $filekernelflash > $filekernelflashtemp
-mv $filekernelflashtemp $filekernelflash
-# Kernel Flash
 sed "s/$name/$stockname/; s/$variant/$stockvariant/" $fileupdaterscript > $fileupdaterscripttemp
 mv $fileupdaterscripttemp $fileupdaterscript
 
