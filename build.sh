@@ -61,7 +61,7 @@ unset zippackagecheck adbcopycheck
 cleankernel() {
 make clean mrproper &> /dev/null | echo "Cleaning..."
 cleankernelcheck="Done"
-unset buildprocesscheck target serie variant maindevicecheck BUILDTIME
+unset buildprocesscheck codename ramdiskaddr name variant namevariant maindevicecheck BUILDTIME
 }
 
 # Clean - End
@@ -84,21 +84,24 @@ echo "9) L7 II Dual        (P715/P716)"
 unset errorchoice
 read -p "Choice: " -n 1 -s choice
 case "$choice" in
-	0 ) target="L5-"; variant="NFC"; defconfig="cyanogenmod_m4_defconfig";;
-	1 ) target="L5-"; variant="NoNFC"; defconfig="cyanogenmod_m4_nonfc_defconfig";;
-	2 ) target="L7-"; variant="NFC"; defconfig="cyanogenmod_u0_defconfig";;
-	3 ) target="L7-"; variant="NoNFC"; defconfig="cyanogenmod_u0_nonfc_defconfig";;
-	4 ) target="L7-"; variant="NFC-8m"; defconfig="cyanogenmod_u0_8m_defconfig";;
-	5 ) target="L1II-"; variant="SD"; defconfig="cyanogenmod_v1_defconfig";;
-	6 ) target="L3II-"; variant="SD"; defconfig="cyanogenmod_vee3_defconfig";;
-	7 ) target="L7II-"; variant="NFC"; defconfig="cyanogenmod_vee7_defconfig";;
-	8 ) target="L7II-"; variant="NoNFC"; defconfig="cyanogenmod_vee7_nonfc_defconfig";;
-	9 ) target="L7II-"; variant="Dual"; defconfig="cyanogenmod_vee7ds_defconfig";;
+	0 ) defconfig="cyanogenmod_m4_defconfig"; codename="m4"; ramdiskaddr="14"; name="L5"; variant="NFC";;
+	1 ) defconfig="cyanogenmod_m4_nonfc_defconfig"; codename="m4"; ramdiskaddr="14"; name="L5"; variant="NoNFC";;
+	2 ) defconfig="cyanogenmod_u0_defconfig"; codename="u0"; ramdiskaddr="14"; name="L7"; variant="NFC";;
+	3 ) defconfig="cyanogenmod_u0_nonfc_defconfig"; codename="u0"; ramdiskaddr="14"; name="L7"; variant="NoNFC";;
+	4 ) defconfig="cyanogenmod_u0_8m_defconfig"; codename="u0"; ramdiskaddr="14"; name="L7"; variant="NFc-8m";;
+	5 ) defconfig="cyanogenmod_v1_defconfig"; codename="v1"; ramdiskaddr="15"; name="L1II"; variant="SingleAndDual";;
+	6 ) defconfig="cyanogenmod_vee3_defconfig"; codename="vee3"; ramdiskaddr="15"; name="L3II"; variant="SingleAndDual";;
+	7 ) defconfig="cyanogenmod_vee7_defconfig"; codename="vee7"; ramdiskaddr="15"; name="L7II"; variant="NFC";;
+	8 ) defconfig="cyanogenmod_vee7_nonfc_defconfig"; codename="vee7"; ramdiskaddr="15"; name="L7II"; variant="NFC";;
+	9 ) defconfig="cyanogenmod_vee7ds_defconfig"; codename="vee7"; ramdiskaddr="15"; name="L7II"; variant="Dual";;
 	* ) echo "$choice - This option is not valid"; sleep .5; errorchoice="ON";;
 esac
 if ! [ "$errorchoice" == "ON" ]; then
-	echo "$choice - $target$variant"; make $defconfig &> /dev/null | echo "Setting..."; maindevicecheck="ON"
-	zipfile="$customkernel-$target$variant-$daytime.zip"
+	namevariant="$name-$variant"
+	echo "$choice - $name $variant"; make $defconfig &> /dev/null | echo "Setting..."
+	maindevicecheck="ON"
+	unset cleankernelcheck
+	zipfile="$customkernel-$name-$variant-$daytime.zip"
 fi
 }
 
@@ -177,21 +180,27 @@ fi
 # Zip Process - Start
 
 zippackage() {
-if [ "$target" == "L1II-" ]; then
-	tol1ii
-elif [ "$target" == "L3II-" ]; then
-	tol3ii
-elif [ "$target" == "L7II-" ]; then
-	tol7ii
-elif [ "$target" == "L7-" ]; then
-	tol7
-fi
+# Variables
+zipdaytime=$(date +%d" "%m" "%Y)
+filekernelflash="zip-creator/tools/kernel_flash.sh"
+filekernelflashtemp="zip-creator/tools/kernel_flash-temp.sh"
+fileupdaterscript="zip-creator/META-INF/com/google/android/updater-script"
+fileupdaterscripttemp="zip-creator/META-INF/com/google/android/updater-script-temp"
+stockcodename="m4"
+stockramdiskaddr="14"
+stockname="L5"
+stockvariant="NFC"
 
-if [ "$variant" == "NoNFC" ]; then
-	tononfc
-elif [ "$variant" == "Dual" ]; then
-	todual
-fi
+# Kernel Flash
+sed "s/$stockcodename/$codename/; s/$stockramdiskaddr/$ramdiskaddr/" $filekernelflash > $filekernelflashtemp
+mv $filekernelflashtemp $filekernelflash
+# Updater-script
+sed "s/$stockname/$name/; s/$stockvariant/$variant/" $fileupdaterscript > $fileupdaterscripttemp
+mv $fileupdaterscripttemp $fileupdaterscript
+# Updater-script - Time
+sed "s/Today/Release Day $zipdaytime/" $fileupdaterscript > $fileupdaterscripttemp
+mv $fileupdaterscripttemp $fileupdaterscript
+
 
 cp arch/$ARCH/boot/zImage zip-creator
 find . -name *.ko | xargs cp -a --target-directory=zip-creator/system/lib/modules/ &> /dev/null
@@ -200,100 +209,18 @@ cd zip-creator
 zip -r $zipfile * -x */.gitignore *.zip &> /dev/null
 cd ..
 
-if [ "$variant" == "Dual" ]; then
-	ofdual
-elif [ "$variant" == "NoNFC" ]; then
-	ofnonfc
-fi
-
-if [ "$target" == "L7-" ]; then
-	ofl7
-elif [ "$target" == "L7II-" ]; then
-	ofl7ii
-elif [ "$target" == "L3II-" ]; then
-	ofl3ii
-elif [ "$target" == "L1II-" ]; then
-	ofl1ii
-fi
+# Updater-script - Time
+sed "s/Release Day $zipdaytime/Today/" $fileupdaterscript > $fileupdaterscripttemp
+mv $fileupdaterscripttemp $fileupdaterscript
+# Updater-script
+sed "s/$codename/$stockcodename/; s/$ramdiskaddr/$stockramdiskaddr/" $filekernelflash > $filekernelflashtemp
+mv $filekernelflashtemp $filekernelflash
+# Kernel Flash
+sed "s/$name/$stockname/; s/$variant/$stockvariant/" $fileupdaterscript > $fileupdaterscripttemp
+mv $fileupdaterscripttemp $fileupdaterscript
 
 zippackagecheck="Done"
 unset cleanzipcheck
-}
-
-tol1ii() {
-sed 's/m4/vee3/; s/14/15/' zip-creator/tools/kernel_flash.sh > zip-creator/tools/kernel_flash-temp.sh
-mv zip-creator/tools/kernel_flash-temp.sh zip-creator/tools/kernel_flash.sh
-sed 's/L5 NFC/L1 II Single|Dual/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-ofl1ii() {
-sed 's/vee3/m4/; s/15/14/' zip-creator/tools/kernel_flash.sh > zip-creator/tools/kernel_flash-temp.sh
-mv zip-creator/tools/kernel_flash-temp.sh zip-creator/tools/kernel_flash.sh
-sed 's/L1 II Single|Dual/L5 NFC/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-tol3ii() {
-sed 's/m4/vee3/; s/14/15/' zip-creator/tools/kernel_flash.sh > zip-creator/tools/kernel_flash-temp.sh
-mv zip-creator/tools/kernel_flash-temp.sh zip-creator/tools/kernel_flash.sh
-sed 's/L5 NFC/L3 II Single and Dual/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-ofl3ii() {
-sed 's/vee3/m4/; s/15/14/' zip-creator/tools/kernel_flash.sh > zip-creator/tools/kernel_flash-temp.sh
-mv zip-creator/tools/kernel_flash-temp.sh zip-creator/tools/kernel_flash.sh
-sed 's/L3 II Single and Dual/L5 NFC/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-tol7ii() {
-sed 's/m4/vee7/; s/14/15/' zip-creator/tools/kernel_flash.sh > zip-creator/tools/kernel_flash-temp.sh
-mv zip-creator/tools/kernel_flash-temp.sh zip-creator/tools/kernel_flash.sh
-sed 's/L5/L7 II/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-ofl7ii() {
-sed 's/vee7/m4/; s/15/14/' zip-creator/tools/kernel_flash.sh > zip-creator/tools/kernel_flash-temp.sh
-mv zip-creator/tools/kernel_flash-temp.sh zip-creator/tools/kernel_flash.sh
-sed 's/L7 II/L5/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-tol7() {
-sed 's/m4/u0/' zip-creator/tools/kernel_flash.sh > zip-creator/tools/kernel_flash-temp.sh
-mv zip-creator/tools/kernel_flash-temp.sh zip-creator/tools/kernel_flash.sh
-sed 's/L5/L7/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-ofl7() {
-sed 's/u0/m4/' zip-creator/tools/kernel_flash.sh > zip-creator/tools/kernel_flash-temp.sh
-mv zip-creator/tools/kernel_flash-temp.sh zip-creator/tools/kernel_flash.sh
-sed 's/L7/L5/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-tononfc() {
-sed 's/NFC/NoNFC/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-ofnonfc() {
-sed 's/NoNFC/NFC/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-todual() {
-sed 's/NFC/Dual/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-ofdual() {
-sed 's/Dual/NFC/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
 }
 
 # Zip Process - End
@@ -343,7 +270,7 @@ echo "-${bldred}Clean:${txtrst}-"
 echo "1) Last Zip Package (${bldred}$cleanzipcheck${txtrst})"
 echo "2) Kernel (${bldred}$cleankernelcheck${txtrst})"
 echo "-${bldgrn}Main Process:${txtrst}-"
-echo "3) Device Choice (${bldgrn}$target$variant${txtrst})"
+echo "3) Device Choice (${bldgrn}$namevariant${txtrst})"
 echo "4) Toolchain Choice (${bldgrn}$ToolchainCompile${txtrst})"
 echo "-${bldyel}Build Process:${txtrst}-"
 if [ "$maindevicecheck" == "" ]; then
@@ -441,7 +368,7 @@ if [ -e build.sh ]; then
 	customkernel=CAFKernel
 	export ARCH=arm
 	daytime=$(date +%d""%m""%Y)
-	zipfile="$customkernel-$target$variant-$daytime.zip"
+	zipfile="$customkernel-$name-$variant-$daytime.zip"
 
 	if [ -f zip-creator/*.zip ]; then
 		unset cleanzipcheck
