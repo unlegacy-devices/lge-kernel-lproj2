@@ -272,8 +272,10 @@ else
 		echo "5) Build $customkernel (${bldyel}$buildprocesscheck${txtrst})"
 	fi
 fi
-if [ -f arch/$ARCH/boot/zImage ]; then
-	echo "6) Build Zip Package (${bldyel}$zippackagecheck${txtrst})"
+if ! [ "$maindevicecheck" == "" ]; then
+	if [ -f arch/$ARCH/boot/zImage ]; then
+		echo "6) Build Zip Package (${bldyel}$zippackagecheck${txtrst})"
+	fi
 fi
 if [ -f zip-creator/$zipfile ]; then
 	echo "${bldblu}Test Process:${txtrst}"
