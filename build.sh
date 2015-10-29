@@ -55,7 +55,7 @@ fi
 cleanzip() {
 rm -rf zip-creator/*.zip zip-creator/zImage zip-creator/system/lib/modules/*.ko
 cleanzipcheck="Done"
-unset zippackagecheck adbcopycheck
+unset zippackagecheck
 }
 
 cleankernel() {
@@ -277,21 +277,12 @@ if ! [ "$maindevicecheck" == "" ]; then
 		echo "6) Build Zip Package (${bldyel}$zippackagecheck${txtrst})"
 	fi
 fi
-if [ -f zip-creator/$zipfile ]; then
-	echo "${bldblu}Test Process:${txtrst}"
-	echo "7) Copy to device - Via Adb (${bldblu}$adbcopycheck${txtrst})"
-	if [ "$adbcopycheck" == "Done" ]; then
-		echo "8) Reboot device to recovery"
-	fi
-fi
+echo "-${bldblu}Test Menu:${txtrst}-"
+if [ -f zip-creator/$zipfile ]; then echo "7) Copy to device - Via Adb"; fi
+echo "8) Reboot device to recovery"
 echo "-${bldmag}Status:${txtrst}-"
 buildtimemisc
-if [ "$maindevicecheck" == "" ]; then
-	if [ -f arch/$ARCH/boot/zImage ]; then
-		echo "${bldblu}You have old Kernel build!${txtrst}"
-		buildprocesscheck="Old build"
-	fi
-elif [ "$CROSS_COMPILE" == "" ]; then
+if [[ "$maindevicecheck" == "" || "$CROSS_COMPILE" == "" ]]; then
 	if [ -f arch/$ARCH/boot/zImage ]; then
 		echo "${bldblu}You have old Kernel build!${txtrst}"
 		buildprocesscheck="Old build"
@@ -317,6 +308,7 @@ echo "o) View Build Output (${bldcya}$buildoutput${txtrst})"
 else
 echo "o) View Build Output ($buildoutput)"
 fi
+echo "g) Git Gui | k) GitK | s) Git Push | l) Git Pull"
 
 echo "q) Quit"
 read -n 1 -p "${txtbld}Choice: ${txtrst}" -s x
@@ -326,7 +318,7 @@ case $x in
 	3) echo "$x - Device choice"; maindevice; buildsh;;
 	4) echo "$x - Toolchain choice"; maintoolchain; buildsh;;
 	5) if [ -f .config ]; then
-		echo "$x - Building $customkernel"; buildprocess; buildsh
+		echo "$x - Building $customkernel"; buildprocess; zippackage; buildsh
 	else
 		echo "$x - This option is not valid"; sleep .5; buildsh
 	fi;;
@@ -335,19 +327,19 @@ case $x in
 	else
 		echo "$x - This option is not valid"; sleep .5; buildsh
 	fi;;
-	7) if [ -f zip-creator/*.zip ]; then
+	7) if [ -f zip-creator/$zipfile ]; then
 		echo "$x - Coping $customkernel"; adbcopy; buildsh
 	else
 		echo "$x - This option is not valid"; sleep .5; buildsh
 	fi;;
-	8) if [ "$adbcopycheck" == "Done" ]; then
-		echo "$x - Rebooting to Recovery..."; adb reboot recovery; buildsh
-	else
-		echo "$x - This option is not valid"; sleep .5; buildsh
-	fi;;
+	8) echo "$x - Rebooting to Recovery..."; adb reboot recovery; buildsh;;
 	c) setcustomcoloroutput; customcoloroutput; buildsh;;
 	o) setcustombuildoutput; buildsh;;
 	q) echo "Ok, Bye!"; unset zippackagecheck;;
+	g) echo "Opening Git Gui"; git gui; buildsh;;
+	k) echo "Opening GitK"; gitk; buildsh;;
+	s) echo "Pushing to local repo"; git push; buildsh;;
+	l) echo "Pulling to local repo"; git pull; buildsh;;
 	*) echo "$x - This option is not valid"; sleep .5; buildsh;;
 esac
 }
