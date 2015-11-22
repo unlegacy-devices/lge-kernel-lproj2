@@ -105,16 +105,30 @@ if ! [ "$errorchoice" == "ON" ]; then
 fi
 }
 
+manualtoolchain() {
+echo ""
+echo "Script says: Please specify a location"
+echo "Script says: and the prefix of the chosen toolchain at the end"
+echo "GCC 4.6 ex. ../arm-eabi-4.6/bin/arm-eabi-"
+read -p "Place: " CROSS_COMPILE
+ToolchainCompile=$CROSS_COMPILE
+}
+
 maintoolchain() {
-if [ -d ../android_prebuilt_toolchains ]; then
+if [ -f ../android_prebuilt_toolchains/aptess.sh ]; then
 	. ../android_prebuilt_toolchains/aptess.sh
+elif [ -d ../android_prebuilt_toolchains ]; then
+	echo "You not have APTESS in Android Prebuilt Toolchain folder"
+	echo "Check the folder or press "y" for manual specify location"
+	read -p "Continue? (y/n): " -n 1 -s tps
+	case "$tps" in
+		y | Y) manualtoolchain ;;
+		n | N) ;;
+		*) echo "$tps - This option is not valid"; sleep .5 ;;
+	esac
 else
 	echo "Script says: You don't have TeamVee Prebuilt Toolchains"
-	echo ""
-	echo "Script says: Please specify a location"
-	echo "Script says: and the prefix of the chosen toolchain at the end"
-	echo "Caio99BR says: GCC 4.6 ex. ../arm-eabi-4.6/bin/arm-eabi-"
-	read -p "Place: " CROSS_COMPILE
+	manualtoolchain
 fi
 }
 
