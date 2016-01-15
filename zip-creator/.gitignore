@@ -1,2 +1,4 @@
 *.zip
 zImage
+device.prop
+modules/*.ko
