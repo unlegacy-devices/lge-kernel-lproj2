@@ -671,7 +671,9 @@ struct mdp_buf_sync {
         uint32_t session_id;
 	int *acq_fen_fd;
 	int *rel_fen_fd;
+#ifndef CONFIG_FB_MSM_EBI2_TOVIS_QVGA_NEW_ADRENO_BLOBS_WORKAROUND
 	int *retire_fen_fd;
+#endif
 };
 
 struct mdp_async_blit_req_list {
@@ -681,6 +683,15 @@ struct mdp_async_blit_req_list {
 };
 
 #define MDP_DISPLAY_COMMIT_OVERLAY 0x00000001
+
+#ifdef CONFIG_FB_MSM_EBI2_TOVIS_QVGA_NEW_ADRENO_BLOBS_WORKAROUND
+struct mdp_buf_fence {
+	uint32_t flags;
+	uint32_t acq_fen_fd_cnt;
+	int acq_fen_fd[MDP_MAX_FENCE_FD];
+	int rel_fen_fd[MDP_MAX_FENCE_FD];
+};
+#endif
 
 struct mdp_display_commit {
 	uint32_t flags;

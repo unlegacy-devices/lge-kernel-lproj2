@@ -205,8 +205,18 @@ struct msm_fb_data_type {
 	int vsync_sysfs_created;
 	u32 acq_fen_cnt;
 	struct sync_fence *acq_fen[MDP_MAX_FENCE_FD];
+#ifdef CONFIG_FB_MSM_EBI2_TOVIS_QVGA_NEW_ADRENO_BLOBS_WORKAROUND
+	int cur_rel_fen_fd;
+	struct sync_pt *cur_rel_sync_pt;
+	struct sync_fence *cur_rel_fence;
+	struct sync_fence *last_rel_fence;
+#endif
 	struct sw_sync_timeline *timeline;
 	int timeline_value;
+#ifdef CONFIG_FB_MSM_EBI2_TOVIS_QVGA_NEW_ADRENO_BLOBS_WORKAROUND
+	u32 last_acq_fen_cnt;
+	struct sync_fence *last_acq_fen[MDP_MAX_FENCE_FD];
+#endif
 	struct mutex sync_mutex;
 	struct completion commit_comp;
 	u32 is_committing;
