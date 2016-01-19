@@ -362,7 +362,7 @@ static int rmt_storage_event_open_cb(struct rmt_storage_event *event_args,
 	if (event_type != RMT_STORAGE_EVNT_OPEN)
 		return -1;
 
-	pr_info("%s: open callback received\n", __func__);
+	pr_debug("%s: open callback received\n", __func__);
 
 	ret = xdr_recv_bytes(xdr, (void **)&path, &len);
 	if (ret || !path) {
@@ -405,7 +405,7 @@ static int rmt_storage_event_open_cb(struct rmt_storage_event *event_args,
 		return cid;
 	}
 	__set_bit(cid, &rmc->cids);
-	pr_info("open partition %s handle=%d\n", event_args->path, cid);
+	pr_debug("open partition %s handle=%d\n", event_args->path, cid);
 
 #ifdef CONFIG_MSM_RMT_STORAGE_CLIENT_STATS
 	stats = &client_stats[cid - 1];
@@ -560,7 +560,7 @@ static int rmt_storage_event_write_block_cb(
 	uint32_t event_type;
 	int ret;
 
-	pr_info("%s Entered\n",__func__);
+	pr_debug("%s Entered\n",__func__);
 	xdr_recv_uint32(xdr, &event_type);
 	if (event_type != RMT_STORAGE_EVNT_WRITE_BLOCK)
 		return -1;
@@ -605,7 +605,7 @@ static int rmt_storage_event_get_err_cb(struct rmt_storage_event *event_args,
 	uint32_t event_type;
 	int ret;
 
-	pr_info("%s Entered\n",__func__);
+	pr_debug("%s Entered\n",__func__);
 	xdr_recv_uint32(xdr, &event_type);
 	if (event_type != RMT_STORAGE_EVNT_GET_DEV_ERROR)
 		return -1;
@@ -634,12 +634,12 @@ static int rmt_storage_event_user_data_cb(struct rmt_storage_event *event_args,
 	uint32_t event_type;
 	int ret;
 
-	pr_info("%s Entered\n",__func__);
+	pr_debug("%s Entered\n",__func__);
 	xdr_recv_uint32(xdr, &event_type);
 	if (event_type != RMT_STORAGE_EVNT_SEND_USER_DATA)
 		return -1;
 
-	pr_info("%s: send user data callback received\n", __func__);
+	pr_debug("%s: send user data callback received\n", __func__);
 	ret = xdr_recv_pointer(xdr, (void **)&event,
 			sizeof(struct rmt_storage_event_params),
 			rmt_storage_parse_params);
@@ -666,12 +666,12 @@ static int rmt_storage_event_write_iovec_cb(
 	struct rmt_storage_stats *stats;
 #endif
 
-	pr_info("%s Entered\n",__func__);
+	pr_debug("%s Entered\n",__func__);
 	xdr_recv_uint32(xdr, &event_type);
 	if (event_type != RMT_STORAGE_EVNT_WRITE_IOVEC)
 		return -EINVAL;
 
-	pr_info("%s: write iovec callback received\n", __func__);
+	pr_debug("%s: write iovec callback received\n", __func__);
 	xdr_recv_uint32(xdr, &event_args->handle);
 	xdr_recv_uint32(xdr, &ent);
 	pr_debug("handle = %d\n", event_args->handle);
@@ -699,7 +699,7 @@ static int rmt_storage_event_write_iovec_cb(
 		wake_lock(&rmc->wlock);
 
 	pr_debug("iovec transfer count = %d\n\n", event_args->xfer_cnt);
-	pr_info("%s Exitting\n",__func__);
+	pr_debug("%s Exitting\n",__func__);
 
 	return RMT_STORAGE_NO_ERROR;
 }
@@ -714,12 +714,12 @@ static int rmt_storage_event_read_iovec_cb(
 	struct rmt_storage_stats *stats;
 #endif
 
-	pr_info("%s Entered\n",__func__);
+	pr_debug("%s Entered\n",__func__);
 	xdr_recv_uint32(xdr, &event_type);
 	if (event_type != RMT_STORAGE_EVNT_READ_IOVEC)
 		return -EINVAL;
 
-	pr_info("%s: read iovec callback received\n", __func__);
+	pr_debug("%s: read iovec callback received\n", __func__);
 	xdr_recv_uint32(xdr, &event_args->handle);
 	xdr_recv_uint32(xdr, &ent);
 	pr_debug("handle = %d\n", event_args->handle);
@@ -787,7 +787,7 @@ static int rmt_storage_sdio_smem_probe(struct platform_device *pdev)
 	sdio_smem->cb_func = sdio_smem_cb;
 	ret = sdio_smem_register_client();
 	if (ret)
-		pr_info("%s: Error (%d) registering sdio_smem client\n",
+		pr_debug("%s: Error (%d) registering sdio_smem client\n",
 			__func__, ret);
 	return ret;
 }
@@ -830,7 +830,7 @@ static int rmt_storage_event_alloc_rmt_buf_cb(
 	if (event_type != RMT_STORAGE_EVNT_ALLOC_RMT_BUF)
 		return -EINVAL;
 
-	pr_info("%s: Alloc rmt buf callback received\n", __func__);
+	pr_debug("%s: Alloc rmt buf callback received\n", __func__);
 	xdr_recv_uint32(xdr, &handle);
 	xdr_recv_uint32(xdr, &size);
 
@@ -1034,7 +1034,7 @@ static long rmt_storage_ioctl(struct file *fp, unsigned int cmd,
 	ktime_t curr_stat;
 #endif
 
-	pr_info("%s Entered\n",__func__);
+	pr_debug("%s Entered\n",__func__);
 	switch (cmd) {
 
 	case RMT_STORAGE_SHRD_MEM_PARAM:
@@ -1096,7 +1096,7 @@ static long rmt_storage_ioctl(struct file *fp, unsigned int cmd,
 		break;
 
 	case RMT_STORAGE_SEND_STATUS:
-		pr_info("%s: send status ioctl\n", __func__);
+		pr_debug("%s: send status ioctl\n", __func__);
 		if (copy_from_user(&status, (void __user *)arg,
 				sizeof(struct rmt_storage_send_sts))) {
 			pr_err("%s: copy from user failed\n\n", __func__);
@@ -1167,14 +1167,14 @@ static long rmt_storage_ioctl(struct file *fp, unsigned int cmd,
 //LGE_CHANGE_S[panchaxari.t@lge.com]
 			if(forceSyncDone)
 				forceSyncDone = 0;
-			pr_info("%s gracefully breaking out from SEND_STATUS\n",__func__);
+			pr_debug("%s gracefully breaking out from SEND_STATUS\n",__func__);
 //LGE_CHANGE_E[panchaxari.t@lge.com]			
 		break;
 
 #if defined(CONFIG_MACH_MSM7X27A_U0)	
 /*LGE_CHANGE_S: seunhang.lee@lge.com 03/01/2013:Check rmt Client Ready*/
 	case RMT_STORAGE_READY_CLIENT:
-		pr_info("%s: Receive RMT_STORAGE_READY_CLIENT\n", __func__);
+		pr_debug("%s: Receive RMT_STORAGE_READY_CLIENT\n", __func__);
 		rmt_storate_report_available();
 		break;
 /*LGE_CHANGE_E: seunhang.lee@lge.com 03/01/2013:Check rmt Client Ready*/
@@ -1197,7 +1197,7 @@ static int rmt_storage_receive_sync_arg(struct msm_rpc_client *client,
 	struct rmt_storage_sync_recv_arg *args = data;
 	struct rmt_storage_srv *srv;
 
-	pr_info("%s Entered\n",__func__);
+	pr_debug("%s Entered\n",__func__);
 	srv = rmt_storage_get_srv(client->prog);
 	if (!srv)
 		return -EINVAL;
@@ -1212,17 +1212,17 @@ static int rmt_storage_force_sync(struct msm_rpc_client *client)
 	int rc;
 	
 
-	pr_info("@@@: %s: Entered\n", __func__); /*qct_patch_seven*/
+	pr_debug("@@@: %s: Entered\n", __func__); /*qct_patch_seven*/
 
 //LGE_CHANGE_S[panchaxari.t@lge.com]
 	if(forceSyncDone){ 
-		pr_info("%s Returning Already ForceSync in progress\n",__func__);
+		pr_debug("%s Returning Already ForceSync in progress\n",__func__);
 		return 0;
 	}
 	else forceSyncDone=1;
 //LGE_CHANGE_E[panchaxari.t@lge.com]
 
-	pr_info("@@@: %s: Force-sync req sent\n", __func__); /*qct_patch_seven*/
+	pr_debug("@@@: %s: Force-sync req sent\n", __func__); /*qct_patch_seven*/
 	
 	rc = msm_rpc_client_req2(client,
 			RMT_STORAGE_FORCE_SYNC_PROC, NULL, NULL,
@@ -1231,7 +1231,7 @@ static int rmt_storage_force_sync(struct msm_rpc_client *client)
 		pr_err("%s: force sync RPC req failed: %d\n", __func__, rc);
 		return rc;
 	} else { /*LGE_CHANGE : seven.kim@lge.com qct patch for power on/off test modem crash*/
-		pr_info("@@@: %s: force sync RPC req done: %d\n", __func__, rc);
+		pr_debug("@@@: %s: force sync RPC req done: %d\n", __func__, rc);
 	}
 	return 0;
 }
@@ -1265,7 +1265,7 @@ static int rmt_storage_get_sync_status(struct msm_rpc_client *client)
 	struct rmt_storage_srv *srv;
 	int rc;
 
-	pr_info("@@@: %s:  Got sync_sts request\n", __func__); /*qct_patch_seven*/
+	pr_debug("@@@: %s:  Got sync_sts request\n", __func__); /*qct_patch_seven*/
 	
 	srv = rmt_storage_get_srv(client->prog);
 	if (!srv)
@@ -1283,7 +1283,7 @@ static int rmt_storage_get_sync_status(struct msm_rpc_client *client)
 		pr_err("%s: sync status RPC req failed: %d\n", __func__, rc);
 		return rc;
 	} else { /*LGE_CHANGE : seven.kim@lge.com qct patch for power on/off test modem crash*/
-		pr_info("@@@: %s: sync status RPC req done: %d\n", __func__, rc);
+		pr_debug("@@@: %s: sync status RPC req done: %d\n", __func__, rc);
 	}
  	
 	return recv_args.data;
@@ -1450,7 +1450,7 @@ static int rmt_storage_get_ramfs(struct rmt_storage_srv *srv)
 		    ramfs_entry->client_id == (u32) RAMFS_DEFAULT)
 			break;
 
-		pr_info("%s: RAMFS entry: addr = 0x%08x, size = 0x%08x\n",
+		pr_debug("%s: RAMFS entry: addr = 0x%08x, size = 0x%08x\n",
 			__func__, ramfs_entry->base_addr, ramfs_entry->size);
 
 		ret = rmt_storage_add_shrd_mem(ramfs_entry->client_id,
@@ -1479,7 +1479,7 @@ set_force_sync(struct device *dev, struct device_attribute *attr,
 	struct rmt_storage_srv *srv;
 	int value, rc;
 
-	pr_info("%s Entered\n",__func__);
+	pr_debug("%s Entered\n",__func__);
 	pdev = container_of(dev, struct platform_device, dev);
 	rpc_pdev = container_of(pdev, struct rpcsvr_platform_device, base);
 	srv = rmt_storage_get_srv(rpc_pdev->prog);
@@ -1506,7 +1506,7 @@ static int rmt_storage_send_frst_sts_arg(struct msm_rpc_client *client,
 	struct rmt_storage_sync_sts_arg *req = data;
 
 	xdr_send_int32(xdr, &req->token);
-	pr_info("%s: do xdr send!\n", __func__);
+	pr_debug("%s: do xdr send!\n", __func__);
 	return 0;
 }
 
@@ -1531,7 +1531,7 @@ show_force_sync(struct device *dev, struct device_attribute *attr,
 	struct rpcsvr_platform_device *rpc_pdev;
 	struct rmt_storage_srv *srv;
 
-	pr_info("%s Entered\n",__func__);
+	pr_debug("%s Entered\n",__func__);
 	pdev = container_of(dev, struct platform_device, dev);
 	rpc_pdev = container_of(pdev, struct rpcsvr_platform_device, base);
 	srv = rmt_storage_get_srv(rpc_pdev->prog);
@@ -1555,7 +1555,7 @@ show_sync_sts(struct device *dev, struct device_attribute *attr, char *buf)
 	struct rpcsvr_platform_device *rpc_pdev;
 	struct rmt_storage_srv *srv;
 
-	pr_info("%s Entered\n",__func__);
+	pr_debug("%s Entered\n",__func__);
 	pdev = container_of(dev, struct platform_device, dev);
 	rpc_pdev = container_of(pdev, struct rpcsvr_platform_device, base);
 	srv = rmt_storage_get_srv(rpc_pdev->prog);
@@ -1608,7 +1608,7 @@ static int rmt_storage_reboot_call(
 	case SYS_RESTART:
 	case SYS_HALT:
 	case SYS_POWER_OFF:
-		pr_info("%s: Force RMT storage final sync...calling rmt_storage_force_sync\n", __func__);
+		pr_debug("%s: Force RMT storage final sync...calling rmt_storage_force_sync\n", __func__);
 
 		ret = rmt_storage_force_sync(rmt_srv->rpc_client);
 		if (ret) {
@@ -1629,11 +1629,11 @@ static int rmt_storage_reboot_call(
 //LGE_CHANGE_E[panchaxari.t@lge.com][QCT SR#01086171]
 		if (ret == 1)
 		{
-			pr_info("%s: Final-sync successful\n",__func__);
+			pr_debug("%s: Final-sync successful\n",__func__);
 		}
 		else
 		{
-			pr_info("%s: Final-sync failed\n",__func__);
+			pr_debug("%s: Final-sync failed\n",__func__);
 		}
 
 //LGE_CHANGE_S[panchaxari.t@lge.com][QCT SR#01086171]
@@ -1655,7 +1655,7 @@ static int rmt_storage_reboot_call(
 		if(atomic_read(&rmc->wcount))
 			pr_err("%s: Efs_sync still incomplete\n",__func__);
 //LGE_CHANGE_E[panchaxari.t@lge.com][QCT SR#01086171]
-		pr_info("%s: Un-register RMT storage client.\n", __func__);
+		pr_debug("%s: Un-register RMT storage client.\n", __func__);
 		msm_rpc_unregister_client(rmt_srv->rpc_client);
 		break;
 
@@ -1719,7 +1719,7 @@ static void rmt_storage_set_client_status(struct rmt_storage_srv *srv,
 {
 	struct rmt_shrd_mem *shrd_mem;
 
-	pr_info("%s Entered\n",__func__);
+	pr_debug("%s Entered\n",__func__);
 	spin_lock(&rmc->lock);
 	list_for_each_entry(shrd_mem, &rmc->shrd_mem_list, list)
 		if (shrd_mem->srv->prog == srv->prog)
@@ -1821,7 +1821,7 @@ static int rmt_storage_reg_callbacks(struct msm_rpc_client *client)
 				 RMT_STORAGE_EVNT_ALLOC_RMT_BUF,
 				 rmt_storage_event_alloc_rmt_buf_cb);
 	if (ret)
-		pr_info("%s: Unable (%d) registering aloc_rmt_buf\n",
+		pr_debug("%s: Unable (%d) registering aloc_rmt_buf\n",
 			__func__, ret);
 
 	pr_debug("%s: Callbacks (re)registered for 0x%08x\n\n", __func__,
@@ -1895,7 +1895,7 @@ static int rmt_storage_probe(struct platform_device *pdev)
 	if (ret)
 		goto unregister_client;
 
-	pr_info("%s: Remote storage RPC client (0x%x)initialized\n",
+	pr_debug("%s: Remote storage RPC client (0x%x)initialized\n",
 		__func__, dev->prog);
 
 	/* register server callbacks */

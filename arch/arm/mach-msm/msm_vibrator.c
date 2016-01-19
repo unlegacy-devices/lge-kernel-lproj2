@@ -122,7 +122,7 @@ static void timed_vibrator_off(struct timed_output_dev *sdev)
 static void vibrator_enable(struct timed_output_dev *dev, int value)
 {
 	hrtimer_cancel(&vibe_timer);
-    printk(KERN_INFO"[msm_vibrator] vibrator_enable, value : %d",value);
+	pr_debug("[msm_vibrator] vibrator_enable, value : %d\n",value);
 	cancel_work_sync(&work_vibrator_off);
 	if (value == 0)
 		timed_vibrator_off(dev);

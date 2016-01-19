@@ -6057,8 +6057,8 @@ static void bma2x2_irq_work_func(struct work_struct *work)
 		break;
 
 	case 0x10:
-		printk(KERN_INFO "double tap interrupt happened\n");
 #if 0
+		printk(KERN_INFO "double tap interrupt happened\n");
 		input_report_rel(bma2x2->input, DOUBLE_TAP_INTERRUPT, DOUBLE_TAP_INTERRUPT_HAPPENED);
 		input_report_key(bma2x2->input, KEY_POWER, 1);
 		input_sync(bma2x2->input);

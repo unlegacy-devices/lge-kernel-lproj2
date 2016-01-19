@@ -280,7 +280,7 @@ static void report_hs_key(uint32_t key_code, uint32_t key_parm)
 	if (key_parm == HS_REL_K)
 		key_code = key_parm;
 
-	printk("%s: reported key is %d\n",__func__,key);
+	pr_debug("%s: reported key is %d\n",__func__,key);
 
 	switch (key) {
 	case KEY_POWER:

@@ -625,11 +625,11 @@ static int prox_power_set(unsigned char onoff)
 	if(onoff == 1)
 	{
 		rt9396_ldo_enable(NULL,1,1);
-		printk(KERN_INFO "%s,***********Proximity probe enter when power on*****\n",__func__);
+		pr_debug("%s,***********Proximity probe enter when power on*****\n",__func__);
 	} else
 	{
 		rt9396_ldo_enable(NULL,1,0);
-		printk(KERN_INFO "%s,***********Proximity probe enter when power on*****\n",__func__);
+		pr_debug("%s,***********Proximity probe enter when power on*****\n",__func__);
 	}
 
 #endif
@@ -822,18 +822,18 @@ static int lp5521_setup(void)
        
        int rc = 0;
 
-       printk("lp5521_enable\n\n");
+       pr_debug("lp5521_enable\n\n");
        rc = gpio_request(RGB_GPIO_RGB_EN, "lp5521_led");
 
        if(rc){
-              printk("lp5521_request failed\n");
+              pr_debug("lp5521_request failed\n");
               return rc;
        }
 
 	rc = gpio_tlmm_config(GPIO_CFG(RGB_GPIO_RGB_EN, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
 	
        if(rc){
-              printk("lp5521_config failed\n");
+              pr_debug("lp5521_config failed\n");
               return rc;
        }
        return rc;
@@ -843,11 +843,11 @@ static void lp5521_enable(bool state)
 {
        if(state){
               gpio_set_value(RGB_GPIO_RGB_EN, 1);
-              printk(KERN_INFO"lp5521_enable_set\n");
+              pr_debug("lp5521_enable_set\n");
        }
        else{
               gpio_set_value(RGB_GPIO_RGB_EN, 0);
-              printk(KERN_INFO"lp5521_disable_set\n");
+              pr_debug("lp5521_disable_set\n");
        }
        
        return;

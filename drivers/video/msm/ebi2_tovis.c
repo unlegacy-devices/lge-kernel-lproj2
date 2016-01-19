@@ -154,7 +154,7 @@ static int ilitek_qvga_disp_off(struct platform_device *pdev)
 #ifdef CONFIG_MACH_MSM7X25A_V1	
 	//do not control when suspend after just working chargerlogo
 		if(StatusBacklightOnOff==1) {
-	printk("%s: display off...\n", __func__);
+	pr_debug("%s: display off...\n", __func__);
 			lge_rt8966a_backlight_control(0);
 			StatusBacklightOnOff = 0;
 			IsFirstDisplayOn = 0;
@@ -593,7 +593,7 @@ static int ilitek_qvga_disp_on(struct platform_device *pdev)
 
 	struct msm_panel_ilitek_pdata *pdata = tovis_qvga_panel_pdata;
 
-	printk("%s: display on... \n", __func__);
+	pr_debug("%s: display on... \n", __func__);
 		
 	if (!disp_initialized)
 		tovis_qvga_disp_init(pdev);
@@ -602,7 +602,7 @@ static int ilitek_qvga_disp_on(struct platform_device *pdev)
    if((pdata->initialized && system_state == SYSTEM_BOOTING) || lcd_init_skip_cnt < 1) {
    
       lcd_init_skip_cnt =1;
-      printk("%s: display on...Skip! and back light off charger logo mode\n", __func__);
+      pr_debug("%s: display on...Skip! and back light off charger logo mode\n", __func__);
 	  
 #else
 	if(pdata->initialized && system_state == SYSTEM_BOOTING) {
@@ -637,7 +637,7 @@ static int ilitek_qvga_disp_on(struct platform_device *pdev)
 			}
 			
 			panel_tianmaDisplay_init();
-			printk("----------tianma Enabled-----------\n");
+			pr_debug("----------tianma Enabled-----------\n");
 
 			
 		}else {
@@ -651,7 +651,7 @@ static int ilitek_qvga_disp_on(struct platform_device *pdev)
 				msleep(120);
 			}
 			panel_CMIDisplay_init();
-			printk("----------CMI Enabled--------------\n");
+			pr_debug("----------CMI Enabled--------------\n");
 			
 		}
 #else
@@ -726,7 +726,7 @@ static int __init tovis_qvga_probe(struct platform_device *pdev)
 
 	ret = device_create_file(&pdev->dev, &dev_attr_lcd_onoff);
 	if (ret) {
-		printk("tovis_qvga_probe device_creat_file failed!\n");
+		pr_debug("tovis_qvga_probe device_creat_file failed!\n");
 	}
 
 #ifndef CONFIG_ARCH_MSM7X27A
