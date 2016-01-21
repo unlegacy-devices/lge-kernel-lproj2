@@ -193,12 +193,18 @@ static int ebi2_lcd_probe(struct platform_device *pdev)
 
 	hw_version = inp32((int)ebi2_base + 8);
 
+	/* OverWrite Panel Info Original Values */
+#ifdef CONFIG_FB_MSM_DEFAULT_DEPTH_RGBA8888
+	mfd->fb_imgType = MDP_RGBA_8888;
+#else
+	/* Use Original setting if no one of aboves is defined */
 	if (mfd->panel_info.bpp == 24)
 		mfd->fb_imgType = MDP_RGB_888;
 	else if (mfd->panel_info.bpp == 18)
 		mfd->fb_imgType = MDP_RGB_888;
 	else
 		mfd->fb_imgType = MDP_RGB_565;
+#endif
 
 	/* config msm ebi2 lcd register */
 	if (mfd->panel_info.pdest == DISPLAY_1) {
