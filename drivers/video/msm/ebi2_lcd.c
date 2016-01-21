@@ -198,11 +198,7 @@ static int ebi2_lcd_probe(struct platform_device *pdev)
 	else if (mfd->panel_info.bpp == 18)
 		mfd->fb_imgType = MDP_RGB_888;
 	else
-#ifdef CONFIG_FB_MSM_EBI2_TOVIS_QVGA_NEW_ADRENO_BLOBS_WORKAROUND
-		mfd->fb_imgType = MDP_RGBA_8888;
-#else
 		mfd->fb_imgType = MDP_RGB_565;
-#endif
 
 	/* config msm ebi2 lcd register */
 	if (mfd->panel_info.pdest == DISPLAY_1) {

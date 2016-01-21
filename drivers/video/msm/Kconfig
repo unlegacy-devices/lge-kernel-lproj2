@@ -812,13 +812,6 @@ config FB_MSM_EBI2_TOVIS_QVGA
 	---help---
 	  Support for EBI2 TOVIS QVGA (240x320) Panel
 
-config FB_MSM_EBI2_TOVIS_QVGA_NEW_ADRENO_BLOBS_WORKAROUND
-	bool "EBI2 Tovis QVGA Panel Workaround for New KK Adreno Blobs"
-	default n
-	depends on FB_MSM_EBI2_TOVIS_QVGA
-	---help---
-	  Workaround for New KK Adreno Blobs in EBI2 TOVIS QVGA (240x320) Panel
-
 config FB_MSM_HDMI_AS_PRIMARY
 	depends on FB_MSM_HDMI_COMMON
 	bool "Use HDMI as primary panel"
