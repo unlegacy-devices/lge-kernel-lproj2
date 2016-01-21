@@ -289,8 +289,8 @@ case $x in
 	q) echo "Ok, Bye!"; unset zippackagecheck; break;;
 	g) echo "Opening Git Gui"; git gui;;
 	k) echo "Opening GitK"; gitk;;
-	s) echo "Pushing to local repo"; git push;;
-	l) echo "Pulling to local repo"; git pull;;
+	s) echo "Pushing to remote repo"; git push --verbose --all; sleep 3;;
+	l) echo "Pushing to local repo"; git pull --verbose --all; sleep 3;;
 	*) echo "$x - This option is not valid"; sleep .5;;
 esac
 }
