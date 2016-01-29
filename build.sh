@@ -166,6 +166,8 @@ cp arch/$ARCH/boot/zImage zip-creator
 mkdir zip-creator/modules
 find . -name *.ko | xargs cp -a --target-directory=zip-creator/modules/ &> /dev/null
 
+${CROSS_COMPILE}strip --strip-unneeded zip-creator/modules/*.ko
+
 cd zip-creator
 zip -r $zipfile * -x .gitignore *.zip &> /dev/null
 cd ..
