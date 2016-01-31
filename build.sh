@@ -33,25 +33,10 @@ fi
 
 # Prepare output customization commands - End
 
-# Clean - Start
-
-cleanzip() {
-rm -rf zip-creator/*.zip
-cleanzipcheck="Done"
-unset zippackagecheck
-}
-
-cleankernel() {
-make clean mrproper &> /dev/null | echo "Cleaning..."
-cleankernelcheck="Done"
-unset buildprocesscheck name variant namevariant maindevicecheck BUILDTIME
-}
-
-# Clean - End
-
 # Main Process - Start
 
 maindevice() {
+unset name variant defconfig
 echo "-${bldred}First Gen${txtrst}-"
 echo "0) L5 NFC            (E610)"
 echo "1) L5 NoNFC          (E612/E617)"
@@ -64,9 +49,8 @@ echo "6) L3 II Single/Dual (E425/E430/E431/E435)"
 echo "7) L7 II NFC         (P710/P712)"
 echo "8) L7 II NoNFC       (P713/P714)"
 echo "9) L7 II Dual        (P715/P716)"
-unset errorchoice
-read -p "Choice: " -n 1 -s choice
-case "$choice" in
+read -p "Choice: " -n 1 -s x
+case "$x" in
 	0 ) defconfig="cyanogenmod_m4_defconfig"; name="L5"; variant="NFC";;
 	1 ) defconfig="cyanogenmod_m4_nonfc_defconfig"; name="L5"; variant="NoNFC";;
 	2 ) defconfig="cyanogenmod_u0_defconfig"; name="L7"; variant="NFC";;
@@ -77,12 +61,11 @@ case "$choice" in
 	7 ) defconfig="cyanogenmod_vee7_defconfig"; name="L7II"; variant="NFC";;
 	8 ) defconfig="cyanogenmod_vee7_nonfc_defconfig"; name="L7II"; variant="NFC";;
 	9 ) defconfig="cyanogenmod_vee7ds_defconfig"; name="L7II"; variant="Dual";;
-	* ) echo "$choice - This option is not valid"; sleep .5; errorchoice="ON";;
+	*) echo "$x - This option is not valid"; sleep .5;;
 esac
-if ! [ "$errorchoice" == "ON" ]; then
-	namevariant="$name-$variant"
-	echo "$choice - $name $variant"; make $defconfig &> /dev/null | echo "Setting..."
-	maindevicecheck="ON"
+if ! [ "$defconfig" == "" ]; then
+	echo "$x - $name $variant"
+	make $defconfig &> /dev/null | echo "Setting..."
 	unset cleankernelcheck
 	zipfile="$customkernel-$name-$variant-$release.zip"
 fi
@@ -90,27 +73,27 @@ fi
 
 manualtoolchain() {
 echo ""
-echo "Script says: Please specify a location"
-echo "Script says: and the prefix of the chosen toolchain at the end"
+echo "Please specify a location"
+echo "and the prefix of the chosen toolchain at the end"
 echo "GCC 4.6 ex. ../arm-eabi-4.6/bin/arm-eabi-"
+echo
+echo "Stay blank if you want to exit"
+echo
 read -p "Place: " CROSS_COMPILE
-ToolchainCompile=$CROSS_COMPILE
+if ! [ "$CROSS_COMPILE" == "" ]
+	then ToolchainCompile=$CROSS_COMPILE
+fi
 }
 
 maintoolchain() {
 if [ -f ../android_prebuilt_toolchains/aptess.sh ]; then
 	. ../android_prebuilt_toolchains/aptess.sh
 elif [ -d ../android_prebuilt_toolchains ]; then
-	echo "You not have APTESS in Android Prebuilt Toolchain folder"
-	echo "Check the folder or press "y" for manual specify location"
-	read -p "Continue? (y/n): " -n 1 -s tps
-	case "$tps" in
-		y | Y) manualtoolchain ;;
-		n | N) ;;
-		*) echo "$tps - This option is not valid"; sleep .5 ;;
-	esac
+	echo "You not have APTESS Script in Android Prebuilt Toolchain folder"
+	echo "Check the folder, using Manual Method"
+	manualtoolchain
 else
-	echo "Script says: You don't have TeamVee Prebuilt Toolchains"
+	echo "-You don't have TeamVee Prebuilt Toolchains-"
 	manualtoolchain
 fi
 }
@@ -134,11 +117,9 @@ fi
 END=$(date +"%s")
 BUILDTIME=$(($END - $START))
 
-if [ -f arch/$ARCH/boot/zImage ]; then
-	buildprocesscheck="Done"
-	unset cleankernelcheck
-else
-	buildprocesscheck="Something goes wrong"
+if [ -f arch/$ARCH/boot/zImage ]
+	then buildprocesscheck="Done"
+	else buildprocesscheck="Something goes wrong"
 fi
 }
 
@@ -151,6 +132,19 @@ if ! [ -f arch/$ARCH/boot/zImage ]; then
 	sleep 1
 	loop
 fi
+}
+
+updatedefconfig(){
+echo
+echo "This can be update:"
+echo "1) Defconfig to Linux Kernel format"
+echo "2) Defconfig to Usual .config format"
+echo
+read -p "Choice: " -n 1 -s x
+case "$x" in
+	1 ) echo "Wait..."; make savedefconfig &>/dev/null; mv defconfig arch/$ARCH/configs/$defconfig;;
+	2 ) cp .config arch/$ARCH/configs/$defconfig;;
+esac
 }
 
 # Build Process - End
@@ -183,13 +177,13 @@ unset cleanzipcheck
 # ADB - Start
 
 adbcopy() {
-echo "Script says: You want to copy to Internal or External Card?"
+echo "You want to copy to Internal or External Card?"
 echo "i) For Internal"
 echo "e) For External"
-read -p "Choice: " -n 1 -s adbcoping
-case "$adbcoping" in
-	i ) echo "Coping to Internal Card..."; adb shell rm -rf /storage/sdcard0/$zipfile &> /dev/null; adb push zip-creator/$zipfile /storage/sdcard0/$zipfile &> /dev/null; adbcopycheck="Done";;
-	e ) echo "Coping to External Card..."; adb shell rm -rf /storage/sdcard1/$zipfile &> /dev/null; adb push zip-creator/$zipfile /storage/sdcard1/$zipfile &> /dev/null; adbcopycheck="Done";;
+read -p "Choice: " -n 1 -s x
+case "$x" in
+	i ) echo "Coping to Internal Card..."; adb shell rm -rf /storage/sdcard0/$zipfile &> /dev/null; adb push zip-creator/$zipfile /storage/sdcard0/$zipfile &> /dev/null;;
+	e ) echo "Coping to External Card..."; adb shell rm -rf /storage/sdcard1/$zipfile &> /dev/null; adb push zip-creator/$zipfile /storage/sdcard1/$zipfile &> /dev/null;;
 	* ) echo "$adbcoping - This option is not valid"; sleep .5;;
 esac
 }
@@ -199,15 +193,11 @@ esac
 # Menu - Start
 
 buildsh() {
-
 kernelversion=`cat Makefile | grep VERSION | cut -c 11- | head -1`
 kernelpatchlevel=`cat Makefile | grep PATCHLEVEL | cut -c 14- | head -1`
 kernelsublevel=`cat Makefile | grep SUBLEVEL | cut -c 12- | head -1`
 kernelname=`cat Makefile | grep NAME | cut -c 8- | head -1`
-if ! [ "$buildprocesscheck" == "Something goes wrong" ]
-	then echo -e "\033c\c"
-	else clear
-fi
+clear
 echo "Simple Linux Kernel Build Script ($(date +%d"/"%m"/"%Y))"
 echo "$customkernel $kernelversion.$kernelpatchlevel.$kernelsublevel - $kernelname"
 echo
@@ -215,10 +205,10 @@ echo "-${bldred}Clean:${txtrst}-"
 echo "1) Last Zip Package (${bldred}$cleanzipcheck${txtrst})"
 echo "2) Kernel (${bldred}$cleankernelcheck${txtrst})"
 echo "-${bldgrn}Main Process:${txtrst}-"
-echo "3) Device Choice (${bldgrn}$namevariant${txtrst})"
+echo "3) Device Choice (${bldgrn}$name$variant${txtrst})"
 echo "4) Toolchain Choice (${bldgrn}$ToolchainCompile${txtrst})"
 echo "-${bldyel}Build Process:${txtrst}-"
-if [ "$maindevicecheck" == "" ]; then
+if [ "$defconfig" == "" ]; then
 	echo "Use "3" first."
 else
 	if [ "$CROSS_COMPILE" == "" ]; then
@@ -227,19 +217,20 @@ else
 		echo "5) Build $customkernel (${bldyel}$buildprocesscheck${txtrst})"
 	fi
 fi
-if ! [ "$maindevicecheck" == "" ]; then
+if ! [ "$defconfig" == "" ]; then
 	if [ -f arch/$ARCH/boot/zImage ]; then
 		echo "6) Build Zip Package (${bldyel}$zippackagecheck${txtrst})"
 	fi
+	echo "7) Update $name$variant Defconfig"
 fi
 echo "-${bldblu}Test Menu:${txtrst}-"
-if [ -f zip-creator/$zipfile ]; then echo "7) Copy to device - Via Adb"; fi
-echo "8) Reboot device to recovery"
+if [ -f zip-creator/$zipfile ]; then echo "8) Copy to device - Via Adb"; fi
+echo "9) Reboot device to recovery"
 echo "-${bldmag}Status:${txtrst}-"
 if ! [ "$BUILDTIME" == "" ]; then
 	echo "${bldgrn}Build Time: $(($BUILDTIME / 60)) minutes and $(($BUILDTIME % 60)) seconds.${txtrst}"
 fi
-if [[ "$maindevicecheck" == "" || "$CROSS_COMPILE" == "" ]]; then
+if [[ "$defconfig" == "" || "$CROSS_COMPILE" == "" ]]; then
 	if [ -f arch/$ARCH/boot/zImage ]; then
 		echo "${bldblu}You have old Kernel build!${txtrst}"
 		buildprocesscheck="Old build"
@@ -270,22 +261,23 @@ echo "g) Git Gui | k) GitK | s) Git Push | l) Git Pull"
 echo "q) Quit"
 read -n 1 -p "${txtbld}Choice: ${txtrst}" -s x
 case $x in
-	1) echo "$x - Cleaning Zips"; cleanzip;;
-	2) echo "$x - Cleaning $customkernel"; cleankernel;;
+	1) echo "$x - Cleaning Zips"; rm -rf zip-creator/*.zip; cleanzipcheck="Done"; unset zippackagecheck;;
+	2) echo "$x - Cleaning $customkernel"; make clean mrproper &> /dev/null | echo "Cleaning..."; cleankernelcheck="Done"; unset buildprocesscheck name variant defconfig BUILDTIME;;
 	3) echo "$x - Device choice"; maindevice;;
 	4) echo "$x - Toolchain choice"; maintoolchain;;
 	5) if [ -f .config ]; then
-		echo "$x - Building $customkernel"; buildprocess; zippackage
+		echo "$x - Building $customkernel"; buildprocess
 	fi;;
-	6) if ! [ "$maindevicecheck" == "" ]; then
+	6) if ! [ "$defconfig" == "" ]; then
 		if [ -f arch/$ARCH/boot/zImage ]; then
 			echo "$x - Ziping $customkernel"; zippackage
 		fi
 	fi;;
-	7) if [ -f zip-creator/$zipfile ]; then
+	7) echo "Updating defconfig"; updatedefconfig;;
+	8) if [ -f zip-creator/$zipfile ]; then
 		echo "$x - Coping $customkernel"; adbcopy
 	fi;;
-	8) echo "$x - Rebooting to Recovery..."; adb reboot recovery;;
+	9) echo "$x - Rebooting to Recovery..."; adb reboot recovery;;
 	c) if [ "$coloroutput" == "ON" ]; then coloroutput="OFF"; else coloroutput="ON"; fi; customcoloroutput;;
 	o) if [ "$buildoutput" == "ON" ]; then buildoutput="OFF"; else buildoutput="ON"; fi;;
 	q) echo "Ok, Bye!"; unset zippackagecheck; break;;
