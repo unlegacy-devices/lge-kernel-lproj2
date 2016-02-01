@@ -16,7 +16,7 @@
 #include <linux/bootmem.h>
 #include <linux/regulator/consumer.h>
 #include <asm/mach-types.h>
-#include <asm/io.h>
+#include <linux/io.h>
 #include <mach/msm_bus_board.h>
 #include <mach/msm_memtypes.h>
 #include <mach/board.h>
@@ -240,7 +240,7 @@ static struct msm_panel_ilitek_pdata ebi2_tovis_panel_data = {
 
 static struct platform_device ebi2_tovis_panel_device = {
 	.name	= "ebi2_tovis_qvga",
-	.id 	= 0,
+	.id	= 0,
 	.dev	= {
 		.platform_data = &ebi2_tovis_panel_data,
 	}
@@ -279,68 +279,68 @@ static struct regulator *regulator_mipi_dsi[2];
 #ifdef CONFIG_FB_MSM_MIPI_DSI_LG4573B_BOOT_LOGO
 static void u0_panel_mipi_dsi_clk_disable(void)
 {
-        int id = P_DSI_CLK;
-        msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);//dsi_clk
+	int id = P_DSI_CLK;
+	msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);
 
 	id = P_DSI_PIXEL_CLK;
-        msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);//dsi_pixel_clk
-        
-        id = P_DSI_ESC_CLK;
-        msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);//dsi_esc_clk
-        
+	msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);
+
+	id = P_DSI_ESC_CLK;
+	msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);
+
 	id = P_DSI_BYTE_CLK;
-        msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);//dsi_byte_div_clk
+	msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);
 
-        id = P_MDP_DSI_P_CLK;
-        msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);//mdp_dsi_p_clk
+	id = P_MDP_DSI_P_CLK;
+	msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);
 
-        id = P_AHB_M_CLK;
-        msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);//ahb_m_clk
+	id = P_AHB_M_CLK;
+	msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);
 
-        id = P_AHB_S_CLK;
-        msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);//ahb_s_clk
+	id = P_AHB_S_CLK;
+	msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);
 
-        id = P_DSI_REF_CLK;
-        msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);//dsi_ref_clk
+	id = P_DSI_REF_CLK;
+	msm_proc_comm(PCOM_CLKCTL_RPC_DISABLE, &id, NULL);
 }
 #endif
 
 static int __init mipi_dsi_regulator_init(void)
 {
 	int rc = 0;
-        regulator_mipi_dsi[0] = regulator_get(0, "rfrx1");
-        if (IS_ERR(regulator_mipi_dsi[0])) {
-                pr_err("%s: vreg_get for rfrx1 failed\n", __func__);
-                return PTR_ERR(regulator_mipi_dsi[0]);
-        }
+	regulator_mipi_dsi[0] = regulator_get(0, "rfrx1");
+	if (IS_ERR(regulator_mipi_dsi[0])) {
+		pr_err("%s: vreg_get for rfrx1 failed\n", __func__);
+		return PTR_ERR(regulator_mipi_dsi[0]);
+	}
 
-        rc = regulator_set_voltage(regulator_mipi_dsi[0], 1800000,1800000);
-	
+	rc = regulator_set_voltage(regulator_mipi_dsi[0], 1800000, 1800000);
+
 	if (rc) {
-                pr_err("%s: vreg_set_level failed for mipi_dsi_v18\n", __func__);
+		pr_err("%s: vreg_set_level failed for mipi_dsi_v18\n", __func__);
 		goto vreg_put_dsi_v18;
-        }
+	}
 
-        regulator_mipi_dsi[1] = regulator_get(0, "emmc");
-        if (IS_ERR(regulator_mipi_dsi[1])) {
-                pr_err("%s: vreg_get for emmc failed\n", __func__);
-                return PTR_ERR(regulator_mipi_dsi[1]);
-        }
+	regulator_mipi_dsi[1] = regulator_get(0, "emmc");
+	if (IS_ERR(regulator_mipi_dsi[1])) {
+		pr_err("%s: vreg_get for emmc failed\n", __func__);
+		return PTR_ERR(regulator_mipi_dsi[1]);
+	}
 
-        rc = regulator_set_voltage(regulator_mipi_dsi[1], 3000000,3000000);
-        if (rc) {
-                pr_err("%s: vreg_set_level failed for mipi_dsi_v28\n", __func__);
-                goto vreg_put_dsi_v28;
-        }
+	rc = regulator_set_voltage(regulator_mipi_dsi[1], 3000000, 3000000);
+	if (rc) {
+		pr_err("%s: vreg_set_level failed for mipi_dsi_v28\n", __func__);
+		goto vreg_put_dsi_v28;
+	}
 
 	return 0;
 vreg_put_dsi_v28:
-        regulator_put(regulator_mipi_dsi[1]);
+	regulator_put(regulator_mipi_dsi[1]);
 
 vreg_put_dsi_v18:
-        regulator_put(regulator_mipi_dsi[0]);
+	regulator_put(regulator_mipi_dsi[0]);
 
-        return rc;
+	return rc;
 }
 
 static int mipi_dsi_panel_power(int on)
@@ -351,19 +351,16 @@ static int mipi_dsi_panel_power(int on)
 	static bool lglogo_firstboot = 1;
 #endif
 		if (unlikely(!dsi_gpio_initialized)) {
-		
 			/* Resetting LCD Panel*/
 			rc = gpio_request(GPIO_LCD_RESET, "lcd_reset");
-			if (rc) {
+			if (rc)
 				pr_err("%s: gpio_request GPIO_LCD_RESET failed\n", __func__);
-			}
+
 			rc = gpio_tlmm_config(GPIO_CFG(GPIO_LCD_RESET, 0, GPIO_CFG_OUTPUT,
 					GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
-			if (rc) {
-				printk(KERN_ERR "%s: Failed to configure GPIO %d\n",
-						__func__, rc);
-			}
-		
+			if (rc)
+				printk(KERN_ERR "%s: Failed to configure GPIO %d\n", __func__, rc);
+
 			dsi_gpio_initialized = 1;
 		}
 		if (on) {
@@ -372,39 +369,36 @@ static int mipi_dsi_panel_power(int on)
 				pr_err("%s: vreg_enable failed for mipi_dsi_v18\n", __func__);
 				goto vreg_put_dsi_v18;
 			}
-			
+
 			msleep(3);
 			rc = regulator_enable(regulator_mipi_dsi[1]);
 			if (rc) {
 				pr_err("%s: vreg_enable failed for mipi_dsi_v28\n", __func__);
 				goto vreg_put_dsi_v28;
 			}
-	
+
 			if (Isfirstbootend) {
 				msleep(15);
-				rc = regulator_disable(regulator_mipi_dsi[1]);//2.8v
+				rc = regulator_disable(regulator_mipi_dsi[1]);
 				if (rc) {
 					pr_err("%s: vreg_disable failed for mipi_dsi_v28\n", __func__);
 					goto vreg_put_dsi_v28;
-				}			
-				mdelay(15);
-				rc = regulator_enable(regulator_mipi_dsi[1]);//2.8v 
+				}
+				msleep(15);
+				rc = regulator_enable(regulator_mipi_dsi[1]);
 				if (rc) {
 					pr_err("%s: vreg_enable failed for mipi_dsi_v28\n", __func__);
 					goto vreg_put_dsi_v28;
-				}		
-			} else{
+				}
+			} else
 				Isfirstbootend = 1;
-			}
+
 			msleep(8);
-		}
-		else
-		{
-	
+		} else {
+
 #ifdef CONFIG_FB_MSM_MIPI_DSI_LG4573B_BOOT_LOGO
-			if(lglogo_firstboot)
-			{
-				printk(KERN_INFO "[DISPLAY]::%s\n",__func__);
+			if (lglogo_firstboot) {
+				printk(KERN_INFO "[DISPLAY]::%s\n", __func__);
 				lglogo_firstboot = 0;
 				u0_panel_mipi_dsi_clk_disable();
 			}
@@ -414,16 +408,16 @@ static int mipi_dsi_panel_power(int on)
 				pr_err("%s: vreg_disable failed for mipi_dsi_v18\n", __func__);
 				goto vreg_put_dsi_v18;
 			}
-			
+
 			rc = regulator_disable(regulator_mipi_dsi[1]);
 			if (rc) {
 				pr_err("%s: vreg_disable failed for mipi_dsi_v28\n", __func__);
 				goto vreg_put_dsi_v28;
 			}
 		}
-	
+
 		return 0;
-	
+
 vreg_put_dsi_v28:
 	regulator_put(regulator_mipi_dsi[1]);
 
@@ -431,7 +425,6 @@ vreg_put_dsi_v18:
 	regulator_put(regulator_mipi_dsi[0]);
 
 	return rc;
-	
 }
 #endif /*CONFIG_FB_MSM_MIPI_DSI*/
 
@@ -441,7 +434,7 @@ vreg_put_dsi_v18:
 		vreg = regulator_get(0, name); \
 		regulator_set_voltage(vreg, level, level); \
 		if (regulator_##op(vreg)) \
-			printk(KERN_ERR "%s: %s vreg operation failed \n", \
+			printk(KERN_ERR "%s: %s vreg operation failed\n", \
 				(regulator_##op == regulator_enable) ? "regulator_enable" \
 				: "regulator_disable", name); \
 	} while (0)
@@ -456,7 +449,7 @@ static int mddi_power_save_on;
 
 static int ebi2_tovis_power_save(int on)
 {
-	struct regulator *vreg;	
+	struct regulator *vreg;
 	int flag_on = !!on;
 
 	printk(KERN_INFO "%s: on=%d\n", __func__, flag_on);
@@ -466,11 +459,11 @@ static int ebi2_tovis_power_save(int on)
 
 	mddi_power_save_on = flag_on;
 
-	if (on) {
-		REGULATOR_OP(msm_fb_vreg[1], enable, 2800000);	
-	} else{
+	if (on)
+		REGULATOR_OP(msm_fb_vreg[1], enable, 2800000);
+	else
 		REGULATOR_OP(msm_fb_vreg[1], disable, 2800000);
-	}
+
 	return 0;
 }
 
@@ -480,7 +473,7 @@ static int v3eu_fb_event_notify(struct notifier_block *self,
 	struct fb_event *event = data;
 	struct fb_info *info = event->info;
 	struct fb_var_screeninfo *var = &info->var;
-	if(action == FB_EVENT_FB_REGISTERED) {
+	if (action == FB_EVENT_FB_REGISTERED) {
 		var->width = 43;
 		var->height = 58;
 	}
@@ -503,14 +496,14 @@ static struct mipi_dsi_platform_data mipi_dsi_pdata = {
 
 void __init msm_fb_add_devices(void)
 {
-	if(ebi2_tovis_panel_data.initialized)
+	if (ebi2_tovis_panel_data.initialized)
 		ebi2_tovis_power_save(1);
 
 	fb_register_client(&v3eu_fb_event_notifier);
-	
+
 	platform_add_devices(msm_fb_devices, ARRAY_SIZE(msm_fb_devices));
 	platform_add_devices(v3eu_panel_devices, ARRAY_SIZE(v3eu_panel_devices));
-	
+
 	msm_fb_register_device("mdp", &mdp_pdata);
 	msm_fb_register_device("lcdc", 0);
 #ifdef CONFIG_FB_MSM_EBI2
@@ -523,5 +516,5 @@ void __init msm_fb_add_devices(void)
 
 #ifdef CONFIG_FB_MSM_MIPI_DSI
 	mipi_dsi_regulator_init();
-#endif	
+#endif
 }

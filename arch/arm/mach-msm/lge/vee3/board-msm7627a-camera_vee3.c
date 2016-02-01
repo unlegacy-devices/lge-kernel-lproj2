@@ -28,7 +28,7 @@
 #include CONFIG_LGE_BOARD_HEADER_FILE
 
 #ifdef CONFIG_HI351
-#if defined (CONFIG_SENSOR_APDS9190)
+#if defined(CONFIG_SENSOR_APDS9190)
 extern int rt9396_ldo_enable(struct device *dev, unsigned num, unsigned enable);
 #else
 extern int bu61800_ldo_enable(struct device *dev, unsigned num, unsigned enable);
@@ -82,89 +82,76 @@ static int msm_camera_vreg_config(int vreg_en)
 {
 	int rc = 0;
 
-#if defined (CONFIG_SENSOR_APDS9190)
+#if defined(CONFIG_SENSOR_APDS9190)
 
-		if (vreg_en) {
-			pr_err("%s: msm_camera_vreg_config power on vreg_en enable\n", __func__);
+	if (vreg_en) {
+		pr_err("%s: msm_camera_vreg_config power on vreg_en enable\n", __func__);
 
-			rc = rt9396_ldo_enable(NULL,4,vreg_en);
-			if (rc < 0) {
-				pr_err("%s: rt9396_ldo_enable(ldo4) failed\n", __func__);
-			}
+		rc = rt9396_ldo_enable(NULL, 4, vreg_en);
+		if (rc < 0)
+			pr_err("%s: rt9396_ldo_enable(ldo4) failed\n", __func__);
 
-			rc = rt9396_ldo_enable(NULL,2,vreg_en);
-			if (rc < 0) {
-				pr_err("%s: rt9396_ldo_enable(ldo2) failed\n", __func__);
-			}
+		rc = rt9396_ldo_enable(NULL, 2, vreg_en);
+		if (rc < 0)
+			pr_err("%s: rt9396_ldo_enable(ldo2) failed\n", __func__);
 
-			rc = rt9396_ldo_enable(NULL,3,vreg_en);
-			if (rc < 0) {
-				pr_err("%s: rt9396_ldo_enable(ldo3) failed\n", __func__);
-			}
+		rc = rt9396_ldo_enable(NULL, 3, vreg_en);
+		if (rc < 0)
+			pr_err("%s: rt9396_ldo_enable(ldo3) failed\n", __func__);
 
-		}
-		else {
+	} else {
 
-			pr_err("%s: msm_camera_vreg_config power on vreg_en disable start\n", __func__);
+		pr_err("%s: msm_camera_vreg_config power on vreg_en disable start\n", __func__);
 
-			rc = rt9396_ldo_enable(NULL,3,vreg_en);
-			if (rc < 0) {
-				pr_err("%s: rt9396_ldo_enable(ldo3) OFF failed\n", __func__);
-			}
+		rc = rt9396_ldo_enable(NULL, 3, vreg_en);
+		if (rc < 0)
+			pr_err("%s: rt9396_ldo_enable(ldo3) OFF failed\n", __func__);
 
-			rc = rt9396_ldo_enable(NULL,2,vreg_en);
-			if (rc < 0) {
-				pr_err("%s: rt9396_ldo_enable(ldo2) OFF failed\n", __func__);
-			}
+		rc = rt9396_ldo_enable(NULL, 2, vreg_en);
+		if (rc < 0)
+			pr_err("%s: rt9396_ldo_enable(ldo2) OFF failed\n", __func__);
 
-			rc = rt9396_ldo_enable(NULL,4,vreg_en);
-			if (rc < 0) {
-				pr_err("%s: rt9396_ldo_enable(ldo4) OFF failed\n", __func__);
-			}
-			pr_err("%s: msm_camera_vreg_config power on vreg_en disable end\n", __func__);
+		rc = rt9396_ldo_enable(NULL, 4, vreg_en);
+		if (rc < 0)
+			pr_err("%s: rt9396_ldo_enable(ldo4) OFF failed\n", __func__);
 
-		}
+		pr_err("%s: msm_camera_vreg_config power on vreg_en disable end\n", __func__);
+
+	}
 #else
 
 	if (vreg_en) {
 		pr_err("%s: msm_camera_vreg_config power on vreg_en enable\n", __func__);
 
-		rc = bu61800_ldo_enable(NULL,4,vreg_en);
-		if (rc < 0) {
+		rc = bu61800_ldo_enable(NULL, 4, vreg_en);
+		if (rc < 0)
 			pr_err("%s: bu61800_ldo_enable(ldo4) failed\n", __func__);
-		}
 
-		rc = bu61800_ldo_enable(NULL,2,vreg_en);
-		if (rc < 0) {
+		rc = bu61800_ldo_enable(NULL, 2, vreg_en);
+		if (rc < 0)
 			pr_err("%s: bu61800_ldo_enable(ldo2) failed\n", __func__);
-		}
 
-		rc = bu61800_ldo_enable(NULL,3,vreg_en);
-		if (rc < 0) {
+		rc = bu61800_ldo_enable(NULL, 3, vreg_en);
+		if (rc < 0)
 			pr_err("%s: bu61800_ldo_enable(ldo3) failed\n", __func__);
-		}
 
-	}
-	else {
+	} else {
 
-	 	pr_err("%s: msm_camera_vreg_config power on vreg_en disable start\n", __func__);
+		pr_err("%s: msm_camera_vreg_config power on vreg_en disable start\n", __func__);
 
-		rc = bu61800_ldo_enable(NULL,3,vreg_en);
-		if (rc < 0) {
+		rc = bu61800_ldo_enable(NULL, 3, vreg_en);
+		if (rc < 0)
 			pr_err("%s: bu61800_ldo_enable(ldo3) OFF failed\n", __func__);
-		}
 
-		rc = bu61800_ldo_enable(NULL,2,vreg_en);
-		if (rc < 0) {
+		rc = bu61800_ldo_enable(NULL, 2, vreg_en);
+		if (rc < 0)
 			pr_err("%s: bu61800_ldo_enable(ldo2) OFF failed\n", __func__);
-		}
 
-		rc = bu61800_ldo_enable(NULL,4,vreg_en);
-		if (rc < 0) {
+		rc = bu61800_ldo_enable(NULL, 4, vreg_en);
+		if (rc < 0)
 			pr_err("%s: bu61800_ldo_enable(ldo4) OFF failed\n", __func__);
-		}
-		pr_err("%s: msm_camera_vreg_config power on vreg_en disable end\n", __func__);
 
+		pr_err("%s: msm_camera_vreg_config power on vreg_en disable end\n", __func__);
 	}
 
 #endif
@@ -174,11 +161,11 @@ static int msm_camera_vreg_config(int vreg_en)
 static int32_t msm_camera_7x27a_ext_power_ctrl(int enable)
 {
 	int rc = 0;
-	if (enable) {
+	if (enable)
 		rc = msm_camera_vreg_config(1);
-	} else {
+	else
 		rc = msm_camera_vreg_config(0);
-	}
+
 	return rc;
 }
 #endif
@@ -328,14 +315,14 @@ static struct msm_camera_sensor_platform_info sensor_board_info_hi351 = {
 };
 
 static struct msm_camera_sensor_info msm_camera_sensor_hi351_data = {
-	.sensor_name    = "hi351",
-	.sensor_reset_enable = 1,
-	.sensor_reset           = 34, 		// GPIO_34
-	.sensor_pwd 			= 42, 		// GPIO_42
-	.pdata                  = &msm_camera_device_data_csi1[0],
-	.flash_data             = &flash_hi351,
-	.sensor_platform_info   = &sensor_board_info_hi351,
-	.csi_if                 = 1,
+	.sensor_name		= "hi351",
+	.sensor_reset_enable	= 1,
+	.sensor_reset		= 34,/* GPIO_34 */
+	.sensor_pwd		= 42,/* GPIO_42 */
+	.pdata			= &msm_camera_device_data_csi1[0],
+	.flash_data		= &flash_hi351,
+	.sensor_platform_info	= &sensor_board_info_hi351,
+	.csi_if			= 1,
 	.camera_type = BACK_CAMERA_2D,
 	.sensor_type = YUV_SENSOR,
 };
@@ -420,8 +407,8 @@ static void qrd1_camera_gpio_cfg(void)
 				GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP,
 				GPIO_CFG_2MA), GPIO_CFG_ENABLE);
 	if (rc < 0) {
-		pr_err("%s: unable to enable Power Down gpio for main"
-				"camera!\n", __func__);
+		pr_err("%s: unable to enable Power Down gpio for main camera!\n",
+				__func__);
 		gpio_free(QRD_GPIO_CAM_5MP_SHDN_EN);
 	}
 
@@ -452,8 +439,8 @@ static void qrd1_camera_gpio_cfg(void)
 				GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP,
 				GPIO_CFG_2MA), GPIO_CFG_ENABLE);
 	if (rc < 0) {
-		pr_err("%s: unable to enable Power Down gpio for front"
-				"camera!\n", __func__);
+		pr_err("%s: unable to enable Power Down gpio for front camera!\n",
+				__func__);
 		gpio_free(QRD_GPIO_CAM_3MP_PWDN);
 	}
 
@@ -509,8 +496,7 @@ static int config_camera_on_gpios_rear(void)
 	rc = config_gpio_table(camera_on_gpio_table,
 			ARRAY_SIZE(camera_on_gpio_table));
 	if (rc < 0) {
-		pr_err("%s: CAMSENSOR gpio table request"
-		"failed\n", __func__);
+		pr_err("%s: CAMSENSOR gpio table request failed\n", __func__);
 		return rc;
 	}
 
@@ -540,8 +526,7 @@ static int config_camera_on_gpios_front(void)
 	rc = config_gpio_table(camera_on_gpio_table,
 			ARRAY_SIZE(camera_on_gpio_table));
 	if (rc < 0) {
-		pr_err("%s: CAMSENSOR gpio table request"
-			"failed\n", __func__);
+		pr_err("%s: CAMSENSOR gpio table request failed\n", __func__);
 		return rc;
 	}
 

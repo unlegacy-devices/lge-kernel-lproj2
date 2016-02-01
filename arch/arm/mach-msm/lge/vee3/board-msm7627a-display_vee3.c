@@ -17,7 +17,7 @@
 #include <linux/regulator/consumer.h>
 #include <linux/gpio.h>
 #include <asm/mach-types.h>
-#include <asm/io.h>
+#include <linux/io.h>
 #include <mach/msm_bus_board.h>
 #include <mach/msm_memtypes.h>
 #include <mach/board.h>
@@ -233,7 +233,7 @@ static struct msm_panel_ilitek_pdata ebi2_tovis_panel_data = {
 
 static struct platform_device ebi2_tovis_panel_device = {
 	.name	= "ebi2_tovis_qvga",
-	.id 	= 0,
+	.id	= 0,
 	.dev	= {
 		.platform_data = &ebi2_tovis_panel_data,
 	}
@@ -249,7 +249,7 @@ static struct platform_device *v3eu_panel_devices[] __initdata = {
 		vreg = regulator_get(0, name); \
 		regulator_set_voltage(vreg, level, level); \
 		if (regulator_##op(vreg)) \
-			printk(KERN_ERR "%s: %s vreg operation failed \n", \
+			printk(KERN_ERR"%s: %s vreg operation failed\n", \
 				(regulator_##op == regulator_enable) ? "regulator_enable" \
 				: "regulator_disable", name); \
 	} while (0)
@@ -264,7 +264,7 @@ static int mddi_power_save_on;
 
 static int ebi2_tovis_power_save(int on)
 {
-	struct regulator *vreg;	
+	struct regulator *vreg;
 	int flag_on = !!on;
 
 	printk(KERN_INFO "%s: on=%d\n", __func__, flag_on);
@@ -274,11 +274,11 @@ static int ebi2_tovis_power_save(int on)
 
 	mddi_power_save_on = flag_on;
 
-	if (on) {
-		REGULATOR_OP(msm_fb_vreg[1], enable, 2800000);	
-	} else{
+	if (on)
+		REGULATOR_OP(msm_fb_vreg[1], enable, 2800000);
+	else
 		REGULATOR_OP(msm_fb_vreg[1], disable, 2800000);
-	}
+
 	return 0;
 }
 
@@ -288,7 +288,7 @@ static int v3eu_fb_event_notify(struct notifier_block *self,
 	struct fb_event *event = data;
 	struct fb_info *info = event->info;
 	struct fb_var_screeninfo *var = &info->var;
-	if(action == FB_EVENT_FB_REGISTERED) {
+	if (action == FB_EVENT_FB_REGISTERED) {
 		var->width = 49;
 		var->height = 65;
 	}
@@ -302,7 +302,7 @@ static struct notifier_block v3eu_fb_event_notifier = {
 
 void __init msm_fb_add_devices(void)
 {
-	if(ebi2_tovis_panel_data.initialized)
+	if (ebi2_tovis_panel_data.initialized)
 		ebi2_tovis_power_save(1);
 
 	fb_register_client(&v3eu_fb_event_notifier);

@@ -231,9 +231,10 @@ struct platform_device msm_device_cad = {
 
 #include <linux/input.h>
 
-void fsa8008_set_headset_mic_bias(int enable) {
-   printk(KERN_INFO "[FSA8008] Set MIC BIAS %d .\n", enable);
-   pmic_hsed_enable(PM_HSED_CONTROLLER_0,(enable ? PM_HSED_ENABLE_ALWAYS : PM_HSED_ENABLE_OFF )); 
+void fsa8008_set_headset_mic_bias(int enable)
+{
+	printk(KERN_INFO "[FSA8008] Set MIC BIAS %d\n", enable);
+	pmic_hsed_enable(PM_HSED_CONTROLLER_0, (enable ? PM_HSED_ENABLE_ALWAYS : PM_HSED_ENABLE_OFF));
 }
 
 static struct fsa8008_platform_data fsa8008_platform_data = {
@@ -257,8 +258,8 @@ static struct platform_device lge_hsd_device = {
    .name = "fsa8008",
    .id   = -1,
    .dev = {
-      .platform_data = &fsa8008_platform_data,
-   },   
+	.platform_data = &fsa8008_platform_data,
+   },
 };
 
 struct platform_device asoc_msm_pcm = {

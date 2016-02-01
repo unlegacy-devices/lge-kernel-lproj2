@@ -230,7 +230,7 @@ static int msm_sdcc_setup_vreg(int dev_id, unsigned int enable)
 		if (rc)
 			pr_err("%s: could not enable regulator: %d\n",
 						__func__, rc);
-	} else if(dev_id !=1){
+	} else if (dev_id != 1) {
 		clear_bit(dev_id, &vreg_sts);
 
 		rc = regulator_disable(curr);

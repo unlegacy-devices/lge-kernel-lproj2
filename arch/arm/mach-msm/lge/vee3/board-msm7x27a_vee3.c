@@ -87,15 +87,15 @@
 
 #ifdef CONFIG_ANDROID_RAM_CONSOLE
 struct persistent_ram_descriptor ram_console_desc = {
-        .name = "ram_console",
-        .size = LGE_RAM_CONSOLE_SIZE - 1,
+	.name = "ram_console",
+	.size = LGE_RAM_CONSOLE_SIZE - 1,
 };
-	
+
 struct persistent_ram ram_console_ram = {
-        .start = LGE_RAM_CONSOLE_START,
-        .size = LGE_RAM_CONSOLE_SIZE - 1,
-        .num_descs = 1,
-        .descs = &ram_console_desc,
+	.start = LGE_RAM_CONSOLE_START,
+	.size = LGE_RAM_CONSOLE_SIZE - 1,
+	.num_descs = 1,
+	.descs = &ram_console_desc,
 };
 
 static struct platform_device ram_console_device = {
@@ -768,10 +768,10 @@ static void __init msm7x27a_init_ebi2(void)
 	if (!ebi2_cfg_ptr)
 		return;
 
-	ebi2_cfg = readl(ebi2_cfg_ptr);
+	ebi2_cfg = readl_relaxed(ebi2_cfg_ptr);
 		ebi2_cfg |= (1 << 4);
 
-	writel(ebi2_cfg, ebi2_cfg_ptr);
+	writel_relaxed(ebi2_cfg, ebi2_cfg_ptr);
 	iounmap(ebi2_cfg_ptr);
 
 	ebi2_cfg_ptr = ioremap_nocache(MSM_EBI2_XMEM_CS2_CFG1,
@@ -779,10 +779,10 @@ static void __init msm7x27a_init_ebi2(void)
 	if (!ebi2_cfg_ptr)
 		return;
 
-	ebi2_cfg = readl(ebi2_cfg_ptr);
+	ebi2_cfg = readl_relaxed(ebi2_cfg_ptr);
 		ebi2_cfg |= (1 << 31);
 
-	writel(ebi2_cfg, ebi2_cfg_ptr);
+	writel_relaxed(ebi2_cfg, ebi2_cfg_ptr);
 	iounmap(ebi2_cfg_ptr);
 }
 

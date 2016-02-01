@@ -23,7 +23,7 @@
 #include <linux/atmel_maxtouch.h>
 #include <linux/input/ft5x06_ts.h>
 #include <linux/leds-msm-tricolor.h>
-#include <asm/gpio.h>
+#include <linux/gpio.h>
 #include <asm/mach-types.h>
 #include <mach/rpc_server_handset.h>
 #include <mach/pmic.h>
@@ -504,12 +504,12 @@ int v3_matrix_info_wrapper(struct gpio_event_input_devs *input_dev,
 	int ret;
 	int i;
 	if (func == GPIO_EVENT_FUNC_RESUME) {
-		for(i = 0; i < ARRAY_SIZE(keypad_row_gpios); i++)  {
+		for (i = 0; i < ARRAY_SIZE(keypad_row_gpios); i++)  {
 			gpio_tlmm_config(GPIO_CFG(keypad_row_gpios[i], 0, GPIO_CFG_INPUT,
 				 GPIO_CFG_PULL_UP, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
-	        }
+		}
 	}
-	
+
 	ret = gpio_event_matrix_func(input_dev, info, data, func);
 	return ret ;
 }
@@ -556,7 +556,7 @@ static struct platform_device *v3_input_devices[] __initdata = {
 	&keypad_device_v3,
 };
 
-#if defined (CONFIG_SENSORS_BMM050) || defined (CONFIG_SENSORS_BMA250)
+#if defined(CONFIG_SENSORS_BMM050) || defined(CONFIG_SENSORS_BMA250)
 static struct gpio_i2c_pin accel_i2c_pin[] = {
 	[0] = {
 		.sda_pin	= SENSOR_GPIO_I2C_SDA,
@@ -588,13 +588,13 @@ static struct platform_device sensor_i2c_device = {
 
 static struct i2c_board_info sensor_i2c_bdinfo[] = {
 	[0] = {
-#if defined (CONFIG_SENSORS_BMA2X2)
+#if defined(CONFIG_SENSORS_BMA2X2)
 		I2C_BOARD_INFO("bma2x2", ACCEL_I2C_ADDRESS),
 		.type = "bma2x2",
 #else
 		I2C_BOARD_INFO("bma250", ACCEL_I2C_ADDRESS),
 		.type = "bma250",
-#endif		
+#endif
 	},
 	[1] = {
 		I2C_BOARD_INFO("bmm050", ECOM_I2C_ADDRESS),
@@ -612,7 +612,7 @@ static void __init v3_init_i2c_sensor(int bus_num)
 }
 #endif
 
-#if defined (CONFIG_SENSOR_APDS9190)
+#if defined(CONFIG_SENSOR_APDS9190)
 extern int rt9396_ldo_enable(struct device *dev, unsigned num, unsigned enable);
 #endif
 
@@ -621,22 +621,20 @@ extern int rt9396_ldo_enable(struct device *dev, unsigned num, unsigned enable);
 static int prox_power_set(unsigned char onoff)
 {
 
-#if defined (CONFIG_SENSOR_APDS9190)
-	if(onoff == 1)
-	{
-		rt9396_ldo_enable(NULL,1,1);
-		pr_debug("%s,***********Proximity probe enter when power on*****\n",__func__);
-	} else
-	{
-		rt9396_ldo_enable(NULL,1,0);
-		pr_debug("%s,***********Proximity probe enter when power on*****\n",__func__);
+#if defined(CONFIG_SENSOR_APDS9190)
+	if (onoff == 1) {
+		rt9396_ldo_enable(NULL, 1, 1);
+		pr_debug("%s, ***********Proximity probe enter when power on*****\n", __func__);
+	} else {
+		rt9396_ldo_enable(NULL, 1, 0);
+		pr_debug("%s, ***********Proximity probe enter when power on*****\n", __func__);
 	}
 
 #endif
 	return 0;
 }
 
-#if defined (CONFIG_SENSOR_APDS9190)
+#if defined(CONFIG_SENSOR_APDS9190)
 
 static struct proximity_platform_data proxi_pdata = {
 	.irq_num	= PROXI_GPIO_DOUT,
@@ -726,28 +724,28 @@ static u8 mode1_red[] = {0xE0, 0x0C, 0x40, 0x00, 0x0C, 0x2F, 0x06, 0x28, 0x05, 0
 static u8 mode1_green[] = {0xE0, 0x80, 0x40, 0x00, 0x52, 0x00, 0x0B, 0x15, 0x05, 0x2D, 0x03, 0x48, 0x03, 0x4B, 0x09, 0x1B, 0x02, 0x63, 0x19, 0x89, 0x03, 0xCA, 0x04, 0xC1, 0x05, 0xB2, 0x06, 0xA6, 0x12, 0x8D, 0x52, 0x00};
 static u8 mode1_blue[] = {0xE0, 0x80, 0x40, 0x00, 0x12, 0xFE, 0x40, 0xC0, 0x0A, 0x18, 0x06, 0xA6, 0x06, 0xAA, 0x03, 0xCF, 0x04, 0xB6, 0x52, 0x00};
 
-static u8 mode2_red[]={0x40, 0xff, 0x4d, 0x00, 0x0a, 0xff, 0x0a, 0xfe, 0xc0, 0x00};
-static u8 mode2_green[]={0x40, 0xff, 0x4d, 0x00, 0x0a, 0xff, 0x0a, 0xfe, 0xc0, 0x00};
-static u8 mode2_blue[]={0x40, 0xff, 0x4d, 0x00, 0x0a, 0xff, 0x0a, 0xfe, 0xc0, 0x00};
+static u8 mode2_red[] = {0x40, 0xff, 0x4d, 0x00, 0x0a, 0xff, 0x0a, 0xfe, 0xc0, 0x00};
+static u8 mode2_green[] = {0x40, 0xff, 0x4d, 0x00, 0x0a, 0xff, 0x0a, 0xfe, 0xc0, 0x00};
+static u8 mode2_blue[] = {0x40, 0xff, 0x4d, 0x00, 0x0a, 0xff, 0x0a, 0xfe, 0xc0, 0x00};
 
 static u8 mode3_red[] = {0x40, 0x1a, 0x42, 0x18, 0x12, 0x65, 0x12, 0x65, 0x66, 0x00, 0x12, 0xe5, 0x12, 0xe5, 0x42, 0x98};
 
-static u8 mode4_green[]={0x40, 0xff};
+static u8 mode4_green[] = {0x40, 0xff};
 
-static u8 mode5_red[]={0x40, 0x19, 0x27, 0x19, 0xe0, 0x04, 0x0c, 0x65, 0xe0, 0x04, 0x0c, 0x65, 0xe0, 0x04, 0x0c, 0xe5, 0xe0, 0x04, 0x0c, 0xe5, 0xe0, 0x04, 0x29, 0x98, 0xe0, 0x04, 0x5a, 0x00};
-static u8 mode5_green[]={0x40, 0x0c, 0x43, 0x0b, 0xe0, 0x80, 0x19, 0x30, 0xe0, 0x80, 0x19, 0x30, 0xe0, 0x80, 0x19, 0xb0, 0xe0, 0x80, 0x19, 0xb0, 0xe0, 0x80, 0x43, 0x8b, 0xe0, 0x80, 0x5a, 0x00};
+static u8 mode5_red[] = {0x40, 0x19, 0x27, 0x19, 0xe0, 0x04, 0x0c, 0x65, 0xe0, 0x04, 0x0c, 0x65, 0xe0, 0x04, 0x0c, 0xe5, 0xe0, 0x04, 0x0c, 0xe5, 0xe0, 0x04, 0x29, 0x98, 0xe0, 0x04, 0x5a, 0x00};
+static u8 mode5_green[] = {0x40, 0x0c, 0x43, 0x0b, 0xe0, 0x80, 0x19, 0x30, 0xe0, 0x80, 0x19, 0x30, 0xe0, 0x80, 0x19, 0xb0, 0xe0, 0x80, 0x19, 0xb0, 0xe0, 0x80, 0x43, 0x8b, 0xe0, 0x80, 0x5a, 0x00};
 
 static u8 mode6_red[] = {0xE0, 0x0C, 0x40, 0x00, 0x0C, 0x2F, 0x06, 0x28, 0x05, 0x2D, 0x06, 0x2A, 0x06, 0x25, 0x03, 0xDC, 0x02, 0xFA, 0x48, 0x00, 0x03, 0x54, 0x44, 0x01, 0x23, 0x06, 0x31, 0x84, 0x06, 0xA8, 0x0C, 0xAF};
 static u8 mode6_green[] = {0xE0, 0x80, 0x40, 0x00, 0x52, 0x00, 0x0B, 0x15, 0x05, 0x2D, 0x03, 0x48, 0x03, 0x4B, 0x09, 0x1B, 0x02, 0x63, 0x19, 0x89, 0x03, 0xCA, 0x04, 0xC1, 0x05, 0xB2, 0x06, 0xA6, 0x12, 0x8D, 0x52, 0x00};
 static u8 mode6_blue[] = {0xE0, 0x80, 0x40, 0x00, 0x12, 0xFE, 0x40, 0xC0, 0x0A, 0x18, 0x06, 0xA6, 0x06, 0xAA, 0x03, 0xCF, 0x04, 0xB6, 0x52, 0x00,};
 
-static u8 mode7_red[]={};
-static u8 mode7_green[]={0x40, 0x00, 0x10, 0xfe, 0x40, 0xff, 0x02, 0xd4, 0x02, 0xd4, 0x02, 0xd4, 0x48, 0x00, 0x40, 0xff, 0x02, 0xd4, 0x02, 0xd4, 0x02, 0xd4, 0x25, 0xfe};
-static u8 mode7_blue[]={};
+static u8 mode7_red[] = {};
+static u8 mode7_green[] = {0x40, 0x00, 0x10, 0xfe, 0x40, 0xff, 0x02, 0xd4, 0x02, 0xd4, 0x02, 0xd4, 0x48, 0x00, 0x40, 0xff, 0x02, 0xd4, 0x02, 0xd4, 0x02, 0xd4, 0x25, 0xfe};
+static u8 mode7_blue[] = {};
 
-static u8 mode8_red[]={0x40, 0x00, 0x10, 0xFE, 0x40, 0xE6, 0xE2, 0x00, 0x03, 0xF2, 0xE2, 0x00, 0x03, 0xF2, 0xE2, 0x00, 0x48, 0x00, 0x40, 0xE6, 0xE2, 0x00, 0x03, 0xF2, 0xE2, 0x00, 0x03, 0xF2, 0xE2, 0x00, 0x25, 0xFE,};
-static u8 mode8_green[]={0x40, 0x00, 0x10, 0xFE, 0x40, 0x66, 0x4F, 0x00, 0x0B, 0xA8, 0xE0, 0x80, 0x0B, 0xA8, 0xE0, 0x80, 0x40, 0x66, 0x4F, 0x00, 0x09, 0xB2, 0xE0, 0x80, 0x09, 0xB2, 0xE0, 0x80, 0x1A, 0xFE,};
-static u8 mode8_blue[]={0x40, 0x00, 0x10, 0xFE, 0x40, 0x73, 0x4F, 0x00, 0x08, 0xBC, 0xE0, 0x80, 0x0F, 0x9E, 0xE0, 0x80, 0x40, 0x73, 0x4F, 0x00, 0x05, 0xD5, 0xE0, 0x80, 0x10, 0x9C, 0xE0, 0x80, 0x1A, 0xFE,};
+static u8 mode8_red[] = {0x40, 0x00, 0x10, 0xFE, 0x40, 0xE6, 0xE2, 0x00, 0x03, 0xF2, 0xE2, 0x00, 0x03, 0xF2, 0xE2, 0x00, 0x48, 0x00, 0x40, 0xE6, 0xE2, 0x00, 0x03, 0xF2, 0xE2, 0x00, 0x03, 0xF2, 0xE2, 0x00, 0x25, 0xFE,};
+static u8 mode8_green[] = {0x40, 0x00, 0x10, 0xFE, 0x40, 0x66, 0x4F, 0x00, 0x0B, 0xA8, 0xE0, 0x80, 0x0B, 0xA8, 0xE0, 0x80, 0x40, 0x66, 0x4F, 0x00, 0x09, 0xB2, 0xE0, 0x80, 0x09, 0xB2, 0xE0, 0x80, 0x1A, 0xFE,};
+static u8 mode8_blue[] = {0x40, 0x00, 0x10, 0xFE, 0x40, 0x73, 0x4F, 0x00, 0x08, 0xBC, 0xE0, 0x80, 0x0F, 0x9E, 0xE0, 0x80, 0x40, 0x73, 0x4F, 0x00, 0x05, 0xD5, 0xE0, 0x80, 0x10, 0x9C, 0xE0, 0x80, 0x1A, 0xFE,};
 
 static struct lp5521_led_pattern board_led_patterns[] = {
 	{
@@ -817,42 +815,40 @@ static struct gpio_i2c_pin rgb_i2c_pin[] = {
 	},
 };
 
-static int lp5521_setup(void)       
+static int lp5521_setup(void)
 {
-       
-       int rc = 0;
+	int rc = 0;
 
-       pr_debug("lp5521_enable\n\n");
-       rc = gpio_request(RGB_GPIO_RGB_EN, "lp5521_led");
+	pr_debug("lp5521_enable\n\n");
+	rc = gpio_request(RGB_GPIO_RGB_EN, "lp5521_led");
 
-       if(rc){
-              pr_debug("lp5521_request failed\n");
-              return rc;
-       }
+	if (rc) {
+		pr_debug("lp5521_request failed\n");
+		return rc;
+	}
 
 	rc = gpio_tlmm_config(GPIO_CFG(RGB_GPIO_RGB_EN, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
-	
-       if(rc){
-              pr_debug("lp5521_config failed\n");
-              return rc;
-       }
-       return rc;
+
+	if (rc) {
+		pr_debug("lp5521_config failed\n");
+		return rc;
+	}
+	return rc;
 }
 
 static void lp5521_enable(bool state)
 {
-       if(state){
-              gpio_set_value(RGB_GPIO_RGB_EN, 1);
-              pr_debug("lp5521_enable_set\n");
-       }
-       else{
-              gpio_set_value(RGB_GPIO_RGB_EN, 0);
-              pr_debug("lp5521_disable_set\n");
-       }
-       
-       return;
+	if (state) {
+		gpio_set_value(RGB_GPIO_RGB_EN, 1);
+		pr_debug("lp5521_enable_set\n");
+	} else {
+		gpio_set_value(RGB_GPIO_RGB_EN, 0);
+		pr_debug("lp5521_disable_set\n");
+	}
+
+	return;
 }
-      
+
 #define LP5521_CONFIGS	(LP5521_PWM_HF | LP5521_PWRSAVE_EN | LP5521_CP_MODE_AUTO | LP5521_CLK_SRC_EXT)
 
 static struct lp5521_platform_data lp5521_pdata = {
@@ -862,8 +858,8 @@ static struct lp5521_platform_data lp5521_pdata = {
 	.update_config = LP5521_CONFIGS,
 	.patterns = board_led_patterns,
 	.num_patterns = ARRAY_SIZE(board_led_patterns),
-       .setup_resources = lp5521_setup,
-       .enable = lp5521_enable
+	.setup_resources = lp5521_setup,
+	.enable = lp5521_enable
 };
 
 static struct i2c_board_info lp5521_board_info[] __initdata = {
@@ -885,8 +881,8 @@ static struct platform_device rgb_i2c_device = {
 
 static void __init lp5521_init_i2c_rgb(int bus_num)
 {
-	int rc=0;
-	
+	int rc = 0;
+
 	rgb_i2c_device.id = bus_num;
 
 	lge_init_gpio_i2c_pin_pullup(&rgb_i2c_pdata, rgb_i2c_pin[0], &lp5521_board_info[0]);
@@ -897,11 +893,10 @@ static void __init lp5521_init_i2c_rgb(int bus_num)
 
 	rc = gpio_tlmm_config(GPIO_CFG(RGB_GPIO_RGB_EN, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
 
-	if (rc) {
-			pr_err("[LP5521] %s: Error requesting GPIO gpio_tlmm_config, ret %d\n", __func__, rc);
-		} else {
-			pr_err ("[LP5521] %s: success gpio_tlmm_config, ret %d\n", __func__, rc);
-		}
+	if (rc)
+		pr_err("[LP5521] %s: Error requesting GPIO gpio_tlmm_config, ret %d\n", __func__, rc);
+	else
+		pr_err("[LP5521] %s: success gpio_tlmm_config, ret %d\n", __func__, rc);
 }
 
 
@@ -930,21 +925,21 @@ static struct platform_device ts_i2c_device = {
 
 
 static struct regulator *regulator_ts;
-static char is_touch_Initialized = 0;
+static char is_touch_Initialized;
 int ts_set_vreg(unsigned char onoff)
 {
 	int rc;
-	
+
 #if defined(CONFIG_MACH_MSM7X25A_V3)
 	if (1) {
 		regulator_ts = regulator_get(NULL, "rfrx1");
 		if (regulator_ts == NULL)
-			pr_err("%s: regulator_get(regulator_ts) failed\n",__func__);
-			
+			pr_err("%s: regulator_get(regulator_ts) failed\n", __func__);
+
 		rc = regulator_set_voltage(regulator_ts, 3000000, 3000000);
 		if (rc < 0)
 			pr_err("%s: regulator_set_voltage(regulator_ts) failed\n", __func__);
-		
+
 		is_touch_Initialized = 1;
 	}
 
@@ -969,8 +964,8 @@ static struct touch_platform_data ts_pdata = {
 	.ts_x_max = TS_X_MAX,
 	.ts_y_min = TS_Y_MIN,
 	.ts_y_max = TS_Y_MAX,
-	.power 	  = ts_set_vreg,
-	.irq 	  = TS_GPIO_IRQ,
+	.power    = ts_set_vreg,
+	.irq      = TS_GPIO_IRQ,
 	.scl      = TS_GPIO_I2C_SCL,
 	.sda      = TS_GPIO_I2C_SDA,
 };
@@ -1182,14 +1177,14 @@ void __init msm7627a_add_io_devices(void)
 				ARRAY_SIZE(atmel_ts_i2c_info));
 #endif
 
-#if defined (CONFIG_SENSORS_BMM050) ||defined(CONFIG_SENSORS_BMA250)
+#if defined(CONFIG_SENSORS_BMM050) || defined(CONFIG_SENSORS_BMA250)
 	lge_add_gpio_i2c_device(v3_init_i2c_sensor);
 #endif
 	lge_add_gpio_i2c_device(v3_init_i2c_prox);
 
-#ifdef CONFIG_LEDS_LP5521	
+#ifdef CONFIG_LEDS_LP5521
 	lge_add_gpio_i2c_device(lp5521_init_i2c_rgb);
-#endif	
+#endif
 	msm_init_pmic_vibrator();
 }
 
