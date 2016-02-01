@@ -59,7 +59,7 @@ case "$x" in
 	5 ) defconfig="cyanogenmod_v1_defconfig"; name="L1II"; variant="SingleAndDual";;
 	6 ) defconfig="cyanogenmod_vee3_defconfig"; name="L3II"; variant="SingleAndDual";;
 	7 ) defconfig="cyanogenmod_vee7_defconfig"; name="L7II"; variant="NFC";;
-	8 ) defconfig="cyanogenmod_vee7_nonfc_defconfig"; name="L7II"; variant="NFC";;
+	8 ) defconfig="cyanogenmod_vee7_nonfc_defconfig"; name="L7II"; variant="NoNFC";;
 	9 ) defconfig="cyanogenmod_vee7ds_defconfig"; name="L7II"; variant="Dual";;
 	* ) echo "$x - This option is not valid"; sleep .5;;
 esac
