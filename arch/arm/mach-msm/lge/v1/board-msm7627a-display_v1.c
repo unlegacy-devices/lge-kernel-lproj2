@@ -43,7 +43,7 @@
 
 #define GPIO_LCD_RESET_N 125
 
-#define MSM_V4L2_VIDEO_OVERLAY_BUF_SIZE 1244160
+#define MSM_V4L2_VIDEO_OVERLAY_BUF_SIZE 460800
 
 static struct resource msm_fb_resources[] = {
 	{
