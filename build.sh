@@ -61,13 +61,12 @@ case "$x" in
 	7 ) defconfig="cyanogenmod_vee7_defconfig"; name="L7II"; variant="NFC";;
 	8 ) defconfig="cyanogenmod_vee7_nonfc_defconfig"; name="L7II"; variant="NFC";;
 	9 ) defconfig="cyanogenmod_vee7ds_defconfig"; name="L7II"; variant="Dual";;
-	*) echo "$x - This option is not valid"; sleep .5;;
+	* ) echo "$x - This option is not valid"; sleep .5;;
 esac
 if ! [ "$defconfig" == "" ]; then
 	echo "$x - $name $variant"
 	make $defconfig &> /dev/null | echo "Setting..."
 	unset cleankernelcheck
-	zipfile="$customkernel-$name-$variant-$release.zip"
 fi
 }
 
@@ -90,7 +89,7 @@ if [ -f ../android_prebuilt_toolchains/aptess.sh ]; then
 	. ../android_prebuilt_toolchains/aptess.sh
 elif [ -d ../android_prebuilt_toolchains ]; then
 	echo "You not have APTESS Script in Android Prebuilt Toolchain folder"
-	echo "Check the folder, using Manual Method"
+	echo "Check the folder, using Manual Method now"
 	manualtoolchain
 else
 	echo "-You don't have TeamVee Prebuilt Toolchains-"
@@ -257,7 +256,6 @@ else
 echo "o) View Build Output ($buildoutput)"
 fi
 echo "g) Git Gui | k) GitK | s) Git Push | l) Git Pull"
-
 echo "q) Quit"
 read -n 1 -p "${txtbld}Choice: ${txtrst}" -s x
 case $x in
@@ -266,7 +264,7 @@ case $x in
 	3) echo "$x - Device choice"; maindevice;;
 	4) echo "$x - Toolchain choice"; maintoolchain;;
 	5) if [ -f .config ]; then
-		echo "$x - Building $customkernel"; buildprocess
+		echo "$x - Building $customkernel"; buildprocess; unset zippackagecheck
 	fi;;
 	6) if ! [ "$defconfig" == "" ]; then
 		if [ -f arch/$ARCH/boot/zImage ]; then
@@ -298,8 +296,6 @@ if [ ! "$BASH_VERSION" ] ; then
 elif [ -e build.sh ]; then
 	customkernel=CAFKernel
 	export ARCH=arm
-	release=$(date +%d""%m""%Y)
-	zipfile="$customkernel-$name-$variant-$release.zip"
 
 	if [ -f zip-creator/*.zip ]; then unset cleanzipcheck; else cleanzipcheck="Done"; fi
 	if [ -f .config ]; then unset cleankernelcheck; else cleankernelcheck="Done"; fi
@@ -308,8 +304,11 @@ elif [ -e build.sh ]; then
 
 	customcoloroutput
 
-	while true
-		do buildsh
+	while true; do
+		release=$(date +%d""%m""%Y)
+		if [ -f .version ]; then build=$(cat .version); else build="0"; fi
+		zipfile="$customkernel-$name-$variant-$release-$build.zip"
+		buildsh
 	done
 else
 	echo
