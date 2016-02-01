@@ -1,13 +1,12 @@
 #include <linux/init.h>
 #include <linux/platform_device.h>
 #include <linux/bootmem.h>
-#include <linux/android_pmem.h>
 #include <linux/gpio.h>
-//LGE_CHANGE_S jongjin7.park@lge.com for frst 2012-11-22 
+
 #if defined(CONFIG_MACH_MSM7X27A_U0) || defined(CONFIG_MACH_MSM7X25A_V1)
 #include <linux/export.h>
 #endif
-//LGE_CHANGE_E jongjin7.park
+
 #include <asm/mach-types.h>
 
 #ifdef CONFIG_ANDROID_RAM_CONSOLE
@@ -24,10 +23,9 @@
 #include CONFIG_LGE_BOARD_HEADER_FILE
 #include <mach/lge/lge_pm.h>
 
-#ifdef CONFIG_MACH_LGE_NO_STOCK_INFO
 /* setting whether uart console is enabled or disabled */
-static int uart_console_mode = 0;
-static int reboot_mode = 0;
+static int uart_console_mode;
+static int reboot_mode;
 
 int __init lge_get_uart_mode(void)
 {
@@ -37,22 +35,21 @@ int __init lge_get_uart_mode(void)
 static int __init lge_uart_mode(char *uart_mode)
 {
 	if (!strncmp("enable", uart_mode, 5)) {
-		printk(KERN_INFO "UART CONSOLE : enable\n");
+		pr_debug("UART CONSOLE : enable\n");
 		uart_console_mode = 1;
 	} else
-		printk(KERN_INFO "UART CONSOLE : disable\n");
+		pr_debug("UART CONSOLE : disable\n");
 
 	return 1;
 }
 
 __setup("uart_console=", lge_uart_mode);
-#endif
 
 #ifdef CONFIG_LGE_HW_REVISION
 /* setting board revision information */
-lge_pcb_rev  lge_bd_rev = 0;
+lge_pcb_rev lge_bd_rev;
 
-lge_pcb_rev  lge_get_board_revno(void)
+lge_pcb_rev lge_get_board_revno(void)
 {
 	return lge_bd_rev;
 }
@@ -60,7 +57,7 @@ lge_pcb_rev  lge_get_board_revno(void)
 static int __init board_revno_setup(char *rev_info)
 {
 	char *rev_str[] = { "evb", "rev_a", "rev_b", "rev_c", "rev_d", "rev_e",
-		"rev_f", "rev_g", "rev_10", "rev_11", "rev_12" ,"reserved"};
+		"rev_f", "rev_g", "rev_10", "rev_11", "rev_12", "reserved"};
 	int i;
 
 	lge_bd_rev = LGE_REV_TOT_NUM;
@@ -71,7 +68,7 @@ static int __init board_revno_setup(char *rev_info)
 			break;
 		}
 
-	printk(KERN_INFO"BOARD: LGE %s\n", rev_str[lge_bd_rev]);
+	pr_debug("BOARD: LGE %s\n", rev_str[lge_bd_rev]);
 	return 1;
 }
 
@@ -79,29 +76,26 @@ __setup("lge.rev=", board_revno_setup);
 
 #endif
 
-#ifdef CONFIG_MACH_LGE_NO_STOCK_INFO
 /* setting whether factory reset is */
 static char frst_mode[6];
 
 static int __init lge_frst_mode(char *cmdline)
 {
-	strncpy(frst_mode, cmdline, 5);
-	frst_mode[5]='\0';
-	printk(KERN_INFO "FRST MODE : %s",frst_mode);
+	strlcpy(frst_mode, cmdline, 5);
+	frst_mode[5] = '\0';
+	pr_debug("FRST MODE : %s", frst_mode);
 
 	return 1;
 }
 
 __setup("lge.frst=", lge_frst_mode);
 
-//LGE_CHANGE_S jongjin7.park@lge.com for frst 2012-11-22 
 #if defined(CONFIG_MACH_MSM7X27A_U0) || defined(CONFIG_MACH_MSM7X25A_V1)
-char* get_frst_mode(void)
+char *get_frst_mode(void)
 {
 	return frst_mode;
 }
 EXPORT_SYMBOL(get_frst_mode);
-#endif
 #endif
 
 /* LGE_CHANGE_S,narasimha.chikka@lge.com,Add BATT_ID Check */
@@ -111,31 +105,28 @@ static char battery_id[10];
 
 static int __init lge_battery_id(char *battery_id_cmd)
 {
-	strncpy(battery_id, battery_id_cmd, 9);
-	battery_id[9]='\0';
-	printk(KERN_INFO "BATT_ID : %s",battery_id);
+	strlcpy(battery_id, battery_id_cmd, 9);
+	battery_id[9] = '\0';
+	printk(KERN_INFO "BATT_ID : %s", battery_id);
 
 	return 1;
 }
 
 __setup("lge.batt_id_info=", lge_battery_id);
 
-char	 *lge_get_battery_id(void)
+char *lge_get_battery_id(void)
 {
 	return battery_id;
 }
-
-//EXPORT_SYMBOL(lge_get_battery_id);
 
 #endif
 
 /* LGE_CHANGE_S,narasimha.chikka@lge.com,Add BATT_ID Check */
 
-//LGE_CHANGE_E jongjin7.park
 /* LGE_CHANGE_S: murali.ramaiah@lge.com [2011-09-22]
 	Read power on status from modem, and update boot reason.
-	Ref:- Documentation\arm\msm\boot.txt
-*/
+	Ref:- Documentation\arm\msm\boot.txt */
+
 #ifdef CONFIG_LGE_POWER_ON_STATUS_PATCH
 void __init lge_board_pwr_on_status(void)
 {
@@ -148,32 +139,33 @@ void __init lge_board_pwr_on_status(void)
 }
 #endif /* CONFIG_LGE_POWER_ON_STATUS_PATCH */
 
-#ifdef CONFIG_MACH_LGE_NO_STOCK_INFO
 /* LGE_CHANGE_S, [20121110][youngbae.choi@lge.com] */
+#ifdef CONFIG_LGE_HANDLE_PANIC
 static int __init panicmode_setup(char *arg)
-{	
+{
 	if ((!strcmp(arg, "soff_pon")) || (!strcmp(arg, "son_pon")))
-			set_kernel_panicmode(2);
+		set_kernel_panicmode(2);
 
 #ifdef CONFIG_LGE_SILENCE_RESET
 	if (!strcmp(arg, "son_pon"))
-			set_kernel_panicmode(0);
-	
-	if ((!strcmp(arg, "son_pon")) || (!strcmp(arg, "son_poff"))){
-			set_kernel_silencemode(1);
-			lge_silence_reset_f(1);
-	}
-	else{
-			set_kernel_silencemode(0);
-			lge_silence_reset_f(0);
+		set_kernel_panicmode(0);
+
+	if ((!strcmp(arg, "son_pon")) || (!strcmp(arg, "son_poff"))) {
+		set_kernel_silencemode(1);
+		lge_silence_reset_f(1);
+	} else {
+		set_kernel_silencemode(0);
+		lge_silence_reset_f(0);
 	}
 
-	printk(KERN_INFO " panicmode_setup , panicmode = %d, silencemode = %d \n", get_kernel_panicmode(), get_kernel_silencemode());
+	pr_debug("panicmode_setup, panicmode = %d, silencemode = %d\n",
+	get_kernel_panicmode(), get_kernel_silencemode());
 #endif
 
 	return 1;
 }
 __setup("lge.panicmode=", panicmode_setup);
+#endif
 
 static int atoi(const char *name)
 {
@@ -189,22 +181,17 @@ static int atoi(const char *name)
 		}
 	}
 }
-#endif
 
-#ifdef CONFIG_MACH_LGE_NO_STOCK_INFO
 static int __init rebootmode_setup(char *arg)
-{	
+{
 	reboot_mode = atoi(arg);
-	printk(KERN_INFO " rebootmode_setup , reboot_mode = %x \n", reboot_mode);
+	pr_debug("rebootmode_setup, reboot_mode = %x\n", reboot_mode);
 
 	return 1;
 }
 __setup("lge.reboot=", rebootmode_setup);
-#endif
 
-//LGE_CHANGE_S FTM boot mode
-#ifdef CONFIG_MACH_LGE_NO_STOCK_INFO
-#if (defined (CONFIG_MACH_MSM7X25A_V3) && !defined (CONFIG_MACH_MSM7X25A_M4)) || defined (CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if (defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X25A_M4)) || defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
 static enum lge_fboot_mode_type lge_fboot_mode = second_boot;
 int __init lge_fboot_mode_init(char *s)
 {
@@ -215,7 +202,7 @@ int __init lge_fboot_mode_init(char *s)
 	else
 		lge_fboot_mode = second_boot;
 
-	printk(KERN_INFO "ANDROID FBOOT MODE : %d \n", lge_fboot_mode);
+	pr_debug("ANDROID FBOOT MODE : %d\n", lge_fboot_mode);
 
 	return 1;
 }
@@ -225,8 +212,6 @@ enum lge_fboot_mode_type lge_get_fboot_mode(void)
 {
 	return lge_fboot_mode;
 }
-#endif
-//LGE_CHANGE_E FTM boot mode
 
 int get_reboot_mode(void)
 {
@@ -282,7 +267,6 @@ void __init lge_add_panic_handler_devices(void)
 }
 #endif
 
-// LGE_CHANGE_S, narasimha.chikka@lge.com,Add pm device
 static struct platform_device lge_pm_device = {
 	.name = LGE_PM_DEVICE,
 	.id      = -1,
@@ -295,7 +279,6 @@ void __init lge_add_pm_devices(void)
 {
 	platform_device_register(&lge_pm_device);
 }
-// LGE_CHANGE_E, narasimha.chikka@lge.com,Add pm device
 
 /* lge gpio i2c device */
 #define MAX_GPIO_I2C_DEV_NUM		10

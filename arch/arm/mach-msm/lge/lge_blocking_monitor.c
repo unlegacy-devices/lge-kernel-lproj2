@@ -1,4 +1,4 @@
-/* 
+/*
  * arch/arm/mach-msm/lge/lge_block_monitor.c
  *
  * Copyright (C) 2012 LGE, Inc

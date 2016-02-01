@@ -176,13 +176,6 @@ config MACH_LGE_NO_DEBUG_INFO
 	help
 	 Support for the LG Electronics MSM7x27A U0.
 
-config MACH_LGE_NO_STOCK_INFO
-	depends on MACH_LGE
-	default y
-	bool "LG Stock DEBUG INFO"
-	help
-	 LG Stock DEBUG INFO
-
 config MACH_LGE_2ND_GEN_KK_WORKAROUD
 	depends on MACH_LGE
 	bool "MSM7x25A V3 errors Workaround"
