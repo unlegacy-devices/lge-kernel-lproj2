@@ -828,6 +828,8 @@ static void mcs8000_work(struct work_struct *work)
 
 	int Is_Touch_Valid = 0;
 
+	unsigned char fw_ver = 0, hw_ver = 0, comp_ver = 0;
+
 	#if DEBUG_PRINT
 	printk(KERN_ERR "melfas_ts_work_func\n");
 	if (ts == NULL)
@@ -936,25 +938,21 @@ static void mcs8000_work(struct work_struct *work)
 
 				printk(KERN_INFO "keyID: [%d]\n", keyID);
 
+				mcs8000_firmware_info(&fw_ver, &hw_ver, &comp_ver);
+
 				switch(keyID) {
 					case 0x1:
 						input_report_key(ts->input_dev, KEY_BACK, touchState ? PRESS_KEY : RELEASE_KEY);
 						break;
-#ifdef CONFIG_MACH_MSM7X25A_V3_DS
 					case 0x2:
-						input_report_key(ts->input_dev, KEY_HOMEPAGE, touchState ? PRESS_KEY : RELEASE_KEY);
+						if ((comp_ver == 2))
+							input_report_key(ts->input_dev, KEY_HOMEPAGE, touchState ? PRESS_KEY : RELEASE_KEY);
+						else
+							input_report_key(ts->input_dev, KEY_MENU, touchState ? PRESS_KEY : RELEASE_KEY);
 						break;
 					case 0x3:
 						input_report_key(ts->input_dev, KEY_MENU, touchState ? PRESS_KEY : RELEASE_KEY);
 						break;
-#else
-					case 0x2:
-						input_report_key(ts->input_dev, KEY_MENU, touchState ? PRESS_KEY : RELEASE_KEY);
-						break;
-					case 0x3:
-						input_report_key(ts->input_dev, KEY_HOMEPAGE, touchState ? PRESS_KEY : RELEASE_KEY);
-						break;
-#endif
 					case 0x4:
 						input_report_key(ts->input_dev, KEY_SIM_SWITCH, touchState ? PRESS_KEY : RELEASE_KEY);
 						break;
