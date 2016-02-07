@@ -936,7 +936,8 @@ static void mcs8000_work(struct work_struct *work)
 				keyID = (buf[i] & 0x0F);
 				touchState = (buf[i] & 0x80);
 
-				printk(KERN_INFO "keyID: [%d]\n", keyID);
+				if (g_touchLogEnable)
+					printk(KERN_INFO "keyID: [%d]\n", keyID);
 
 				mcs8000_firmware_info(&fw_ver, &hw_ver, &comp_ver);
 
