@@ -53,10 +53,9 @@ typedef enum {
 
 #define	LGE_BOOT_MODE_MINIOS_STR		"miniOS"
 
-#define LGE_BOOT_MODE_CRASHNOSOUND_ST		"panic"
+#define LGE_BOOT_MODE_CRASHNOSOUND_STR		"panic"
 
-static const char *boot_mode_str()
-{
+static const char *boot_mode_str[] = {
 	LGE_BOOT_MODE_UNKNOWN_STR,
 	LGE_BOOT_MODE_CHARGER_STR,
 	LGE_BOOT_MODE_FACTORY_STR,
@@ -89,8 +88,7 @@ static int update_apps_boot_mode(void)
 
 	apps_boot_mode = smem_apps_boot_mode;
 
-	printk(KERN_INFO "[BootMode] apps_boot_mode = 0x%08x\n",
-	apps_boot_mode);
+	printk(KERN_INFO "[BootMode] apps_boot_mode = 0x%08x\n", apps_boot_mode);
 
 	return apps_boot_mode;
 }
@@ -182,7 +180,7 @@ static ssize_t msm_nv_frststatus_show(struct device *dev, struct device_attribut
 
 	frststatus = (unsigned char)lge_get_nv_frststatus();
 
-	return snprintf(buf, "%d\n", frststatus);
+	return sprintf(buf, "%d\n", frststatus);
 }
 
 static ssize_t msm_nv_frststatus_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)

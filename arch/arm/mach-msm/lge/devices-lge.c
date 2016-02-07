@@ -212,6 +212,7 @@ enum lge_fboot_mode_type lge_get_fboot_mode(void)
 {
 	return lge_fboot_mode;
 }
+#endif
 
 int get_reboot_mode(void)
 {
@@ -232,7 +233,6 @@ void __init lge_add_boot_mode_devices(void)
 {
 	platform_device_register(&lge_boot_mode_device);
 }
-#endif
 #endif
 
 #ifdef CONFIG_LGE_HANDLE_PANIC

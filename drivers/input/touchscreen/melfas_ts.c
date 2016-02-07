@@ -101,7 +101,9 @@ static void Release_All_Fingers(void);
 #define	SET_DOWNLOAD_BY_GPIO							1
 #define GPIO_TOUCH_ID 121
 
+#if defined(CONFIG_MACH_MSM7X25A_V1)
 #define KEY_SIM_SWITCH 223
+#endif
 
 int power_flag=0;
 static int irq_flag;
@@ -463,9 +465,11 @@ Touchscreen doesn't work*/
 					case 0x3:
 						input_report_key(ts->input_dev, KEY_MENU, touchState ? PRESS_KEY : RELEASE_KEY);
 						break;
+#if defined(CONFIG_MACH_MSM7X25A_V1)
 					case 0x4:
 						input_report_key(ts->input_dev, KEY_SIM_SWITCH, touchState ? PRESS_KEY : RELEASE_KEY);
 						break;
+#endif
 					default:
 						break;
 				}
@@ -1034,8 +1038,9 @@ static int __devinit mcs8000_ts_init(void)
 	mcs8000_ts_input->keybit[BIT_WORD(KEY_BACK)] |= BIT_MASK(KEY_BACK);
 	mcs8000_ts_input->keybit[BIT_WORD(KEY_MENU)] |= BIT_MASK(KEY_MENU);
 	mcs8000_ts_input->keybit[BIT_WORD(KEY_HOMEPAGE)] |= BIT_MASK(KEY_HOMEPAGE);
+#if defined(CONFIG_MACH_MSM7X25A_V1)
 	mcs8000_ts_input->keybit[BIT_WORD(KEY_SIM_SWITCH)] |= BIT_MASK(KEY_SIM_SWITCH);
-	#endif	
+#endif
 
 	err = input_register_device(mcs8000_ts_input);
 	if (err < 0) {
