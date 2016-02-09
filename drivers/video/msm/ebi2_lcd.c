@@ -113,8 +113,7 @@ static int ebi2_lcd_probe(struct platform_device *pdev)
 						pdev->resource[i].end -
 						pdev->resource[i].start + 1);
 				if (!ebi2_base) {
-					printk(KERN_ERR
-						"ebi2_base ioremap failed!\n");
+					pr_err("ebi2_base ioremap failed!\n");
 					return -ENOMEM;
 				}
 				ebi2_lcd_cfg0 = (void *)(ebi2_base + 0x20);
@@ -126,8 +125,7 @@ static int ebi2_lcd_probe(struct platform_device *pdev)
 						pdev->resource[i].end -
 						pdev->resource[i].start + 1);
 				if (!lcd01_base) {
-					printk(KERN_ERR
-						"lcd01_base ioremap failed!\n");
+					pr_err("lcd01_base ioremap failed!\n");
 					return -ENOMEM;
 				}
 			} else if (!strncmp(pdev->resource[i].name,
@@ -136,8 +134,7 @@ static int ebi2_lcd_probe(struct platform_device *pdev)
 						pdev->resource[i].end -
 						pdev->resource[i].start + 1);
 				if (!lcd02_base) {
-					printk(KERN_ERR
-						"lcd02_base ioremap failed!\n");
+					pr_err("lcd02_base ioremap failed!\n");
 					return -ENOMEM;
 				}
 			}
@@ -177,7 +174,7 @@ static int ebi2_lcd_probe(struct platform_device *pdev)
 	if (platform_device_add_data
 	    (mdp_dev, pdev->dev.platform_data,
 	     sizeof(struct msm_fb_panel_data))) {
-		printk(KERN_ERR "ebi2_lcd_probe: platform_device_add_data failed!\n");
+		pr_err("ebi2_lcd_probe: platform_device_add_data failed!\n");
 		platform_device_put(mdp_dev);
 		return -ENOMEM;
 	}
@@ -193,18 +190,10 @@ static int ebi2_lcd_probe(struct platform_device *pdev)
 
 	hw_version = inp32((int)ebi2_base + 8);
 
-	/* OverWrite Panel Info Original Values */
-#ifdef CONFIG_FB_MSM_DEFAULT_DEPTH_RGBA8888
-	mfd->fb_imgType = MDP_RGBA_8888;
-#else
-	/* Use Original setting if no one of aboves is defined */
-	if (mfd->panel_info.bpp == 24)
-		mfd->fb_imgType = MDP_RGB_888;
-	else if (mfd->panel_info.bpp == 18)
-		mfd->fb_imgType = MDP_RGB_888;
+	if (mfd->index == 0)
+		mfd->fb_imgType = MSMFB_DEFAULT_TYPE;
 	else
 		mfd->fb_imgType = MDP_RGB_565;
-#endif
 
 	/* config msm ebi2 lcd register */
 	if (mfd->panel_info.pdest == DISPLAY_1) {
@@ -268,9 +257,8 @@ static int ebi2_lcd_probe(struct platform_device *pdev)
 	 * register in mdp driver
 	 */
 	rc = platform_device_add(mdp_dev);
-	if (rc) {
+	if (rc)
 		goto ebi2_lcd_probe_err;
-	}
 
 	pm_runtime_set_active(&pdev->dev);
 	pm_runtime_enable(&pdev->dev);
@@ -279,7 +267,7 @@ static int ebi2_lcd_probe(struct platform_device *pdev)
 	pdev_list[pdev_list_cnt++] = pdev;
 	return 0;
 
-      ebi2_lcd_probe_err:
+	ebi2_lcd_probe_err:
 	platform_device_put(mdp_dev);
 	return rc;
 }
