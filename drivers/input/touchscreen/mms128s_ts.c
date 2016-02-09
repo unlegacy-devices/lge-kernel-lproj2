@@ -91,7 +91,7 @@ static void ResetTS(void);
 #define DEBUG_TS 0 /* enable or disable debug message */
 
 #if DEBUG_TS
-#define DMSG(fmt, args...) printk(KERN_DEBUG fmt, ##args)
+#define DMSG(fmt, args...) pr_debug(fmt, ##args)
 #else
 #define DMSG(fmt, args...) do {} while (0)
 #endif
@@ -240,12 +240,12 @@ static inline int mcs8000_ioctl_down_i2c_write(struct file *file, unsigned char 
 		DMSG("\n");
 
 	if (ts == (void *)NULL) {
-		printk(KERN_ERR "mcs8000 ts data is null\n");
+		pr_err("mcs8000 ts data is null\n");
 		return err;
 	}
 
 	if (ts->client == NULL) {
-		printk(KERN_ERR "mcs8000_ts_ioctl_down_i2c_write: client is null\n");
+		pr_err("mcs8000_ts_ioctl_down_i2c_write: client is null\n");
 		return err;
 	}
 
@@ -255,7 +255,7 @@ static inline int mcs8000_ioctl_down_i2c_write(struct file *file, unsigned char 
 	msg.buf = &val;
 
 	if ((err = i2c_transfer(ts->client->adapter, &msg, 1)) < 0)
-		printk(KERN_ERR "mcs8000_ts_ioctl_down_i2c_write: transfer failed[%d]\n", err);
+		pr_err("mcs8000_ts_ioctl_down_i2c_write: transfer failed[%d]\n", err);
 
 	return err;
 }
@@ -270,12 +270,12 @@ static inline int mcs8000_ioctl_down_i2c_read(struct file *file, unsigned char a
 		DMSG("\n");
 
 	if (ts == (void *)NULL) {
-		printk(KERN_ERR "mcs8000_ts_ioctl_down_i2c_read: client is null\n");
+		pr_err("mcs8000_ts_ioctl_down_i2c_read: client is null\n");
 		return err;
 	}
 
 	if (ts->client == NULL) {
-		printk(KERN_ERR "mcs8000_ts_ioctl_down_i2c_read: transfer failed[%d]\n", err);
+		pr_err("mcs8000_ts_ioctl_down_i2c_read: transfer failed[%d]\n", err);
 		return err;
 	}
 
@@ -285,7 +285,7 @@ static inline int mcs8000_ioctl_down_i2c_read(struct file *file, unsigned char a
 	msg.buf = ret;
 
 	if ((err = i2c_transfer(ts->client->adapter, &msg, 1)) < 0)
-		printk(KERN_ERR "mcs8000_ts_ioctl_down_i2c_read: transfer failed[%d]\n", err);
+		pr_err("mcs8000_ts_ioctl_down_i2c_read: transfer failed[%d]\n", err);
 
 	return err;
 }
@@ -306,12 +306,12 @@ int mcs8000_ts_ioctl_down(struct file *file, unsigned int cmd, unsigned long arg
 		case MCS8000_TS_DOWN_IOCTL_VDD_HIGH:
 			err = ts->power(1);
 			if (err < 0)
-				printk(KERN_INFO "mcs8000_ts_ioctl_down: Power up failed\n");
+				pr_info("mcs8000_ts_ioctl_down: Power up failed\n");
 			break;
 		case MCS8000_TS_DOWN_IOCTL_VDD_LOW:
 			err = ts->power(0);
 			if (err < 0)
-				printk(KERN_INFO "mcs8000_ts_ioctl_down: Power down failed\n");
+				pr_info("mcs8000_ts_ioctl_down: Power down failed\n");
 			break;
 		case MCS8000_TS_DOWN_IOCTL_INTR_HIGH:
 			gpio_set_value(ts->intr_gpio, 1);
@@ -372,7 +372,7 @@ int mcs8000_ts_ioctl_down(struct file *file, unsigned int cmd, unsigned long arg
 		case MCS8000_TS_DOWN_IOCTL_I2C_READ:
 			if (copy_from_user(&client_data, (struct mcs8000_ts_down_ioctl_i2c_type *)arg,
 						sizeof(struct mcs8000_ts_down_ioctl_i2c_type))) {
-				printk(KERN_INFO "mcs8000_ts_ioctl_down: copyfromuser-read error\n");
+				pr_info("mcs8000_ts_ioctl_down: copyfromuser-read error\n");
 				return -EFAULT;
 			}
 
@@ -383,14 +383,14 @@ int mcs8000_ts_ioctl_down(struct file *file, unsigned int cmd, unsigned long arg
 
 			if (copy_to_user((void *)arg, (const void *)&client_data,
 						sizeof(struct mcs8000_ts_down_ioctl_i2c_type))) {
-				printk(KERN_INFO "mcs8000_ts_ioctl_down: copytouser-read error\n");
+				pr_info("mcs8000_ts_ioctl_down: copytouser-read error\n");
 				err = -EFAULT;
 			}
 			break;
 		case MCS8000_TS_DOWN_IOCTL_I2C_WRITE:
 			if (copy_from_user(&client_data, (struct mcs8000_ts_down_ioctl_i2c_type *)arg,
 						sizeof(struct mcs8000_ts_down_ioctl_i2c_type))) {
-				printk(KERN_INFO "mcs8000_ts_ioctl_down: copyfromuser-write error\n");
+				pr_info("mcs8000_ts_ioctl_down: copyfromuser-write error\n");
 				return -EFAULT;
 			}
 
@@ -407,7 +407,7 @@ int mcs8000_ts_ioctl_down(struct file *file, unsigned int cmd, unsigned long arg
 	}
 
 	if (err < 0)
-		printk(KERN_ERR "Touch DONW IOCTL Fail %d\n", _IOC_NR(cmd));
+		pr_err("Touch DONW IOCTL Fail %d\n", _IOC_NR(cmd));
 
 	return err;
 }
@@ -476,23 +476,23 @@ static int firmware_update(struct mcs8000_ts_device *ts)
 
 	ret = AskTSisConnected();
 	if (ret == FALSE) {
-		printk(KERN_ERR "Check H/W !!! firmware_update Failed!\n");
+		pr_err("Check H/W !!! firmware_update Failed!\n");
 		return ret;
 	}
 
 	GetManual(&iValue, 0);
 	if (iValue == MANUAL_DOWNLOAD_ENABLE) {
-		printk(KERN_INFO "MANUAL_DOWNLOAD_ENABLE: MFS_ISC_update\n");
+		pr_info("MANUAL_DOWNLOAD_ENABLE: MFS_ISC_update\n");
 		ret = MFS_ISC_update();
 	} else {
 		mcs8000_firmware_info(&fw_ver, &hw_ver, &comp_ver);
-		printk(KERN_INFO "Firmware ver: [%d], HW ver: [%d]\n", fw_ver, hw_ver);
+		pr_info("Firmware ver: [%d], HW ver: [%d]\n", fw_ver, hw_ver);
 
 		if (((fw_ver < MELFAS_FW_VERSION) && (comp_ver == 2)) || (fw_ver == 0x0) || (fw_ver == 0xFF) || (comp_ver == 0)) {
-			printk(KERN_INFO "MFS_ISC_update\n");
+			pr_info("MFS_ISC_update\n");
 			ret = MFS_ISC_update();
 		} else
-			printk(KERN_INFO "MFS_ISC_update SKIP!!\n");
+			pr_info("MFS_ISC_update SKIP!!\n");
 
 	}
 	return ret;
@@ -506,7 +506,7 @@ void intensity_extract(void)
 	struct mcs8000_ts_device *dev = NULL;
 	dev = &mcs8000_ts_dev;
 
-	printk(KERN_DEBUG "===START===\n");
+	pr_debug("===START===\n");
 	for (r = 0; r < 11; r++) {
 		master_write_buf[0] = 0xA0;
 		master_write_buf[1] = 0x4D;
@@ -531,19 +531,19 @@ void intensity_extract(void)
 
 		/* Tx channel count */
 		{
-		printk(KERN_DEBUG "%3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d",
+		pr_debug("%3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d",
 			((signed short*) master_read_buf_array)[0], ((signed short*) master_read_buf_array)[1], ((signed short*) master_read_buf_array)[2],
 			((signed short*) master_read_buf_array)[3], ((signed short*) master_read_buf_array)[4], ((signed short*) master_read_buf_array)[5],
 			((signed short*) master_read_buf_array)[6], ((signed short*) master_read_buf_array)[7], ((signed short*) master_read_buf_array)[8],
 			((signed short*) master_read_buf_array)[9], ((signed short*) master_read_buf_array)[10], ((signed short*) master_read_buf_array)[11],
 			((signed short*) master_read_buf_array)[12], ((signed short*) master_read_buf_array)[13]);
 		}
-		printk(KERN_DEBUG "\n");
+		pr_debug("\n");
 	}
-	printk(KERN_DEBUG "===END===\n");
+	pr_debug("===END===\n");
 	return;
 
-	ERROR_HANDLE: printk(KERN_DEBUG "ERROR!!! intensity_extract: i2c error\n");
+	ERROR_HANDLE: pr_debug("ERROR!!! intensity_extract: i2c error\n");
 	return;
 }
 
@@ -574,7 +574,7 @@ static long mcs8000_ioctl(struct file *file, unsigned int cmd, unsigned long arg
 					}
 
 					mcs8000_firmware_info(&fw_ver, &hw_ver, &comp_ver);
-					printk(KERN_INFO "Firmware ver: [%d],HW ver: [%d], Product ver: [%d]\n", fw_ver, hw_ver, comp_ver);
+					pr_info("Firmware ver: [%d],HW ver: [%d], Product ver: [%d]\n", fw_ver, hw_ver, comp_ver);
 
 					if (is_touch_suspend) {
 						if (power_flag == 1) {
@@ -597,13 +597,13 @@ static long mcs8000_ioctl(struct file *file, unsigned int cmd, unsigned long arg
 						g_touchLogEnable = 1;
 
 					err = g_touchLogEnable;
-					printk(KERN_INFO "<MELFAS>: Touch Log: %s\n", g_touchLogEnable ? "ENABLE" : "DISABLE");
+					pr_info("<MELFAS>: Touch Log: %s\n", g_touchLogEnable ? "ENABLE" : "DISABLE");
 					break;
 				}
 
 				case MCS8000_TS_IOCTL_KERNEL_DOWN:
 				{
-					printk(KERN_INFO "Normal Touch Firmware Down Load\n");
+					pr_info("Normal Touch Firmware Down Load\n");
 
 					if (is_touch_suspend) {
 						if (power_flag == 0) {
@@ -625,7 +625,7 @@ static long mcs8000_ioctl(struct file *file, unsigned int cmd, unsigned long arg
 					dev->power(ON);
 
 					if (irq_flag == 1) {
-						printk(KERN_INFO "[MELFAS] enable_irq\n");
+						pr_info("[MELFAS] enable_irq\n");
 						enable_irq(dev->num_irq);
 						irq_flag = 0;
 					}
@@ -633,7 +633,7 @@ static long mcs8000_ioctl(struct file *file, unsigned int cmd, unsigned long arg
 			}
 		case MCS8000_TS_IOCTL_KERNEL_DOWN_MANUAL:
 		{
-			printk(KERN_INFO "Manual Touch Firmware Down Load\n");
+			pr_info("Manual Touch Firmware Down Load\n");
 			SetManual();
 
 			if (is_touch_suspend) {
@@ -656,7 +656,7 @@ static long mcs8000_ioctl(struct file *file, unsigned int cmd, unsigned long arg
 			dev->power(ON);
 
 			if (irq_flag == 1) {
-				printk(KERN_INFO "[MELFAS] enable_irq\n");
+				pr_info("[MELFAS] enable_irq\n");
 				enable_irq(dev->num_irq);
 				irq_flag = 0;
 			}
@@ -672,7 +672,7 @@ static long mcs8000_ioctl(struct file *file, unsigned int cmd, unsigned long arg
 	break;
 
 	default:
-		printk(KERN_ERR "mcs8000_ts_ioctl: unknown ioctl\n");
+		pr_err("mcs8000_ts_ioctl: unknown ioctl\n");
 		err = -EINVAL;
 		break;
 	}
@@ -800,7 +800,7 @@ static void ResetTS(void)
 
 	mcs8000_ts_on();
 
-	printk(KERN_DEBUG "Reset TS For ESD\n");
+	pr_debug("Reset TS For ESD\n");
 }
 
 int CheckTSForESD(unsigned char ucData)
@@ -831,14 +831,14 @@ static void mcs8000_work(struct work_struct *work)
 	unsigned char fw_ver = 0, hw_ver = 0, comp_ver = 0;
 
 	#if DEBUG_PRINT
-	printk(KERN_ERR "melfas_ts_work_func\n");
+	pr_err("melfas_ts_work_func\n");
 	if (ts == NULL)
-		printk(KERN_ERR "melfas_ts_work_func : TS NULL\n");
+		pr_err("melfas_ts_work_func: TS NULL\n");
 	#endif
 
 	if (is_touch_suspend == 1) {
 		#if DEBUG_PRINT
-		printk(KERN_ERR "mcs8000_work : is_touch_suspend == 1, EXIT!!\n");
+		pr_err("mcs8000_work: is_touch_suspend == 1, EXIT!!\n");
 		#endif
 
 		msleep(20);
@@ -858,7 +858,7 @@ static void mcs8000_work(struct work_struct *work)
 	}
 	if (ret < 0 ) {
 		#if DEBUG_PRINT
-		printk(KERN_ERR "mcs8000_work: i2c failed\n");
+		pr_err("mcs8000_work: i2c failed\n");
 		#endif
 		ResetTS();
 		enable_irq(ts->client->irq);
@@ -866,14 +866,14 @@ static void mcs8000_work(struct work_struct *work)
 	} else {
 		read_num = buf[0];
 		#if DEBUG_PRINT
-		printk(KERN_INFO "mcs8000_work: read_num : [%d]\n", read_num);
+		pr_info("mcs8000_work: read_num: [%d]\n", read_num);
 		#endif
 	}
 
 	iTouchedCnt = 6*5;
 	if (read_num > iTouchedCnt) {
 		#if DEBUG_PRINT
-		printk(KERN_INFO "mcs8000_work: read_num > iTouchedCnt EXIT !!\n");
+		pr_info("mcs8000_work: read_num > iTouchedCnt EXIT !!\n");
 		#endif
 		enable_irq(ts->client->irq);
 		return;
@@ -894,7 +894,7 @@ static void mcs8000_work(struct work_struct *work)
 
 		if (ret < 0) {
 			#if DEBUG_PRINT
-			printk(KERN_ERR "mcs8000_work: i2c failed\n");
+			pr_err("mcs8000_work: i2c failed\n");
 			#endif
 			ResetTS();
 			enable_irq(ts->client->irq);
@@ -905,7 +905,7 @@ static void mcs8000_work(struct work_struct *work)
 		ucSensedInfo = buf[0];
 		if (CheckTSForESD(ucSensedInfo)) {
 			#if DEBUG_PRINT
-			printk(KERN_INFO "mcs8000_work: ESD EXIT !!\n");
+			pr_info("mcs8000_work: ESD EXIT !!\n");
 			#endif
 			enable_irq(ts->client->irq);
 			return;
@@ -914,7 +914,7 @@ static void mcs8000_work(struct work_struct *work)
 		for (i = 0; i < read_num; i = i + 6) {
 			touchType  = (buf[i] >> 5) & 0x03;
 			#if DEBUG_PRINT
-			printk(KERN_INFO "TouchType: [%d]\n", touchType);
+			pr_info("TouchType: [%d]\n", touchType);
 			#endif
 
 			/* Touch Type is Screen */
@@ -937,7 +937,7 @@ static void mcs8000_work(struct work_struct *work)
 				touchState = (buf[i] & 0x80);
 
 				if (g_touchLogEnable)
-					printk(KERN_INFO "keyID: [%d]\n", keyID);
+					pr_info("keyID: [%d]\n", keyID);
 
 				mcs8000_firmware_info(&fw_ver, &hw_ver, &comp_ver);
 
@@ -991,7 +991,7 @@ static void mcs8000_work(struct work_struct *work)
 					input_mt_sync(ts->input_dev);
 
 				if (g_touchLogEnable) {
-					printk(KERN_ERR "melfas_ts_work_func: Touch ID: %d, State : %d, x: %d, y: %d, z: %d w: %d\n",
+					pr_err("melfas_ts_work_func: Touch ID: %d, State: %d, x: %d, y: %d, z: %d w: %d\n",
 							j, (g_Mtouch_info[j].strength > 0), g_Mtouch_info[j].posX, g_Mtouch_info[j].posY, g_Mtouch_info[j].strength, g_Mtouch_info[j].width);
 				}
 
@@ -1009,7 +1009,7 @@ static void mcs8000_work(struct work_struct *work)
 		usleep_range(1000, 1000);
 	else {
 		#if DEBUG_PRINT
-		printk(KERN_INFO "mcs8000_work: Invalid data INT happen !!! Added more delay !!!");
+		pr_info("mcs8000_work: Invalid data INT happen! Added more delay");
 		#endif
 		msleep(20);
 	}
@@ -1037,7 +1037,7 @@ static irqreturn_t mcs8000_ts_irq_handler(int irq, void *handle)
 
 	schedule_work(&dev->work);
 #if DEBUG_PRINT
-	printk(KERN_ERR "melfas_ts_work_func is sending irq");
+	pr_err("melfas_ts_work_func is sending irq");
 #endif
 	return IRQ_HANDLED;
 }
@@ -1055,7 +1055,7 @@ static int mcs8000_ts_off(void)
 	}
 
 	if (ret < 0) {
-		printk(KERN_ERR "mcs8000_ts_on power on failed\n");
+		pr_err("mcs8000_ts_on power on failed\n");
 		goto err_power_failed;
 	}
 	msleep(10);
@@ -1077,7 +1077,7 @@ int mcs8000_ts_on(void)
 	}
 
 	if (ret < 0) {
-		printk(KERN_ERR "mcs8000_ts_on power on failed\n");
+		pr_err("mcs8000_ts_on power on failed\n");
 		goto err_power_failed;
 	}
 
@@ -1101,7 +1101,7 @@ void mcs8000_firmware_info(unsigned char *fw_ver, unsigned char *hw_ver, unsigne
 	iRet = i2c_master_send(dev->client, ucTXBuf, 1);
 	if (iRet < 0) {
 #if DEBUG_PRINT
-		printk(KERN_ERR "mcs8000_firmware_info: i2c failed\n");
+		pr_err("mcs8000_firmware_info: i2c failed\n");
 		return;
 #endif
 	}
@@ -1109,7 +1109,7 @@ void mcs8000_firmware_info(unsigned char *fw_ver, unsigned char *hw_ver, unsigne
 	iRet = i2c_master_recv(dev->client, ucRXBuf, 1);
 	if (iRet < 0) {
 #if DEBUG_PRINT
-		printk(KERN_ERR "mcs8000_firmware_info: i2c failed\n");
+		pr_err("mcs8000_firmware_info: i2c failed\n");
 		return;
 #endif
 	}
@@ -1120,7 +1120,7 @@ void mcs8000_firmware_info(unsigned char *fw_ver, unsigned char *hw_ver, unsigne
 	iRet = i2c_master_send(dev->client, ucTXBuf, 1);
 	if (iRet < 0) {
 #if DEBUG_PRINT
-		printk(KERN_ERR "mcs8000_firmware_info: i2c failed\n");
+		pr_err("mcs8000_firmware_info: i2c failed\n");
 		return;
 #endif
 	}
@@ -1128,7 +1128,7 @@ void mcs8000_firmware_info(unsigned char *fw_ver, unsigned char *hw_ver, unsigne
 	iRet = i2c_master_recv(dev->client, ucRXBuf, 1);
 	if (iRet < 0) {
 #if DEBUG_PRINT
-		printk(KERN_ERR "mcs8000_firmware_info: i2c failed\n");
+		pr_err("mcs8000_firmware_info: i2c failed\n");
 		return;
 #endif
 	}
@@ -1139,7 +1139,7 @@ void mcs8000_firmware_info(unsigned char *fw_ver, unsigned char *hw_ver, unsigne
 	iRet = i2c_master_send(dev->client, ucTXBuf, 1);
 	if (iRet < 0) {
 #if DEBUG_PRINT
-		printk(KERN_ERR "mcs8000_firmware_info: i2c failed\n");
+		pr_err("mcs8000_firmware_info: i2c failed\n");
 		return;
 #endif
 	}
@@ -1147,7 +1147,7 @@ void mcs8000_firmware_info(unsigned char *fw_ver, unsigned char *hw_ver, unsigne
 	iRet = i2c_master_recv(dev->client, ucRXBuf, 10);
 	if (iRet < 0) {
 #if DEBUG_PRINT
-		printk(KERN_ERR "mcs8000_firmware_info: i2c failed\n");
+		pr_err("mcs8000_firmware_info: i2c failed\n");
 		return;
 #endif
 	}
@@ -1159,7 +1159,7 @@ void mcs8000_firmware_info(unsigned char *fw_ver, unsigned char *hw_ver, unsigne
 	else
 		*comp_ver = 0; /* V3 Unknown */
 
-	printk(KERN_INFO "Touch PRODUCT = %s, comp_ver = %d\n", ucRXBuf, *comp_ver);
+	pr_debug("Touch PRODUCT = %s, comp_ver = %d\n", ucRXBuf, *comp_ver);
 }
 
 static ssize_t read_touch_version(struct device *dev, struct device_attribute *attr, char *buf)
@@ -1170,12 +1170,12 @@ static ssize_t read_touch_version(struct device *dev, struct device_attribute *a
 	if (is_touch_suspend)
 		mcs8000_ts_on();
 
-	printk(KERN_DEBUG "TOUCHSCREEN FW VERSION Starts\n");
+	pr_debug("TOUCHSCREEN FW VERSION Starts\n");
 
 	mcs8000_firmware_info(&fw_ver, &hw_ver, &comp_ver);
 
 	iRet = sprintf(buf, "%02x\n", fw_ver);
-	printk(KERN_DEBUG "TOUCHSCREEN FW VERSION : %d\n", fw_ver);
+	pr_debug("TOUCHSCREEN FW VERSION: %d\n", fw_ver);
 
 	if (is_touch_suspend)
 		mcs8000_ts_off();
@@ -1191,7 +1191,7 @@ int mcs8000_create_file(struct input_dev *pdev)
 
 	ret = device_create_file(&pdev->dev, &dev_attr_version);
 	if (ret) {
-		printk(KERN_DEBUG "LG_FW : dev_attr_version create fail\n");
+		pr_debug("LG_FW: dev_attr_version create fail\n");
 		device_remove_file(&pdev->dev, &dev_attr_version);
 		return ret;
 	}
@@ -1221,7 +1221,7 @@ static int mcs8000_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	input_set_abs_params(mcs8000_ts_input, ABS_MT_TRACKING_ID, 0, MELFAS_MAX_TOUCH-1, 0, 0);
 	input_set_abs_params(mcs8000_ts_input, ABS_MT_PRESSURE, 0, 255, 0, 0);
 #if DEBUG_PRINT
-	printk(KERN_INFO "ABS_MT_POSITION_X :  ABS_MT_POSITION_Y = [%d] : [%d]\n", ts_pdata->ts_x_max, ts_pdata->ts_y_max);
+	pr_info("ABS_MT_POSITION_X: [%d] | ABS_MT_POSITION_Y: [%d]\n", ts_pdata->ts_x_max, ts_pdata->ts_y_max);
 #endif
 
 	dev = &mcs8000_ts_dev;
@@ -1245,19 +1245,19 @@ static int mcs8000_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	i2c_set_clientdata(client, dev);
 
 	if (!(err = i2c_check_functionality(client->adapter, I2C_FUNC_I2C))) {
-		printk(KERN_ERR "%s: fucntionality check failed\n", __func__);
+		pr_err("%s: fucntionality check failed\n", __func__);
 		return err;
 	}
 
 	err = gpio_request(dev->intr_gpio, "touch_mcs8000");
 	if (err < 0) {
-		printk(KERN_ERR "%s: gpio input direction fail\n", __func__);
+		pr_err("%s: gpio input direction fail\n", __func__);
 		return err;
 	}
 
 	err = gpio_direction_input(dev->intr_gpio);
 	if (err < 0) {
-		printk(KERN_ERR "%s: gpio input direction fail\n", __func__);
+		pr_err("%s: gpio input direction fail\n", __func__);
 		return err;
 	}
 
@@ -1268,7 +1268,7 @@ static int mcs8000_ts_probe(struct i2c_client *client, const struct i2c_device_i
 			IRQF_TRIGGER_LOW | IRQF_ONESHOT, "mcs8000_ts", dev);
 
 	if (err < 0) {
-		printk(KERN_ERR "%s: request_irq failed\n", __func__);
+		pr_err("%s: request_irq failed\n", __func__);
 		return err;
 	}
 
@@ -1283,11 +1283,11 @@ static int mcs8000_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	err = firmware_update(dev);
 
 	if (err < 0)
-		printk(KERN_ERR "[mms-128s]:firmware update fail\n");
+		pr_err("[mms-128s]: firmware update fail\n");
 
 	err = misc_register(&mcs8000_ts_misc_dev);
 	if (err < 0) {
-		printk(KERN_ERR "mcs8000_probe_ts: misc register failed\n");
+		pr_err("mcs8000_probe_ts: misc register failed\n");
 		return err;
 	}
 
@@ -1429,7 +1429,7 @@ static int __devinit mcs8000_ts_init(void)
 
 	mcs8000_ts_input = input_allocate_device();
 	if (mcs8000_ts_input == NULL) {
-		printk(KERN_ERR "%s: input_allocate: not enough memory\n",
+		pr_err("%s: input_allocate: not enough memory\n",
 				__func__);
 		err = -ENOMEM;
 		goto err_input_allocate;
@@ -1451,19 +1451,19 @@ static int __devinit mcs8000_ts_init(void)
 
 	err = input_register_device(mcs8000_ts_input);
 	if (err < 0) {
-		printk(KERN_ERR "%s: Fail to register device\n", __func__);
+		pr_err("%s: Fail to register device\n", __func__);
 		goto err_input_register;
 	}
 
 	err = i2c_add_driver(&mcs8000_i2c_ts_driver);
 	if (err < 0) {
-		printk(KERN_ERR "%s: failed to probe i2c\n", __func__);
+		pr_err("%s: failed to probe i2c\n", __func__);
 		goto err_i2c_add_driver;
 	}
 
 	dev->ts_wq = create_singlethread_workqueue("ts_wq");
 	if (!dev->ts_wq) {
-		printk(KERN_ERR "%s: failed to create wp\n", __func__);
+		pr_err("%s: failed to create wp\n", __func__);
 		err = -1;
 	}
 	return err;
@@ -1488,7 +1488,7 @@ static void __exit mcs8000_ts_exit(void)
 
 	if (dev->ts_wq)
 		destroy_workqueue(dev->ts_wq);
-	printk(KERN_INFO "touchscreen driver was unloaded!\nHave a nice day!\n");
+	pr_info("touchscreen driver was unloaded!\nHave a nice day!\n");
 }
 
 module_init(mcs8000_ts_init);

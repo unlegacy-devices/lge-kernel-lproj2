@@ -249,7 +249,7 @@ static struct platform_device *v3eu_panel_devices[] __initdata = {
 		vreg = regulator_get(0, name); \
 		regulator_set_voltage(vreg, level, level); \
 		if (regulator_##op(vreg)) \
-			printk(KERN_ERR"%s: %s vreg operation failed\n", \
+			pr_err("%s: %s vreg operation failed\n", \
 				(regulator_##op == regulator_enable) ? "regulator_enable" \
 				: "regulator_disable", name); \
 	} while (0)
@@ -267,7 +267,7 @@ static int ebi2_tovis_power_save(int on)
 	struct regulator *vreg;
 	int flag_on = !!on;
 
-	printk(KERN_INFO "%s: on=%d\n", __func__, flag_on);
+	pr_debug("%s: on = %d\n", __func__, flag_on);
 
 	if (mddi_power_save_on == flag_on)
 		return 0;

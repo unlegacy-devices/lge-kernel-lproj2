@@ -106,9 +106,6 @@ enum {
 	POWEROFF_STATE
 } RT9396BL_STATE;
 
-#define dprintk(fmt, args...)   printk(KERN_INFO "%s:%s: " fmt, MODULE_NAME, __func__, ## args);
-#define eprintk(fmt, args...)   printk(KERN_ERR "%s:%s: " fmt, MODULE_NAME, __func__, ## args)
-
 struct ldo_vout_struct {
 	unsigned char reg;
 	unsigned vol;
@@ -205,14 +202,14 @@ static int rt9396_read(struct i2c_client *client, u8 reg, u8 *pval)
 	int status = 0;
 
 	if (client == NULL) {
-		eprintk("client is null\n");
+		pr_err("client is null\n");
 		return -1;
 	}
 
 	ret = i2c_smbus_read_byte_data(client, reg);
 	if (ret < 0) {
 		status = -EIO;
-		eprintk("fail to read(reg=0x%x,val=0x%x)\n", reg,*pval);
+		pr_err("fail to read(reg=0x%x,val=0x%x)\n", reg,*pval);
 	}
 
 	*pval = ret;
@@ -225,13 +222,13 @@ static int rt9396_write(struct i2c_client *client, u8 reg, u8 val)
 	int status = 0;
 
 	if (client == NULL) {
-		eprintk("client is null\n");
+		pr_err("client is null\n");
 		return -1;
 	}	
 	ret = i2c_smbus_write_byte_data(client, reg, val);
 	if (ret != 0) {
 		status = -EIO;
-		eprintk("fail to write(reg=0x%x,val=0x%x)\n", reg, val);
+		pr_err("fail to write(reg=0x%x,val=0x%x)\n", reg, val);
 	}
 
 	return status;
@@ -335,7 +332,7 @@ static int rt9396_set_table(struct rt9396_driver_data *drvdata, struct rt9396_ct
 	unsigned long delay = 0;
 
 	if (ptbl == NULL) {
-		eprintk("input ptr is null\n");
+		pr_err("input ptr is null\n");
 		return -EIO;
 	}
 
@@ -351,7 +348,7 @@ static int rt9396_set_table(struct rt9396_driver_data *drvdata, struct rt9396_ct
 		}
 		else {
 		   if (rt9396_write(drvdata->client, ptbl->reg, ptbl->val) != 0)
-			 dprintk("i2c failed addr:%d, value:%d\n", ptbl->reg, ptbl->val);
+			 pr_debug("i2c failed addr:%d, value:%d\n", ptbl->reg, ptbl->val);
 			}
 		ptbl++;
 		i++;
@@ -369,7 +366,7 @@ static void rt9396_go_opmode(struct rt9396_driver_data *drvdata)
 		case ALC_MODE:
 			break;
 		default:
-			eprintk("Invalid Mode\n");
+			pr_err("Invalid Mode\n");
 			break;
 	}
 }
@@ -389,7 +386,7 @@ static void rt9396_sleep(struct rt9396_driver_data *drvdata)
 	if (!drvdata || drvdata->state == SLEEP_STATE)
 		return;	
 
-printk("[rt9396_sleep] pre intensity:%d !\n", drvdata->intensity);
+	pr_debug("[rt9396_sleep] pre intensity:%d !\n", drvdata->intensity);
 	switch (drvdata->mode) {
 		case NORMAL_MODE:
 			drvdata->state = SLEEP_STATE;
@@ -399,7 +396,7 @@ printk("[rt9396_sleep] pre intensity:%d !\n", drvdata->intensity);
 		case ALC_MODE:
 			break;
 		default:
-			eprintk("Invalid Mode\n");
+			pr_err("Invalid Mode\n");
 			break;
 	}
 	{
@@ -414,18 +411,18 @@ static void rt9396_wakeup(struct rt9396_driver_data *drvdata)
 	if (!drvdata || drvdata->state == NORMAL_STATE)
 		return;
 
-   printk("[rt9396_wakeup] pre intensity:%d !\n", drvdata->intensity);
-	if(rt9396_powerstate == SLEEP_STATE){
+	pr_debug("[rt9396_wakeup] pre intensity:%d !\n", drvdata->intensity);
+	if (rt9396_powerstate == SLEEP_STATE)
 			rt9396_powerstate = NORMAL_STATE;
-	}
-	if(bl_chargerlogo == 1)
+
+	if (bl_chargerlogo == 1)
 		msleep(50);
 	else
 		msleep(100);
+
 	if (drvdata->state == POWEROFF_STATE) {
 	} else if (drvdata->state == SLEEP_STATE) {
-		if (drvdata->mode == NORMAL_MODE) 
-		{
+		if (drvdata->mode == NORMAL_MODE) {
 			drvdata->state = NORMAL_STATE;
 		} else if (drvdata->mode == ALC_MODE) {
 		}
@@ -448,18 +445,16 @@ static int rt9396_send_intensity(struct rt9396_driver_data *drvdata, int next)
 	if (next < LCD_LED_MIN)
 		next = LCD_LED_MIN;
 
-   if ((drvdata->intensity != next) && (next != 0))
-   {
-	rt9396_write(drvdata->client, drvdata->reg_addrs.led_set_on, next);
-	// printk("[%s] LCD-backlight ON ! val:%d \n", __func__,next);
-	Is_Backlight_Set = 1;
+	if ((drvdata->intensity != next) && (next != 0)) {
+		rt9396_write(drvdata->client, drvdata->reg_addrs.led_set_on, next);
+		pr_debug("[%s] LCD-backlight ON ! val:%d \n", __func__,next);
+		Is_Backlight_Set = 1;
+	} else if(next == 0) {
+		rt9396_write(drvdata->client, drvdata->reg_addrs.led_set_off, next);
+		pr_debug("[%s] LCD-backlight OFF !\n", __func__);
+		Is_Backlight_Set = 0;
 	}
-   else if(next ==0)
-   {
-	rt9396_write(drvdata->client, drvdata->reg_addrs.led_set_off, next);
-	// printk("[%s] LCD-backlight OFF !\n", __func__);
-	Is_Backlight_Set = 0;
-   }
+
 	drvdata->intensity = next;
 	return 0;
 
@@ -470,15 +465,12 @@ int rt9396_send_intensity_button(struct rt9396_driver_data *drvdata, int level)
 {
 // [Caio99BR][caiooliveirafarias0@gmail.com] Workaround for bug of screen still awake after lock
 #ifndef CONFIG_MACH_LGE_2ND_GEN_KK_WORKAROUD
-	if(level)
-	{
-	printk("[%s] key-backlight ON ! \n", __func__);
-	rt9396_write(drvdata->client, RT9396BL_REG_KEYLED_ON, RT9396BL_VAL_KEYLED_SET);
-	}
-	else
-	{
-	printk("[%s] key-backlight OFF !\n", __func__);
-	rt9396_write(drvdata->client, RT9396BL_REG_KEYLED_OFF, RT9396BL_VAL_KEYLED_SET);
+	if(level) {
+		pr_debug("[%s] key-backlight ON ! \n", __func__);
+		rt9396_write(drvdata->client, RT9396BL_REG_KEYLED_ON, RT9396BL_VAL_KEYLED_SET);
+	} else {
+		pr_debug("[%s] key-backlight OFF !\n", __func__);
+		rt9396_write(drvdata->client, RT9396BL_REG_KEYLED_OFF, RT9396BL_VAL_KEYLED_SET);
 	}
 #endif
 	return 0;
@@ -536,10 +528,9 @@ void rt9396_switch_mode(struct device *dev, int next_mode)
 		return;
 
 	if (next_mode == ALC_MODE) {
-	}
-	else if (next_mode == NORMAL_MODE) {		
+	} else if (next_mode == NORMAL_MODE) {
 	} else {
-		printk(KERN_ERR "%s: invalid mode(%d)!\n", __func__, next_mode);
+		pr_err("%s: invalid mode(%d)!\n", __func__, next_mode);
 		return;
 	}
 
@@ -657,7 +648,7 @@ static void leds_brightness_set(struct led_classdev *led_cdev, enum led_brightne
 	int next;	
 
 	if (!drvdata) {
-		eprintk("Error getting drvier data\n");
+		pr_err("Error getting drvier data\n");
 		return;
 	}
 
@@ -722,7 +713,7 @@ static void button_leds_brightness_set(struct led_classdev *led_cdev, enum led_b
 	struct rt9396_driver_data *drvdata = dev_get_drvdata(led_cdev->dev->parent);
 
 	if (!drvdata) {
-		eprintk("Error getting driver data\n");
+		pr_err("Error getting driver data\n");
 		return;
 	}
 	rt9396_send_intensity_button(drvdata, value);
@@ -742,7 +733,7 @@ static int rt9396_probe(struct i2c_client *i2c_dev, const struct i2c_device_id *
 	int err;
 
 	rt9396_powerstate = NORMAL_STATE;
-	dprintk("start, client addr=0x%x\n", i2c_dev->addr);
+	pr_debug("start, client addr=0x%x\n", i2c_dev->addr);
 
 	pdata = i2c_dev->dev.platform_data;
 	if(!pdata)
@@ -768,13 +759,13 @@ static int rt9396_probe(struct i2c_client *i2c_dev, const struct i2c_device_id *
 	drvdata->version = pdata->version;
 
 	if(rt9396_setup_version(drvdata) != 0) {
-		eprintk("Error while requesting gpio %d\n", drvdata->gpio);
+		pr_err("Error while requesting gpio %d\n", drvdata->gpio);
 		kfree(drvdata);
 		return -ENODEV;
 	}
 
 	if (drvdata->gpio && gpio_request(drvdata->gpio, "rt9396_en") != 0) {
-		eprintk("Error while requesting gpio %d\n", drvdata->gpio);
+		pr_err("Error while requesting gpio %d\n", drvdata->gpio);
 		kfree(drvdata);
 		return -ENODEV;
 	}
@@ -782,7 +773,7 @@ static int rt9396_probe(struct i2c_client *i2c_dev, const struct i2c_device_id *
 
 	bd = backlight_device_register("rt9396-bl", &i2c_dev->dev, NULL, &rt9396_ops, NULL);
 	if (bd == NULL) {
-		eprintk("entering rt9396 probe function error \n");
+		pr_err("entering rt9396 probe function error \n");
 		kfree(drvdata);
 		return -1;
 	}
@@ -792,7 +783,7 @@ static int rt9396_probe(struct i2c_client *i2c_dev, const struct i2c_device_id *
 	drvdata->bd = bd;
 
 	if (led_classdev_register(&i2c_dev->dev, &rt9396_led_dev) == 0) {
-		eprintk("Registering led class dev successfully.\n");
+		pr_err("Registering led class dev successfully.\n");
 		drvdata->led = &rt9396_led_dev;
 		err = device_create_file(drvdata->led->dev, &dev_attr_alc);
 		err = device_create_file(drvdata->led->dev, &dev_attr_reg);
@@ -801,7 +792,7 @@ static int rt9396_probe(struct i2c_client *i2c_dev, const struct i2c_device_id *
 	}
 
 	if (led_classdev_register(&i2c_dev->dev, &rt9396_keyled_dev) == 0) {
-		eprintk("Registering led class dev successfully.\n");
+		pr_err("Registering led class dev successfully.\n");
 		drvdata->led = &rt9396_keyled_dev;
 	}
 
@@ -820,7 +811,7 @@ static int rt9396_probe(struct i2c_client *i2c_dev, const struct i2c_device_id *
 
 	rt9396_ref = drvdata;
 
-	eprintk("done\n");
+	pr_err("done\n");
 	return 0;
 }
 
@@ -876,9 +867,9 @@ extern int register_reboot_notifier(struct notifier_block *nb);
 
 static int __init rt9396_init(void)
 {
-	printk("rt9396 init start\n");
+	pr_info("rt9396 init start\n");
 
-       register_reboot_notifier(&lge_chg_reboot_nb);
+	register_reboot_notifier(&lge_chg_reboot_nb);
  
 	return i2c_add_driver(&rt9396_driver);
 }

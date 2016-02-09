@@ -233,7 +233,7 @@ struct platform_device msm_device_cad = {
 
 void fsa8008_set_headset_mic_bias(int enable)
 {
-	printk(KERN_INFO "[FSA8008] Set MIC BIAS %d\n", enable);
+	pr_info("[FSA8008] Set MIC BIAS %d\n", enable);
 	pmic_hsed_enable(PM_HSED_CONTROLLER_0, (enable ? PM_HSED_ENABLE_ALWAYS : PM_HSED_ENABLE_OFF));
 }
 

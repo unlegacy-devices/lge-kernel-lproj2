@@ -5293,7 +5293,7 @@ static int wlan_hdd_cfg80211_get_station(struct wiphy *wiphy, struct net_device 
     myRate = pAdapter->hdd_stats.ClassA_stat.tx_rate * 5;
 
 #ifdef LINKSPEED_DEBUG_ENABLED
-    pr_info("RSSI %d, RLMS %u, rate %d, rssi high %d, rssi low %d\n",
+    pr_debug("RSSI %d, RLMS %u, rate %d, rssi high %d, rssi low %d\n",
             sinfo->signal,
             pCfg->reportMaxLinkSpeed,
             myRate,
@@ -5427,7 +5427,7 @@ static int wlan_hdd_cfg80211_get_station(struct wiphy *wiphy, struct net_device 
         {
             sinfo->txrate.legacy  = maxRate;
 #ifdef LINKSPEED_DEBUG_ENABLED
-            pr_info("Reporting legacy rate %d\n", sinfo->txrate.legacy);
+            pr_debug("Reporting legacy rate %d\n", sinfo->txrate.legacy);
 #endif //LINKSPEED_DEBUG_ENABLED
         }
         else
@@ -5443,7 +5443,7 @@ static int wlan_hdd_cfg80211_get_station(struct wiphy *wiphy, struct net_device 
                 sinfo->txrate.flags |= RATE_INFO_FLAGS_40_MHZ_WIDTH;
             }
 #ifdef LINKSPEED_DEBUG_ENABLED
-            pr_info("Reporting MCS rate %d flags %x\n",
+            pr_debug("Reporting MCS rate %d flags %x\n",
                     sinfo->txrate.mcs,
                     sinfo->txrate.flags );
 #endif //LINKSPEED_DEBUG_ENABLED
@@ -5458,7 +5458,7 @@ static int wlan_hdd_cfg80211_get_station(struct wiphy *wiphy, struct net_device 
             //provide to the UI in units of 100kbps
             sinfo->txrate.legacy = myRate;
 #ifdef LINKSPEED_DEBUG_ENABLED
-            pr_info("Reporting actual legacy rate %d\n", sinfo->txrate.legacy);
+            pr_debug("Reporting actual legacy rate %d\n", sinfo->txrate.legacy);
 #endif //LINKSPEED_DEBUG_ENABLED
         }
         else
@@ -5475,7 +5475,7 @@ static int wlan_hdd_cfg80211_get_station(struct wiphy *wiphy, struct net_device 
                 sinfo->txrate.flags |= RATE_INFO_FLAGS_40_MHZ_WIDTH;
             }
 #ifdef LINKSPEED_DEBUG_ENABLED
-            pr_info("Reporting actual MCS rate %d flags %x\n",
+            pr_debug("Reporting actual MCS rate %d flags %x\n",
                     sinfo->txrate.mcs,
                     sinfo->txrate.flags );
 #endif //LINKSPEED_DEBUG_ENABLED
