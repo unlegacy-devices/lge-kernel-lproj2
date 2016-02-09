@@ -37,15 +37,16 @@ fi
 
 maindevice() {
 unset name variant defconfig
-echo "-${bldred}First Gen${txtrst}-"
+echo "-${bldred}First Gen${txtrst}"
 echo "0) L5 NFC            (E610)"
 echo "1) L5 NoNFC          (E612/E617)"
 echo "2) L7 NFC            (P700)"
 echo "3) L7 NoNFC          (P705)"
 echo "4) L7 NFC - 8m       (P708)"
-echo "-${bldblu}Second Gen${txtrst}-"
+echo "-${bldblu}Second Gen${txtrst}"
 echo "5) L1 II Single/Dual (E410/E411/E415/E420)"
 echo "6) L3 II Single/Dual (E425/E430/E431/E435)"
+echo "-${bldyel}WIP${txtrst}"
 echo "7) L7 II NFC         (P710/P712)"
 echo "8) L7 II NoNFC       (P713/P714)"
 echo "9) L7 II Dual        (P715/P716)"
@@ -108,7 +109,11 @@ echo "${bldblu}Building $customkernel with $NR_CPUS jobs at once${txtrst}"
 
 rm -rf arch/$ARCH/boot/zImage
 
-START=$(date +"%s")
+if [ "$buildprocesscheck" == "Something goes wrong" ]
+	then START=$BUILDTIME
+	else START=$(date +"%s")
+fi
+
 if [ "$buildoutput" == "ON" ]
 	then make -j${NR_CPUS}
 	else make -j${NR_CPUS} &>/dev/null | loop
@@ -199,19 +204,18 @@ kernelname=`cat Makefile | grep NAME | cut -c 8- | head -1`
 clear
 echo "Simple Linux Kernel Build Script ($(date +%d"/"%m"/"%Y))"
 echo "$customkernel $kernelversion.$kernelpatchlevel.$kernelsublevel - $kernelname"
-echo
-echo "-${bldred}Clean:${txtrst}-"
+echo "-${bldred}Clean:${txtrst}"
 echo "1) Last Zip Package (${bldred}$cleanzipcheck${txtrst})"
 echo "2) Kernel (${bldred}$cleankernelcheck${txtrst})"
-echo "-${bldgrn}Main Process:${txtrst}-"
+echo "-${bldgrn}Main Process:${txtrst}"
 echo "3) Device Choice (${bldgrn}$name$variant${txtrst})"
 echo "4) Toolchain Choice (${bldgrn}$ToolchainCompile${txtrst})"
-echo "-${bldyel}Build Process:${txtrst}-"
+echo "-${bldyel}Build Process:${txtrst}"
 if [ "$defconfig" == "" ]; then
-	echo "Use "3" first."
+	echo "5) Use "3" first."
 else
 	if [ "$CROSS_COMPILE" == "" ]; then
-		echo "Use "4" first."
+		echo "5) Use "4" first."
 	else
 		echo "5) Build $customkernel (${bldyel}$buildprocesscheck${txtrst})"
 	fi
@@ -220,12 +224,12 @@ if ! [ "$defconfig" == "" ]; then
 	if [ -f arch/$ARCH/boot/zImage ]; then
 		echo "6) Build Zip Package (${bldyel}$zippackagecheck${txtrst})"
 	fi
-	echo "7) Update $name$variant Defconfig"
+	echo "7) Update Defconfig (${bldgrn}$name$variant${txtrst})"
 fi
-echo "-${bldblu}Test Menu:${txtrst}-"
+echo "-${bldblu}Test Menu:${txtrst}"
 if [ -f zip-creator/$zipfile ]; then echo "8) Copy to device - Via Adb"; fi
 echo "9) Reboot device to recovery"
-echo "-${bldmag}Status:${txtrst}-"
+echo "-${bldmag}Status:${txtrst}"
 if ! [ "$BUILDTIME" == "" ]; then
 	echo "${bldgrn}Build Time: $(($BUILDTIME / 60)) minutes and $(($BUILDTIME % 60)) seconds.${txtrst}"
 fi
@@ -244,7 +248,7 @@ elif [ `ls zip-creator/*.zip 2>/dev/null | wc -l` -ge 1 ]; then
 	echo "${bldblu}You have old Zip Saved on zip-creator folder!${txtrst}"
 	ls zip-creator/*.zip ${coloroutputzip}
 fi
-echo "-${bldcya}Menu:${txtrst}-"
+echo "-${bldcya}Menu:${txtrst}"
 if [ "$coloroutput" == "ON" ]; then
 echo "c) Color (${bldcya}$coloroutput${txtrst})"
 else
@@ -291,8 +295,8 @@ esac
 
 # The core of script is here!
 
-if [ ! "$BASH_VERSION" ] ; then
-	echo "Please do not use sh to run this script, just use ./build.sh"
+if [ ! "$BASH_VERSION" ]
+	then echo "Please do not use sh to run this script, just use . build.sh"
 elif [ -e build.sh ]; then
 	customkernel=CAFKernel
 	export ARCH=arm
@@ -315,6 +319,6 @@ else
 	echo "Ensure you run this file from the SAME folder as where it was,"
 	echo "otherwise the script will have problems running the commands."
 	echo "After you 'cd' to the correct folder, start the build script"
-	echo "with the ./build.sh command, NOT with any other command!"
-	echo; sleep 1
+	echo "with the . build.sh command, NOT with any other command!"
+	echo
 fi
