@@ -1502,7 +1502,7 @@ static int __init adsp_init(void)
 		return -ENOMEM;
 	msm_adsp_driver.driver.name = msm_adsp_driver_name;
 	rc = platform_driver_register(&msm_adsp_driver);
-	MM_INFO("%s -- %d\n", msm_adsp_driver_name, rc);
+	MM_DBG("%s -- %d\n", msm_adsp_driver_name, rc);
 	return rc;
 }
 
