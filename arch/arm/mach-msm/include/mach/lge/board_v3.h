@@ -11,7 +11,7 @@
 #define __WEAK __attribute__((weak))
 #endif
 
-#define  LGE_CHG_DONE_NOTIFICATION
+#define LGE_CHG_DONE_NOTIFICATION
 
 #ifdef CONFIG_ANDROID_RAM_CONSOLE
 /* allocate 128K * 2 instead of ram_console's original size 128K
@@ -19,13 +19,13 @@
  * 2010-03-03, cleaneye.kim@lge.com
  */
 #define MSM7X27_EBI1_CS0_BASE	PHYS_OFFSET
-#define LGE_RAM_CONSOLE_SIZE    (124 * SZ_1K * 2)
+#define LGE_RAM_CONSOLE_SIZE	(124 * SZ_1K * 2)
 #endif
 
 #ifdef CONFIG_LGE_HANDLE_PANIC
-#define LGE_CRASH_LOG_SIZE              (4 * SZ_1K)
+#define LGE_CRASH_LOG_SIZE	(4 * SZ_1K)
 #endif
-//LGE_CHANGE_S FTM boot mode
+
 enum lge_fboot_mode_type {
 	first_boot,
 	second_boot
@@ -33,7 +33,7 @@ enum lge_fboot_mode_type {
 
 #ifdef CONFIG_LGE_HW_REVISION
 /* board revision information */
-typedef  enum {
+typedef enum {
 	EVB = 0,
 	LGE_REV_A,
 	LGE_REV_B,
@@ -46,7 +46,7 @@ typedef  enum {
 	LGE_REV_11,
 	LGE_REV_12,
 	LGE_REV_TOT_NUM,
-}lge_pcb_rev;
+} lge_pcb_rev;
 
 #define REV_EVB	0
 #define REV_A	1
@@ -74,67 +74,57 @@ struct gpio_i2c_pin {
 #endif
 
 #ifdef CONFIG_MMC_MSM_CARD_HW_DETECTION
-#define GPIO_SD_DETECT_N 40
+#define GPIO_SD_DETECT_N	40
 #endif
 
 #ifdef CONFIG_MACH_MSM7X25A_V3
 #define GPIO_SD_DETECT_N 40
 
-#define SENSOR_GPIO_I2C_SCL		13
-#define SENSOR_GPIO_I2C_SDA		35
+#define SENSOR_GPIO_I2C_SCL	13
+#define SENSOR_GPIO_I2C_SDA	35
 
 /* accelerometer */
-#define ACCEL_GPIO_INT			94
-#define ACCEL_GPIO_I2C_SCL		SENSOR_GPIO_I2C_SCL
-#define ACCEL_GPIO_I2C_SDA		SENSOR_GPIO_I2C_SDA
+#define ACCEL_GPIO_INT		94
+#define ACCEL_GPIO_I2C_SCL	SENSOR_GPIO_I2C_SCL
+#define ACCEL_GPIO_I2C_SDA	SENSOR_GPIO_I2C_SDA
 
 #ifdef CONFIG_SENSORS_BMA2X2
-#define ACCEL_I2C_ADDRESS		0x10
+#define ACCEL_I2C_ADDRESS	0x10
 #else
-#define ACCEL_I2C_ADDRESS		0x18
+#define ACCEL_I2C_ADDRESS	0x18
 #endif
 
-#define ECOM_GPIO_I2C_SCL		SENSOR_GPIO_I2C_SCL
-#define ECOM_GPIO_I2C_SDA		SENSOR_GPIO_I2C_SDA
-#define ECOM_GPIO_INT			130
+/* BOSCH Ecompass: Bosch compass+accelerometer are internally use two sensor */
+#define ECOM_GPIO_I2C_SCL	SENSOR_GPIO_I2C_SCL
+#define ECOM_GPIO_I2C_SDA	SENSOR_GPIO_I2C_SDA
+#define ECOM_GPIO_INT		130
+
 #ifdef CONFIG_SENSORS_BMA2X2
-#define ECOM_I2C_ADDRESS		0x12
+#define ECOM_I2C_ADDRESS	0x12
 #else
-#define ECOM_I2C_ADDRESS		0x10
+#define ECOM_I2C_ADDRESS	0x10
 #endif
 
 /* proximity sensor */
-#define PROXI_GPIO_I2C_SCL		16
-#define PROXI_GPIO_I2C_SDA		30
-#define PROXI_GPIO_DOUT			17
+#define PROXI_GPIO_I2C_SCL	16
+#define PROXI_GPIO_I2C_SDA	30
+#define PROXI_GPIO_DOUT		17
+
 #ifdef CONFIG_SENSOR_APDS9190
-#define PROXI_I2C_ADDRESS		0x39
+#define PROXI_I2C_ADDRESS	0x39
 #else
-#define PROXI_I2C_ADDRESS		0x44
+#define PROXI_I2C_ADDRESS	0x44
 #endif
-#define PROXI_LDO_NO_VCC		1
+
+#define PROXI_LDO_NO_VCC	1
 #endif
 
 /* LP5521 RGB Driver*/
 #ifdef CONFIG_LEDS_LP5521
-#define RGB_GPIO_I2C_SCL		57
-#define RGB_GPIO_I2C_SDA		58
-#define RGB_GPIO_RGB_EN 		115
-#define RGB_I2C_ADDRESS			0x32
-#endif
-
-/* touch screen platform data */
-#ifdef CONFIG_TOUCHSCREEN_SYNAPTICS
-struct touch_platform_data {
-	int ts_x_min;
-	int ts_x_max;
-	int ts_y_min;
-	int ts_y_max;
-	int (*power)(unsigned char onoff);
-	int irq;
-	int scl;
-	int sda;
-};
+#define RGB_GPIO_I2C_SCL	57
+#define RGB_GPIO_I2C_SDA	58
+#define RGB_GPIO_RGB_EN		115
+#define RGB_I2C_ADDRESS		0x32
 #endif
 
 /* touch screen platform data */
@@ -177,8 +167,8 @@ struct ecom_platform_data {
 	int (*power)(unsigned char onoff);
 	char accelerator_name[20];
 	int fdata_sign_x;
-        int fdata_sign_y;
-        int fdata_sign_z;
+	int fdata_sign_y;
+	int fdata_sign_z;
 	int fdata_order0;
 	int fdata_order1;
 	int fdata_order2;
@@ -268,8 +258,9 @@ enum {
 	PANEL_ID_LGDISPLAY_1 = 1,
 	PANEL_ID_TOVIS = 2,
 	PANEL_ID_LGDISPLAY = 3,
-	PANEL_ID_ILITEK =4,
+	PANEL_ID_ILITEK = 4,
 };
+
 /* LCD panel IL9486*/
 enum {
 	PANEL_ID_OLD_ILI9486 = 0,
@@ -293,10 +284,12 @@ typedef void (gpio_i2c_init_func_t)(int bus_num);
 
 void __init lge_add_gpio_i2c_device(gpio_i2c_init_func_t *init_func);
 void __init lge_add_gpio_i2c_devices(void);
-int __init lge_init_gpio_i2c_pin(struct i2c_gpio_platform_data *i2c_adap_pdata,
+int __init lge_init_gpio_i2c_pin(
+		struct i2c_gpio_platform_data *i2c_adap_pdata,
 		struct gpio_i2c_pin gpio_i2c_pin,
 		struct i2c_board_info *i2c_board_info_data);
-int __init lge_init_gpio_i2c_pin_pullup(struct i2c_gpio_platform_data *i2c_adap_pdata,
+int __init lge_init_gpio_i2c_pin_pullup(
+		struct i2c_gpio_platform_data *i2c_adap_pdata,
 		struct gpio_i2c_pin gpio_i2c_pin,
 		struct i2c_board_info *i2c_board_info_data);
 
@@ -314,23 +307,25 @@ void __init lge_add_pm_devices(void);
 void __init lge_add_usb_devices(void);
 void __init lge_add_connectivity_devices(void);
 void __init lge_add_nfc_devices(void);
-
 void __init lge_add_gpio_i2c_device(gpio_i2c_init_func_t *init_func);
-
 void __init lge_add_ramconsole_devices(void);
+
 #if defined(CONFIG_ANDROID_RAM_CONSOLE) && defined(CONFIG_LGE_HANDLE_PANIC)
 void __init lge_add_panic_handler_devices(void);
 void lge_set_reboot_reason(unsigned reason);
 #endif
+
 int __init lge_get_uart_mode(void);
+
 #ifdef CONFIG_LGE_HW_REVISION
-lge_pcb_rev  lge_get_board_revno(void);
+lge_pcb_rev lge_get_board_revno(void);
 #endif
 
 int get_reboot_mode(void);
 
 enum lge_fboot_mode_type lge_get_fboot_mode(void);
 unsigned lge_nv_manual_f(int val);
+
 #ifdef CONFIG_LGE_SILENCE_RESET
 unsigned lge_silence_reset_f(int val);
 #endif
