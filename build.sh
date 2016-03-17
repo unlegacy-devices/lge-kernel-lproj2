@@ -174,9 +174,11 @@ if ! [ "$defconfig" == "" ]; then
 		echo "$x - Ziping $customkernel"
 
 		zipdirout="zip-creator-out"
+		rm -rf $zipdirout
+		mkdir $zipdirout
 
-		cp -r zip-creator $zipdirout
-		cp arch/$ARCH/boot/zImage $zipdirout
+		cp -r zip-creator/base/* $zipdirout/
+		cp arch/$ARCH/boot/zImage $zipdirout/
 
 		echo "${name}" >> $zipdirout/device.prop
 		echo "${variant}" >> $zipdirout/device.prop
