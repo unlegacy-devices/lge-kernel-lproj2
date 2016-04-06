@@ -22,8 +22,8 @@
 #include <mach/rpc_pmapp.h>
 #include <mach/socinfo.h>
 
-#include "board-msm7627a.h"
-#include "devices-msm7x2xa.h"
+#include "../../board-msm7627a.h"
+#include "../../devices-msm7x2xa.h"
 
 #if defined(CONFIG_BT) && defined(CONFIG_MARIMBA_CORE)
 
@@ -553,8 +553,7 @@ static int bahama_bt(int on)
 	on = on ? 1 : 0;
 	version = marimba_read_bahama_ver(&config);
 	if (version < 0 || version == BAHAMA_VER_UNSUPPORTED) {
-		dev_err(&msm_bt_power_device.dev, "%s : Bahama "
-			"version read Error, version = %d\n",
+		dev_err(&msm_bt_power_device.dev, "%s : Bahama version read Error, version = %d\n",
 			__func__, version);
 		return -EIO;
 	}
@@ -798,8 +797,7 @@ static unsigned int msm_bahama_core_config(int type)
 						__func__, v20_init[i].reg, rc);
 					return rc;
 				}
-				pr_debug("%s: reg 0x%02x value 0x%02x"
-					" mask 0x%02x\n",
+				pr_debug("%s: reg 0x%02x value 0x%02x mask 0x%02x\n",
 					__func__, v20_init[i].reg,
 					v20_init[i].value, v20_init[i].mask);
 			}
@@ -914,8 +912,7 @@ fail_gpio_cfg:
 			rc = gpio_tlmm_config(bt_config_power_off[pin],
 				GPIO_CFG_ENABLE);
 			if (rc < 0) {
-				pr_err("%s:"
-					" gpio_tlmm_config(%#x)=%d\n",
+				pr_err("%s: gpio_tlmm_config(%#x)=%d\n",
 					__func__,
 					bt_config_power_off[pin], rc);
 			}
