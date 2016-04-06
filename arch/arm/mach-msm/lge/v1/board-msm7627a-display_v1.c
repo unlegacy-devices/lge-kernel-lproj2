@@ -32,12 +32,12 @@
 #include <mach/lge/lge_proc_comm.h>
 
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
-#define MSM_FB_SIZE		0x4BF000
-#define MSM7x25A_MSM_FB_SIZE	0x078000
+#define MSM_FB_SIZE		0x1C2000
+#define MSM7x25A_MSM_FB_SIZE	0x1C2000
 #define MSM8x25_MSM_FB_SIZE	0x5FA000
 #else
 #define MSM_FB_SIZE		0x32A000
-#define MSM7x25A_MSM_FB_SIZE	0x050000
+#define MSM7x25A_MSM_FB_SIZE	0x12C000
 #define MSM8x25_MSM_FB_SIZE	0x3FC000
 #endif
 
@@ -131,11 +131,7 @@ void __init msm_msm7627a_allocate_memory_regions(void)
 	void *addr;
 	unsigned long fb_size;
 
-	if (machine_is_msm7x25a_v1())
-		fb_size = MSM7x25A_MSM_FB_SIZE;
-	else
-		fb_size = MSM_FB_SIZE;
-
+	fb_size = MSM_FB_SIZE;
 	addr = alloc_bootmem_align(fb_size, 0x1000);
 	msm_fb_resources[0].start = __pa(addr);
 	msm_fb_resources[0].end = msm_fb_resources[0].start + fb_size - 1;
