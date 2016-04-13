@@ -213,14 +213,8 @@ static struct msm_i2c_platform_data msm_gsbi1_qup_i2c_pdata = {
 };
 
 #ifdef CONFIG_ARCH_MSM7X27A
-/*LGE_CHANGE_S[jyothishre.nk@lge.com]20121102:
- *Migrating QCT patch to remove pmem and fmem support*/
 #define MSM_RESERVE_MDP_SIZE       	    0x1800000 	// 0x2300000 
-#define MSM7x25A_MSM_RESERVE_MDP_SIZE       0x1400000
-
 #define MSM_RESERVE_ADSP_SIZE      	    0x00D00000
-#define MSM7x25A_MSM_RESERVE_ADSP_SIZE      0xB91000
-/*LGE_CHANGE_E[jyothishre.nk@lge.com]20121102*/
 #define CAMERA_ZSL_SIZE		(SZ_1M * 60)
 #endif
 
@@ -748,13 +742,8 @@ early_param("reserve_audio_size", reserve_audio_size_setup);
 
 static void fix_sizes(void)
 {
-	if (machine_is_msm7625a_surf() || machine_is_msm7625a_ffa()) {
-		reserve_mdp_size 	= MSM7x25A_MSM_RESERVE_MDP_SIZE;
-		reserve_adsp_size 	= MSM7x25A_MSM_RESERVE_ADSP_SIZE;
-	} else {
-		reserve_mdp_size 	= MSM_RESERVE_MDP_SIZE;
-		reserve_adsp_size 	= MSM_RESERVE_ADSP_SIZE;
-	}
+	reserve_mdp_size = MSM_RESERVE_MDP_SIZE;
+	reserve_adsp_size = MSM_RESERVE_ADSP_SIZE;
 
 	if (get_ddr_size() > SZ_512M)
 		reserve_adsp_size 	= CAMERA_ZSL_SIZE;
