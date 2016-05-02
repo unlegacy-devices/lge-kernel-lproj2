@@ -48,6 +48,12 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/almk.h>
 
+#ifdef CONFIG_HIGHMEM
+#define _ZONE ZONE_HIGHMEM
+#else
+#define _ZONE ZONE_NORMAL
+#endif
+
 static uint32_t lowmem_debug_level = 1;
 static int lowmem_adj[6] = {
 	0,
@@ -98,7 +104,7 @@ enum {
 	VMPRESSURE_ADJUST_NORMAL,
 };
 
-int adjust_minadj(int *min_score_adj)
+int adjust_minadj(short *min_score_adj)
 {
 	int ret = VMPRESSURE_NO_ADJUST;
 
@@ -188,6 +194,7 @@ static int test_task_flag(struct task_struct *p, int flag)
 	return 0;
 }
 
+static DEFINE_MUTEX(scan_mutex);
 
 void tune_lmk_zone_param(struct zonelist *zonelist, int classzone_idx,
 					int *other_free, int *other_file)
@@ -197,7 +204,8 @@ void tune_lmk_zone_param(struct zonelist *zonelist, int classzone_idx,
 	int zone_idx;
 
 	for_each_zone_zonelist(zone, zoneref, zonelist, MAX_NR_ZONES) {
-		if ((zone_idx = zonelist_zone_idx(zoneref)) == ZONE_MOVABLE)
+		zone_idx = zonelist_zone_idx(zoneref);
+		if (zone_idx == ZONE_MOVABLE)
 			continue;
 
 		if (zone_idx > classzone_idx) {
@@ -283,9 +291,9 @@ void tune_lmk_param(int *other_free, int *other_file, struct shrink_control *sc)
 			tune_lmk_zone_param(zonelist, classzone_idx, other_free,
 				       NULL);
 
-		if (zone_watermark_ok(preferred_zone, 0, 0, ZONE_HIGHMEM, 0)) {
+		if (zone_watermark_ok(preferred_zone, 0, 0, _ZONE, 0)) {
 				*other_free -=
-				  preferred_zone->lowmem_reserve[ZONE_HIGHMEM];
+				  preferred_zone->lowmem_reserve[_ZONE];
 		} else {
 			*other_free -= zone_page_state(preferred_zone,
 						      NR_FREE_PAGES);
@@ -302,8 +310,6 @@ void tune_lmk_param(int *other_free, int *other_file, struct shrink_control *sc)
 	}
 }
 
-static DEFINE_MUTEX(scan_mutex);
-
 static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 {
 	struct task_struct *tsk;
@@ -312,7 +318,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	int tasksize;
 	int i;
 	int ret = 0;
-	int min_score_adj = OOM_SCORE_ADJ_MAX + 1;
+	short min_score_adj = OOM_SCORE_ADJ_MAX + 1;
 	int minfree = 0;
 	int selected_tasksize = 0;
 	int selected_oom_score_adj;
@@ -351,7 +357,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	}
 	if (nr_to_scan > 0) {
 		ret = adjust_minadj(&min_score_adj);
-		lowmem_print(3, "lowmem_shrink %lu, %x, ofree %d %d, ma %d\n",
+		lowmem_print(3, "lowmem_shrink %lu, %x, ofree %d %d, ma %hd\n",
 				nr_to_scan, sc->gfp_mask, other_free,
 				other_file, min_score_adj);
 	}
@@ -418,6 +424,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 		selected_oom_score_adj = oom_score_adj;
 		lowmem_print(3, "select '%s' (%d), adj %hd, size %d, to kill\n",
 			     p->comm, p->pid, oom_score_adj, tasksize);
+
 	}
 	if (selected) {
 		lowmem_print(1, "Killing '%s' (%d), adj %hd,\n" \
