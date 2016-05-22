@@ -22,8 +22,8 @@
 #include <mach/rpc_pmapp.h>
 #include <mach/socinfo.h>
 
-#include "board-msm7627a.h"
-#include "devices-msm7x2xa.h"
+#include "../../board-msm7627a.h"
+#include "../../devices-msm7x2xa.h"
 
 #if defined(CONFIG_BT) && defined(CONFIG_MARIMBA_CORE)
 
@@ -103,25 +103,7 @@ static unsigned fm_i2s_config_power_off[] = {
 int gpio_bt_sys_rest_en = 133;
 static void gpio_bt_config(void)
 {
-	// *s LGBT_COMMON_FUNCTION_BRINGUP change the BT reset pin for bring-up 2012-09-13 sunmee.choi@lge.com
-	/* Google Original
-	u32 socinfo = socinfo_get_platform_version();
-	if (machine_is_msm7627a_qrd1())
-		gpio_bt_sys_rest_en = 114;
-	if (machine_is_msm7627a_evb() || machine_is_msm8625_evb()
-				|| machine_is_msm8625_evt())
-		gpio_bt_sys_rest_en = 16;
-	if (machine_is_msm8625_qrd7())
-		gpio_bt_sys_rest_en = 88;
-	if (machine_is_msm7627a_qrd3()) {
-		if (socinfo == 0x70002)
-			gpio_bt_sys_rest_en = 88;
-		 else
-			gpio_bt_sys_rest_en = 85;
-	}
-	*/
 	gpio_bt_sys_rest_en = 6;
-	// *e LGBT_COMMON_FUNCTION_BRINGUP
 }
 
 static int bt_set_gpio(int on)
