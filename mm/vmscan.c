@@ -2129,8 +2129,6 @@ static unsigned long do_try_to_free_pages(struct zonelist *zonelist,
 	do {
 		vmpressure_prio(sc->gfp_mask, sc->target_mem_cgroup, sc->priority);
 		sc->nr_scanned = 0;
-		if (!priority)
-			disable_swap_token(sc->target_mem_cgroup);
 		aborted_reclaim = shrink_zones(zonelist, sc);
 
 		/*
@@ -2482,10 +2480,6 @@ loop_again:
 	do {
 		unsigned long lru_pages = 0;
 		int has_under_min_watermark_zone = 0;
-
-		/* The swap token gets in the way of swapout... */
-		if (!priority)
-			disable_swap_token(NULL);
 
 		all_zones_ok = 1;
 		balanced = 0;
