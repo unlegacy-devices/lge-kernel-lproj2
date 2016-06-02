@@ -350,6 +350,8 @@ then
 		if [ -f zip-creator/${zipfile} ]
 		then
 			menu_zipfile="${color_cyan}zip-creator/${zipfile}${color_stock}"
+		else
+			unset menu_zipfile
 		fi
 
 		clear
@@ -374,7 +376,7 @@ then
 		echo
 		read -n 1 -p "$(tput bold)Choice: ${color_stock}" -s x
 		case ${x} in
-			1) echo "${x} - Cleaning Zips"; rm -rf zip-creator/*.zip; unset zip_packer_check menu_zipfile;;
+			1) echo "${x} - Cleaning Zips"; rm -rf zip-creator/*.zip; unset zip_packer_check;;
 			2) echo "${x} - Cleaning Kernel"; make clean mrproper &> /dev/null; unset kernel_build_check name variant defconfig build_time;;
 			3) device_choice;;
 			4) defconfig_updater;;
