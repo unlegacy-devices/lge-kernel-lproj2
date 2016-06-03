@@ -15,9 +15,8 @@ clear
 echo "-${color_green}Device choice${color_stock}-"
 echo
 _name=${name}
-_variant=${variant}
 _defconfig=${defconfig}
-unset name variant defconfig
+unset name defconfig
 echo "0) ${color_yellow}LG L1 II${color_stock} | Single/Dual | E410 E411 E415 E420"
 echo "1) ${color_blue}LG L3 II${color_stock} | Single/Dual | E425 E430 E431 E435"
 echo "2) ${color_red}LG L5${color_stock}    | NFC         | E610"
@@ -30,25 +29,24 @@ echo "*) Any other key to Exit"
 echo
 read -p "Choice: " -n 1 -s x
 case "${x}" in
-	0) defconfig="cyanogenmod_v1_defconfig"; name="L1II"; variant="All";;
-	1) defconfig="cyanogenmod_vee3_defconfig"; name="L3II"; variant="All";;
-	2) defconfig="cyanogenmod_m4_defconfig"; name="L5"; variant="NFC";;
-	3) defconfig="cyanogenmod_m4_nonfc_defconfig"; name="L5"; variant="NoNFC";;
-	4) defconfig="cyanogenmod_u0_defconfig"; name="L7"; variant="NFC";;
-	5) defconfig="cyanogenmod_u0_nonfc_defconfig"; name="L7"; variant="NoNFC";;
-	6) defconfig="cyanogenmod_u0_8m_defconfig"; name="L7"; variant="NFC-8m";;
+	0) defconfig="cyanogenmod_v1_defconfig"; name="L1II";;
+	1) defconfig="cyanogenmod_vee3_defconfig"; name="L3II";;
+	2) defconfig="cyanogenmod_m4_defconfig"; name="L5-NFC";;
+	3) defconfig="cyanogenmod_m4_nonfc_defconfig"; name="L5-NoNFC";;
+	4) defconfig="cyanogenmod_u0_defconfig"; name="L7-NFC";;
+	5) defconfig="cyanogenmod_u0_nonfc_defconfig"; name="L7-NoNFC";;
+	6) defconfig="cyanogenmod_u0_8m_defconfig"; name="L7-NFC-8m";;
 esac
 if [ "${defconfig}" == "" ]
 then
 	name=${_name}
-	variant=${_variant}
 	defconfig=${_defconfig}
-	unset _name _variant _defconfig
+	unset _name _defconfig
 else
 	if ! [ $(make ${defconfig}) ]
 	then
 		defconfig="${common_message_error}"
-	fi | echo "${name} ${variant} setting..."
+	fi | echo "${name} setting..."
 	unset kernel_build_check zip_packer_check defconfig_check
 fi
 }
@@ -157,16 +155,17 @@ then
 	then
 		echo "${x} - Ziping ${customkernel}"
 
-		zip_out="zip-creator-out"
+		zip_out="zip-creator_out"
 		rm -rf ${zip_out}
-		mkdir ${zip_out}
+		mkdir -p ${zip_out}/META-INF/com/google/android/
 
-		cp -r zip-creator/base/* ${zip_out}/
+		cp zip-creator/base/update-binary ${zip_out}/META-INF/com/google/android/
+		cp zip-creator/base/mkbootimg ${zip_out}/
+		cp zip-creator/base/unpackbootimg ${zip_out}/
 		cp arch/${ARCH}/boot/zImage ${zip_out}/
 
 		echo "${customkernel}" >> ${zip_out}/device.prop
 		echo "${name}" >> ${zip_out}/device.prop
-		echo "${variant}" >> ${zip_out}/device.prop
 		echo "${release}" >> ${zip_out}/device.prop
 
 		mkdir ${zip_out}/modules
@@ -344,7 +343,7 @@ then
 		kernel_base="${k_version}.${k_patch_level}.${k_sub_level}"
 		release=$(date +%d""%m""%Y)
 		build=$(cat .version)
-		export zipfile="${customkernel}-${name}-${variant}-${release}-${build}.zip"
+		export zipfile="${customkernel}-${name}-${release}-${build}.zip"
 
 		# Check ZIP
 		if [ -f zip-creator/${zipfile} ]
@@ -361,7 +360,7 @@ then
 		echo "1 | Zip Package's      | ${color_red}${zip_clean_check}${color_stock}"
 		echo "2 | Kernel             | ${color_red}${kernel_clean_check}${color_stock}"
 		echo " ${color_green}Choice Menu${color_stock}"
-		echo "3 | Device             | ${color_green}${name} ${variant}${color_stock}"
+		echo "3 | Device             | ${color_green}${name}${color_stock}"
 		echo "4 | Update Defconfig   | ${color_green}${defconfig_check}${color_stock}"
 		echo "5 | Toolchain          | ${color_green}${ToolchainCompile}${color_stock}"
 		echo "6 | Build Output       | ${color_green}${kernel_build_output}${color_stock}"
@@ -377,7 +376,7 @@ then
 		read -n 1 -p "$(tput bold)Choice: ${color_stock}" -s x
 		case ${x} in
 			1) echo "${x} - Cleaning Zips"; rm -rf zip-creator/*.zip; unset zip_packer_check;;
-			2) echo "${x} - Cleaning Kernel"; make clean mrproper &> /dev/null; unset kernel_build_check name variant defconfig build_time;;
+			2) echo "${x} - Cleaning Kernel"; make clean mrproper &> /dev/null; unset kernel_build_check name defconfig build_time;;
 			3) device_choice;;
 			4) defconfig_updater;;
 			5) toolchain_choice;;

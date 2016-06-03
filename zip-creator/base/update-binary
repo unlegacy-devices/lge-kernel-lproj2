@@ -21,12 +21,11 @@ unzip "${zipfile}"
 
 kernelname=$(sed -n '1p' /tmp/kernel/device.prop)
 name=$(sed -n '2p' /tmp/kernel/device.prop)
-variant=$(sed -n '3p' /tmp/kernel/device.prop)
-release=$(sed -n '4p' /tmp/kernel/device.prop)
+release=$(sed -n '3p' /tmp/kernel/device.prop)
 
 ui_print "TeamHackLG Presents"
 ui_print "${kernelname}"
-ui_print "For ${name} ${variant}"
+ui_print "For ${name}"
 ui_print "Release ${release}"
 
 if [ $(mount | grep /system | wc -l) -ge 1 ]
