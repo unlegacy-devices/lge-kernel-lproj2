@@ -19,14 +19,15 @@ cd /tmp/kernel/
 
 unzip "${zipfile}"
 
-kernelname=$(sed -n '1p' /tmp/kernel/device.prop)
-name=$(sed -n '2p' /tmp/kernel/device.prop)
-release=$(sed -n '3p' /tmp/kernel/device.prop)
+builder=$(sed -n '1p' /tmp/kernel/device.prop)
+custom_kernel=$(sed -n '2p' /tmp/kernel/device.prop)
+device_name=$(sed -n '3p' /tmp/kernel/device.prop)
+release=$(sed -n '4p' /tmp/kernel/device.prop)
 
-ui_print "TeamHackLG Presents"
-ui_print "${kernelname}"
-ui_print "For ${name}"
-ui_print "Release ${release}"
+ui_print
+ui_print "${builder} Presents"
+ui_print "${custom_kernel} for ${device_name}"
+ui_print "${release}"
 
 if [ $(mount | grep /system | wc -l) -ge 1 ]
 then
@@ -44,7 +45,7 @@ dd if=/dev/block/mmcblk0p9 of=/tmp/kernel/boot.img
 /tmp/kernel/unpackbootimg /tmp/kernel/boot.img
 /tmp/kernel/mkbootimg --kernel /tmp/kernel/zImage --ramdisk /tmp/kernel/boot.img-ramdisk.gz --cmdline "$(cat /tmp/kernel/boot.img-cmdline)" --base "$(cat /tmp/kernel/boot.img-base)" -o /tmp/kernel/newboot.img
 
-ui_print "Flashing TeamHackLG ${kernelname}!"
+ui_print "Flashing ${builder} ${custom_kernel}!"
 dd if=/tmp/kernel/newboot.img of=/dev/block/mmcblk0p9
 
 umount /system
@@ -55,3 +56,4 @@ BUILDTIME=$((${END} - ${START}))
 rm -rf /tmp/kernel/
 
 ui_print "Done in $((${BUILDTIME} % 60)) seconds."
+ui_print
