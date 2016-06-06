@@ -640,9 +640,6 @@ static void exit_mm(struct task_struct * tsk)
 {
 	struct mm_struct *mm = tsk->mm;
 	struct core_state *core_state;
-#ifndef CONFIG_UML
-	int mm_released;
-#endif
 
 	mm_release(tsk, mm);
 	if (!mm)
