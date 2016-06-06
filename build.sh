@@ -16,13 +16,13 @@ echo
 temp_device_name=${device_name}
 temp_device_defconfig=${device_defconfig}
 unset device_name device_defconfig
-echo "0 | ${color_yellow}LG L1 II${color_stock} | Single/Dual | E410 E411 E415 E420"
-echo "1 | ${color_blue}LG L3 II${color_stock} | Single/Dual | E425 E430 E431 E435"
-echo "2 | ${color_red}LG L5${color_stock}    | NFC         | E610"
-echo "3 | ${color_red}LG L5${color_stock}    | NoNFC       | E612 E617"
-echo "4 | ${color_green}LG L7${color_stock}    | NFC         | P700"
-echo "5 | ${color_green}LG L7${color_stock}    | NoNFC       | P705"
-echo "6 | ${color_green}LG L7${color_stock}    | NFC - 8m    | P708"
+echo "0 | ${color_yellow}LG L1 II${color_stock} | All      | E410 E411 E415 E420"
+echo "1 | ${color_blue}LG L3 II${color_stock} | All      | E425 E430 E431 E435"
+echo "2 | ${color_red}LG L5${color_stock}    | NFC      | E610"
+echo "3 | ${color_red}LG L5${color_stock}    | NoNFC    | E612 E617"
+echo "4 | ${color_green}LG L7${color_stock}    | NFC      | P700"
+echo "5 | ${color_green}LG L7${color_stock}    | NoNFC    | P705"
+echo "6 | ${color_green}LG L7${color_stock}    | NFC - 8m | P708"
 echo
 echo "* | Any other key to Exit"
 echo
