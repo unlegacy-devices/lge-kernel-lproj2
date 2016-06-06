@@ -11,7 +11,6 @@
 
 # Device Choice
 device_choice() {
-clear
 echo "${x} | ${color_green}Device choice${color_stock}"
 echo
 temp_device_name=${device_name}
@@ -50,7 +49,6 @@ fi
 
 # Toolchain Choice
 toolchain_choice() {
-clear
 echo "${x} | Toolchain choice"
 echo
 if [ -f ../android_prebuilt_toolchains/aptess.sh ]
@@ -201,7 +199,6 @@ then
 	else
 		defconfig_format="Usual copy of .config format | Complete"
 	fi
-	clear
 	echo "${x} | ${color_green}Updating defconfig${color_stock}"
 	echo
 	echo "  | The actual defconfig is:"
@@ -227,7 +224,6 @@ fi
 zip_copy_adb() {
 if [ -f zip-creator/${zipfile} ]
 then
-	clear
 	echo "${x} | Coping ${builder} ${custom_kernel}-"
 	echo
 	adb shell rm -rf /data/media/0/${zipfile} &> /dev/null
