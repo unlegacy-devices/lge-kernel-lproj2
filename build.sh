@@ -108,8 +108,20 @@ else
 		rm -rf arch/${ARCH}/boot/zImage
 	fi
 
+	if [ "$(which ccache)" ]
+	then
+		export CXX="ccache g++"
+		export CC="ccache gcc"
+		ccache_build=" and ccache enabled!"
+	else
+		echo " | CCache not is installed!"
+		echo " | If you install it, you can speed up builds"
+		sleep 5
+		ccache_build=" and ccache disabled!"
+	fi
+
 	build_cpu_usage=$(($(grep -c ^processor /proc/cpuinfo) + 1))
-	echo "  | ${color_blue}Building ${custom_kernel} with ${build_cpu_usage} jobs at once${color_stock}"
+	echo "  | ${color_blue}Building ${custom_kernel} with ${build_cpu_usage} jobs at once${ccache_build}${color_stock}"
 
 	start_build_time=$(date +"%s")
 	if [ "${kernel_build_output}" == "(OFF)" ]
@@ -124,6 +136,12 @@ else
 	fi
 	build_time=$(($(date +"%s") - ${start_build_time}))
 	build_time_minutes=$((${build_time} / 60))
+
+	if [ "$(which ccache)" ]
+	then
+		unset CXX CC
+	fi
+	unset ccache_build
 fi
 }
 
