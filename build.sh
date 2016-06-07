@@ -108,63 +108,15 @@ else
 		rm -rf arch/${ARCH}/boot/zImage
 	fi
 
-	if [ "$(which ccache)" ]
-	then
-		export CXX="ccache g++"
-		export CC="ccache gcc"
-		ccache_build=" and ccache enabled!"
-	else
-		echo " | CCache not is installed!"
-		echo " | If you install it, you can speed up builds"
-		sleep 5
-		ccache_build=" and ccache disabled!"
-	fi
-
 	build_cpu_usage=$(($(grep -c ^processor /proc/cpuinfo) + 1))
 	echo "  | ${color_blue}Building ${custom_kernel} with ${build_cpu_usage} jobs at once${ccache_build}${color_stock}"
 
 	start_build_time=$(date +"%s")
-	if [ "${kernel_build_output}" == "(OFF)" ]
-	then
-		if ! [ $(make -j${build_cpu_usage}) ]
-		then
-			loop_fail_check="1"
-		fi | kernel_build_LOOP
-	else
-		make -j${build_cpu_usage}
-		sleep 5
-	fi
+	make -j${build_cpu_usage}${kernel_build_output_enable}
+	sleep 5
 	build_time=$(($(date +"%s") - ${start_build_time}))
 	build_time_minutes=$((${build_time} / 60))
-
-	if [ "$(which ccache)" ]
-	then
-		unset CXX CC
-	fi
-	unset ccache_build
 fi
-}
-
-# Kernel Build LOOP function
-kernel_build_LOOP() {
-while true
-do
-	loop_build_time=$(($(date +"%s") - ${start_build_time}))
-	loop_minutes=$((${loop_build_time} / 60))
-	echo -ne "\r\033[K"
-	if [ "$loop_minutes" == "" ]
-	then
-		echo -ne "  | (Build Time | ${color_green}$((${loop_build_time} % 60)) seconds${color_stock})"
-	else
-		echo -ne "  | (Build Time | ${color_green}${loop_minutes} minutes and $((${loop_build_time} % 60)) seconds${color_stock})"
-	fi
-	if [[ -f arch/${ARCH}/boot/zImage || "${loop_fail_check}" == "1" ]]
-	then
-		unset loop_fail_check loop_build_time loop_minutes
-		break
-	fi
-	sleep 1
-done
 }
 
 # Zip Packer Process
@@ -287,9 +239,12 @@ then
 	while true
 	do
 		# Kernel OutPut
-		if [ "${kernel_build_output}" == "" ]
+		if [ "${kernel_build_output}" == "(OFF)" ]
 		then
+			kernel_build_output_enable=" -s"
+		else
 			kernel_build_output="(${color_green}ON${color_stock})"
+			unset kernel_build_output_enable
 		fi
 		# Build Time
 		if ! [ "${build_time}" == "" ]
