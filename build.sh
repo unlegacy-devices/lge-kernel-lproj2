@@ -332,9 +332,9 @@ then
 				else
 					kernel_build_output="(OFF)"
 				fi;;
-			7) kernel_build;;
-			8) zip_packer;;
-			9) zip_copy_adb;;
+			6) kernel_build;;
+			7) zip_packer;;
+			8) zip_copy_adb;;
 			q|e) echo "${x} | Ok, Bye!"; break;;
 			*) wrong_choice;;
 		esac
