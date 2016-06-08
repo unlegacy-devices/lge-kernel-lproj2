@@ -103,16 +103,16 @@ then
 else
 	echo "${x} | Building ${builder} ${custom_kernel}"
 
-	if [ -f arch/${ARCH}/boot/zImage ]
+	if [ $(which ccache) ]
 	then
-		rm -rf arch/${ARCH}/boot/zImage
+		kernel_build_ccache="ccache "
 	fi
 
 	build_cpu_usage=$(($(grep -c ^processor /proc/cpuinfo) + 1))
 	echo "  | ${color_blue}Building ${custom_kernel} with ${build_cpu_usage} jobs at once${ccache_build}${color_stock}"
 
 	start_build_time=$(date +"%s")
-	make -j${build_cpu_usage}${kernel_build_output_enable}
+	make -j${build_cpu_usage}${kernel_build_output_enable} CROSS_COMPILE="${kernel_build_ccache}${CROSS_COMPILE}"
 	sleep 5
 	build_time=$(($(date +"%s") - ${start_build_time}))
 	build_time_minutes=$((${build_time} / 60))
@@ -123,7 +123,7 @@ fi
 zip_packer() {
 if ! [ "${device_defconfig}" == "" ]
 then
-	if [ -f arch/$ARCH/boot/zImage ]
+	if [ -f arch/${ARCH}/boot/zImage ]
 	then
 		echo "${x} | Ziping ${builder} ${custom_kernel}"
 
