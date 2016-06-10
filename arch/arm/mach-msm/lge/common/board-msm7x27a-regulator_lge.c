@@ -215,33 +215,98 @@ static struct proccomm_regulator_info msm7x27a_pcom_vreg_info[] = {
 	 * S = supply voltage (uV)
 	 * T = type of regulator (smps, pldo, nldo)
 	 *            name   id  supp   min uV    max uV   R   P  A  B  V  S  T*/
-	PCOM_VREG_SMP(smps1,  3, NULL,  1100000,  1100000, 0, -1, 0, 0, 0, 0, s),	/* msmc1 */
-	PCOM_VREG_SMP(smps2,  4, NULL,  1100000,  1100000, 0, -1, 0, 0, 0, 0, s),	/* msmc2 */
-	PCOM_VREG_SMP(smps3,  2, NULL,  1800000,  1800000, 0, -1, 0, 0, 0, 0, s),	/* msme1, emmc */
-	PCOM_VREG_SMP(smps4, 24, NULL,  2100000,  2100000, 0, -1, 0, 0, 0, 0, s),	/* rf */
-	PCOM_VREG_LDO(ldo01, 12, NULL,  1800000,  3300000, 0, -1, 0, 0, 0, 0, p),	/* rfrx1 */
-	PCOM_VREG_LDO(ldo02, 13, NULL,  2050000,  2850000, 0, -1, 0, 0, 0, 0, p),	/* rfrx2 */
-	PCOM_VREG_LDO(ldo03, 49, NULL,  1200000,  1200000, 0, -1, 0, 0, 0, 0, n),	/* mddi */
-	PCOM_VREG_LDO(ldo04, 50, NULL,  1100000,  1100000, 0, -1, 0, 0, 0, 0, n),	/* pllx */
-	PCOM_VREG_LDO(ldo05, 45, NULL,  1300000,  1350000, 0, -1, 0, 0, 0, 0, n),	/* wlan2 */
-	PCOM_VREG_LDO(ldo06, 51, NULL,  1200000,  1200000, 0, -1, 0, 0, 0, 0, n),	/* wlan3 */
-	PCOM_VREG_LDO(ldo07,  0, NULL,  2600000,  2600000, 0, -1, 0, 0, 0, 0, p),	/* msma */
-	PCOM_VREG_LDO(ldo08,  9, NULL,  2850000,  2850000, 0, -1, 0, 0, 0, 0, p),	/* tcxo */
-	PCOM_VREG_LDO(ldo09, 44, NULL,  1800000,  1800000, 0, -1, 0, 0, 0, 0, p),	/* usb2 */
-	PCOM_VREG_LDO(ldo10, 52, NULL,  2800000,  3000000, 0, -1, 0, 0, 0, 0, p),	/* lcd */
-	PCOM_VREG_LDO(ldo11, 53, NULL,  1800000,  1800000, 0, -1, 0, 0, 0, 0, p),	/* wlan_tcx0 */
-	PCOM_VREG_LDO(ldo12, 21, NULL,  2850000,  2850000, 0, -1, 0, 0, 0, 0, p),	/* gp2 */
-	PCOM_VREG_LDO(ldo13, 18, NULL,  2850000,  2850000, 0, -1, 0, 0, 0, 0, p),	/* mmc */
-	PCOM_VREG_LDO(ldo14, 16, NULL,  3300000,  3300000, 0, -1, 0, 0, 0, 0, p),	/* usb */
-	PCOM_VREG_LDO(ldo15, 54, NULL,  1800000,  2850000, 0, -1, 0, 0, 0, 0, p),	/* usim2 */
-	PCOM_VREG_LDO(ldo16, 55, NULL,  2850000,  3000000, 0, -1, 0, 0, 0, 0, p),	/* usim */
-	PCOM_VREG_LDO(ldo17, 56, NULL,  3000000,  3300000, 0, -1, 0, 0, 0, 0, p),	/* bt */
-	PCOM_VREG_LDO(ldo18, 11, NULL,  2700000,  2700000, 0, -1, 0, 0, 0, 0, p),	/* rftx */
-	PCOM_VREG_LDO(ldo19, 57, NULL,  1200000,  1800000, 0, -1, 0, 0, 0, 0, p),	/* wlan4 */
-	PCOM_VREG_NCP(ncp,   31, NULL, -1800000, -1800000, 0,     0, 0, 0, 0),		/* ncp */
+	PCOM_VREG_SMP(smps1,  3, NULL,  1100000,  1100000, 0, -1, 0, 0, 0, 0, s),	// msmc1
+	PCOM_VREG_SMP(smps2,  4, NULL,  1100000,  1100000, 0, -1, 0, 0, 0, 0, s),	// msmc2
+	PCOM_VREG_SMP(smps3,  2, NULL,  1800000,  1800000, 0, -1, 0, 0, 0, 0, s),	// msme1, emmc
+	PCOM_VREG_SMP(smps4, 24, NULL,  2100000,  2100000, 0, -1, 0, 0, 0, 0, s),	// rf
+	PCOM_VREG_LDO(ldo01, 12, NULL,  1800000,  3300000, 0, -1, 0, 0, 0, 0, p),	// rfrx1
+	PCOM_VREG_LDO(ldo02, 13, NULL,  2050000,  2850000, 0, -1, 0, 0, 0, 0, p),	// rfrx2
+	PCOM_VREG_LDO(ldo03, 49, NULL,  1200000,  1200000, 0, -1, 0, 0, 0, 0, n),	// mddi
+	PCOM_VREG_LDO(ldo04, 50, NULL,  1100000,  1100000, 0, -1, 0, 0, 0, 0, n),	// pllx
+	PCOM_VREG_LDO(ldo05, 45, NULL,  1300000,  1350000, 0, -1, 0, 0, 0, 0, n),	// wlan2
+	PCOM_VREG_LDO(ldo06, 51, NULL,  1200000,  1200000, 0, -1, 0, 0, 0, 0, n),	// wlan3
+	PCOM_VREG_LDO(ldo07,  0, NULL,  2600000,  2600000, 0, -1, 0, 0, 0, 0, p),	// msma
+	PCOM_VREG_LDO(ldo08,  9, NULL,  2850000,  2850000, 0, -1, 0, 0, 0, 0, p),	// tcxo
+	PCOM_VREG_LDO(ldo09, 44, NULL,  1800000,  1800000, 0, -1, 0, 0, 0, 0, p),	// usb2
+	PCOM_VREG_LDO(ldo10, 52, NULL,  2800000,  3000000, 0, -1, 0, 0, 0, 0, p),	// lcd
+	PCOM_VREG_LDO(ldo11, 53, NULL,  1800000,  1800000, 0, -1, 0, 0, 0, 0, p),	// wlan_tcx0
+	PCOM_VREG_LDO(ldo12, 21, NULL,  2850000,  2850000, 0, -1, 0, 0, 0, 0, p),	// gp2
+	PCOM_VREG_LDO(ldo13, 18, NULL,  2850000,  2850000, 0, -1, 0, 0, 0, 0, p),	// mmc
+	PCOM_VREG_LDO(ldo14, 16, NULL,  3300000,  3300000, 0, -1, 0, 0, 0, 0, p),	// usb
+	PCOM_VREG_LDO(ldo15, 54, NULL,  1800000,  2850000, 0, -1, 0, 0, 0, 0, p),	// usim2
+	PCOM_VREG_LDO(ldo16, 55, NULL,  2850000,  3000000, 0, -1, 0, 0, 0, 0, p),	// usim
+	PCOM_VREG_LDO(ldo17, 56, NULL,  3000000,  3300000, 0, -1, 0, 0, 0, 0, p),	// bt
+	PCOM_VREG_LDO(ldo18, 11, NULL,  2700000,  2700000, 0, -1, 0, 0, 0, 0, p),	// rftx
+	PCOM_VREG_LDO(ldo19, 57, NULL,  1200000,  1800000, 0, -1, 0, 0, 0, 0, p),	// wlan4
+	PCOM_VREG_NCP(ncp,   31, NULL, -1800000, -1800000, 0,     0, 0, 0, 0),		// ncp
 };
 
 struct proccomm_regulator_platform_data msm7x27a_proccomm_regulator_data = {
 	.regs = msm7x27a_pcom_vreg_info,
 	.nregs = ARRAY_SIZE(msm7x27a_pcom_vreg_info)
 };
+
+#ifdef CONFIG_MINIABB_REGULATOR
+#define MINIABB_VREG_CONSUMERS(name) \
+	static struct regulator_consumer_supply __miniabb_vreg_supply_##name[]
+
+#define MINIABB_VREG_INIT_DATA(_name, _supply, _min_uV, _max_uV, _always_on, _boot_on, _apply_uV, _supply_uV)\
+{ \
+	.supply_regulator = _supply, \
+	.consumer_supplies = __miniabb_vreg_supply_##_name, \
+	.num_consumer_supplies = ARRAY_SIZE(__miniabb_vreg_supply_##_name), \
+	.constraints = { \
+		.name = #_name, \
+		.min_uV = _min_uV, \
+		.max_uV = _max_uV, \
+		.valid_modes_mask = REGULATOR_MODE_NORMAL, \
+		.valid_ops_mask = REGULATOR_CHANGE_VOLTAGE | REGULATOR_CHANGE_STATUS, \
+		.input_uV = _supply_uV, \
+		.apply_uV = _apply_uV, \
+		.boot_on = _boot_on, \
+		.always_on = _always_on \
+	} \
+}
+
+#define MINIABB_VREG_LDO(_name, _id, _supply, _min_uV, _max_uV, _always_on, _boot_on, _apply_uV, _supply_uV) \
+{ \
+	.init_data = MINIABB_VREG_INIT_DATA(_name, _supply, _min_uV, _max_uV, _always_on, _boot_on, _apply_uV, _supply_uV), \
+	.id = _id, \
+	.negative = 0, \
+}
+
+MINIABB_VREG_CONSUMERS(miniabb_ldo1) = {
+	REGULATOR_SUPPLY("prox",	NULL),
+	REGULATOR_SUPPLY("accl",	NULL),
+};
+
+MINIABB_VREG_CONSUMERS(miniabb_ldo2) = {
+	REGULATOR_SUPPLY("cam_avdd",	NULL),
+};
+
+MINIABB_VREG_CONSUMERS(miniabb_ldo3) = {
+	REGULATOR_SUPPLY("cam_dvdd",	NULL),
+};
+
+MINIABB_VREG_CONSUMERS(miniabb_ldo4) = {
+	REGULATOR_SUPPLY("cam_iovdd",	NULL),
+};
+
+static struct miniabb_regulator_info miniabb_vreg_info[] = {
+	/* Standard regulators (LDO)
+	 * A = always on
+	 * B = boot on
+	 * V = automatic voltage set (meaningful for single-voltage regs only)
+	 * S = supply voltage (uV)
+	 *            	 name						id	supp	min uV		max uV		A  B  V  S*/
+	MINIABB_VREG_LDO(miniabb_ldo1, 	1, 	NULL, 1000000,  3300000, 	0, 0, 0, 0),	/* VREG_PROX_3.0V */
+	MINIABB_VREG_LDO(miniabb_ldo2, 	2, 	NULL, 1000000,  3300000, 	0, 0, 0, 0),	/* CAM_AVDD_2.8V */
+	MINIABB_VREG_LDO(miniabb_ldo3, 	3, 	NULL, 1000000,  3300000, 	0, 0, 0, 0),	/* CAM_DVDD_1.2V */
+	MINIABB_VREG_LDO(miniabb_ldo4, 	4, 	NULL, 1000000,  3300000, 	0, 0, 0, 0),	/* CAM_IOVDD_1.8V */
+};
+
+struct miniabb_regulator_platform_data miniabb_regulator_data = {
+	.regs = miniabb_vreg_info,
+	.nregs = ARRAY_SIZE(miniabb_vreg_info)
+};
+#endif

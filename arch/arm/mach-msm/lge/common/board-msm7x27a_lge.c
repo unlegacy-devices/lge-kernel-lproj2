@@ -45,7 +45,6 @@
 #include <mach/rpc_pmapp.h>
 #include <mach/msm_battery.h>
 #include <linux/atmel_maxtouch.h>
-#include <linux/msm_adc.h>
 #include <linux/msm_ion.h>
 #include <linux/dma-contiguous.h>
 #include <linux/dma-mapping.h>
@@ -54,18 +53,18 @@
 #include <linux/persistent_ram.h>
 #endif
 
-#include "devices.h"
-#include "timer.h"
-#include "board-msm7x27a-regulator.h"
-#include "devices-msm7x2xa.h"
-#include "pm.h"
+#include "../../devices.h"
+#include "../../timer.h"
+#include "../../board-msm7x27a-regulator.h"
+#include "../../devices-msm7x2xa.h"
+#include "../../pm.h"
 
 #include <mach/rpc_server_handset.h>
 #include <mach/socinfo.h>
 
 #include CONFIG_LGE_BOARD_HEADER_FILE
-#include "pm-boot.h"
-#include "board-msm7627a.h"
+#include "../../pm-boot.h"
+#include "../../board-msm7627a.h"
 
 #ifdef CONFIG_ANDROID_RAM_CONSOLE
 #include <asm/setup.h>
@@ -87,15 +86,15 @@
 
 #ifdef CONFIG_ANDROID_RAM_CONSOLE
 struct persistent_ram_descriptor ram_console_desc = {
-        .name = "ram_console",
-        .size = LGE_RAM_CONSOLE_SIZE - 1,
+	.name = "ram_console",
+	.size = LGE_RAM_CONSOLE_SIZE - 1,
 };
-	
+
 struct persistent_ram ram_console_ram = {
-        .start = LGE_RAM_CONSOLE_START,
-        .size = LGE_RAM_CONSOLE_SIZE - 1,
-        .num_descs = 1,
-        .descs = &ram_console_desc,
+	.start = LGE_RAM_CONSOLE_START,
+	.size = LGE_RAM_CONSOLE_SIZE - 1,
+	.num_descs = 1,
+	.descs = &ram_console_desc,
 };
 
 static struct platform_device ram_console_device = {
@@ -361,72 +360,6 @@ static struct msm_pm_boot_platform_data msm_pm_boot_pdata __initdata = {
 	.p_addr = 0,
 };
 
-/* 8625 PM platform data */
-static struct msm_pm_platform_data msm8625_pm_data[MSM_PM_SLEEP_MODE_NR * 2] = {
-	/* CORE0 entries */
-	[MSM_PM_MODE(0, MSM_PM_SLEEP_MODE_POWER_COLLAPSE)] = {
-					.idle_supported = 1,
-					.suspend_supported = 1,
-					.idle_enabled = 0,
-					.suspend_enabled = 0,
-					.latency = 16000,
-					.residency = 20000,
-	},
-
-	[MSM_PM_MODE(0, MSM_PM_SLEEP_MODE_POWER_COLLAPSE_NO_XO_SHUTDOWN)] = {
-					.idle_supported = 1,
-					.suspend_supported = 1,
-					.idle_enabled = 0,
-					.suspend_enabled = 0,
-					.latency = 12000,
-					.residency = 20000,
-	},
-
-	/* picked latency & redisdency values from 7x30 */
-	[MSM_PM_MODE(0, MSM_PM_SLEEP_MODE_POWER_COLLAPSE_STANDALONE)] = {
-					.idle_supported = 1,
-					.suspend_supported = 1,
-					.idle_enabled = 0,
-					.suspend_enabled = 0,
-					.latency = 500,
-					.residency = 6000,
-	},
-
-	[MSM_PM_MODE(0, MSM_PM_SLEEP_MODE_WAIT_FOR_INTERRUPT)] = {
-					.idle_supported = 1,
-					.suspend_supported = 1,
-					.idle_enabled = 1,
-					.suspend_enabled = 1,
-					.latency = 2,
-					.residency = 10,
-	},
-
-	/* picked latency & redisdency values from 7x30 */
-	[MSM_PM_MODE(1, MSM_PM_SLEEP_MODE_POWER_COLLAPSE_STANDALONE)] = {
-					.idle_supported = 1,
-					.suspend_supported = 1,
-					.idle_enabled = 0,
-					.suspend_enabled = 0,
-					.latency = 500,
-					.residency = 6000,
-	},
-
-	[MSM_PM_MODE(1, MSM_PM_SLEEP_MODE_WAIT_FOR_INTERRUPT)] = {
-					.idle_supported = 1,
-					.suspend_supported = 1,
-					.idle_enabled = 1,
-					.suspend_enabled = 1,
-					.latency = 2,
-					.residency = 10,
-	},
-
-};
-
-static struct msm_pm_boot_platform_data msm_pm_8625_boot_pdata __initdata = {
-	.mode = MSM_PM_BOOT_CONFIG_REMAP_BOOT_ADDR,
-	.v_addr = MSM_CFG_CTL_BASE,
-};
-
 static unsigned reserve_mdp_size = MSM_RESERVE_MDP_SIZE;
 static int __init reserve_mdp_size_setup(char *p)
 {
@@ -476,24 +409,6 @@ static struct platform_device msm_batt_device = {
 	.dev.platform_data  = &msm_psy_batt_data,
 };
 
-static char *msm_adc_surf_device_names[] = {
-	"XO_ADC",
-};
-
-static struct msm_adc_platform_data msm_adc_pdata = {
-	.dev_names = msm_adc_surf_device_names,
-	.num_adc = ARRAY_SIZE(msm_adc_surf_device_names),
-	.target_hw = MSM_8x25,
-};
-
-static struct platform_device msm_adc_device = {
-	.name   = "msm_adc",
-	.id = -1,
-	.dev = {
-		.platform_data = &msm_adc_pdata,
-	},
-};
-
 #if defined(CONFIG_SERIAL_MSM_HSL_CONSOLE) && defined(CONFIG_MSM_SHARED_GPIO_FOR_UART2DM)
 static struct msm_gpio uart2dm_gpios[] = {
 	{GPIO_CFG(19, 2, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
@@ -537,23 +452,9 @@ static struct platform_device *common_devices[] __initdata = {
 	&ram_console_device,
 #endif
 	&msm_batt_device,
-	&msm_adc_device,
 #ifdef CONFIG_ION_MSM
 	&ion_dev,
 #endif
-};
-
-static struct platform_device *msm8625_surf_devices[] __initdata = {
-	&msm8625_device_dmov,
-	&msm8625_device_uart1,
-	&msm8625_device_uart_dm1,
-	&msm8625_device_uart_dm2,
-	&msm8625_gsbi0_qup_i2c_device,
-	&msm8625_gsbi1_qup_i2c_device,
-	&msm8625_device_smd,
-	&msm8625_device_otg,
-	&msm8625_device_gadget_peripheral,
-	&msm8625_kgsl_3d0,
 };
 
 static unsigned reserve_kernel_ebi1_size = RESERVE_KERNEL_EBI1_SIZE;
@@ -577,18 +478,13 @@ static void fix_sizes(void)
 	reserve_mdp_size = MSM_RESERVE_MDP_SIZE;
 	reserve_adsp_size = MSM_RESERVE_ADSP_SIZE;
 
-	if (get_ddr_size() > SZ_512M)
-		reserve_adsp_size = CAMERA_ZSL_SIZE;
 #ifdef CONFIG_ION_MSM
 	msm_ion_audio_size = MSM_RESERVE_AUDIO_SIZE;
 	msm_ion_sf_size = reserve_mdp_size;
-#ifdef CONFIG_CMA
-	if (get_ddr_size() > SZ_256M)
-		reserve_adsp_size = CAMERA_ZSL_SIZE;
 	msm_ion_camera_size = reserve_adsp_size;
+#ifdef CONFIG_CMA
 	msm_ion_camera_size_carving = 0;
 #else
-	msm_ion_camera_size = reserve_adsp_size;
 	msm_ion_camera_size_carving = msm_ion_camera_size;
 #endif
 #endif
@@ -761,10 +657,10 @@ static void __init msm7x27a_init_ebi2(void)
 	if (!ebi2_cfg_ptr)
 		return;
 
-	ebi2_cfg = readl(ebi2_cfg_ptr);
+	ebi2_cfg = readl_relaxed(ebi2_cfg_ptr);
 		ebi2_cfg |= (1 << 4);
 
-	writel(ebi2_cfg, ebi2_cfg_ptr);
+	writel_relaxed(ebi2_cfg, ebi2_cfg_ptr);
 	iounmap(ebi2_cfg_ptr);
 
 	ebi2_cfg_ptr = ioremap_nocache(MSM_EBI2_XMEM_CS2_CFG1,
@@ -772,10 +668,10 @@ static void __init msm7x27a_init_ebi2(void)
 	if (!ebi2_cfg_ptr)
 		return;
 
-	ebi2_cfg = readl(ebi2_cfg_ptr);
+	ebi2_cfg = readl_relaxed(ebi2_cfg_ptr);
 		ebi2_cfg |= (1 << 31);
 
-	writel(ebi2_cfg, ebi2_cfg_ptr);
+	writel_relaxed(ebi2_cfg, ebi2_cfg_ptr);
 	iounmap(ebi2_cfg_ptr);
 }
 
@@ -799,10 +695,7 @@ static void msm_adsp_add_pdev(void)
 	}
 	rpc_adsp_pdev->prog = ADSP_RPC_PROG;
 
-	if (cpu_is_msm8625())
-		rpc_adsp_pdev->pdev = msm8625_device_adsp;
-	else
-		rpc_adsp_pdev->pdev = msm_adsp_device;
+	rpc_adsp_pdev->pdev = msm_adsp_device;
 	rc = msm_rpc_add_board_dev(rpc_adsp_pdev, 1);
 	if (rc < 0) {
 		pr_err("%s: return val: %d\n",	__func__, rc);
@@ -838,13 +731,8 @@ static void __init msm7x27a_add_footswitch_devices(void)
 
 static void __init msm7x27a_add_platform_devices(void)
 {
-	if (machine_is_msm8625_surf() || machine_is_msm8625_ffa()) {
-		platform_add_devices(msm8625_surf_devices,
-			ARRAY_SIZE(msm8625_surf_devices));
-	} else {
-		platform_add_devices(msm7627a_surf_ffa_devices,
+	platform_add_devices(msm7627a_surf_ffa_devices,
 			ARRAY_SIZE(msm7627a_surf_ffa_devices));
-	}
 
 	platform_add_devices(common_devices,
 			ARRAY_SIZE(common_devices));
@@ -854,44 +742,23 @@ static void __init msm7x27a_uartdm_config(void)
 {
 	msm7x27a_cfg_uart2dm_serial();
 	msm_uart_dm1_pdata.wakeup_irq = gpio_to_irq(UART1DM_RX_GPIO);
-	if (cpu_is_msm8625())
-		msm8625_device_uart_dm1.dev.platform_data =
-			&msm_uart_dm1_pdata;
-	else
-		msm_device_uart_dm1.dev.platform_data = &msm_uart_dm1_pdata;
+	msm_device_uart_dm1.dev.platform_data = &msm_uart_dm1_pdata;
 }
 
 static void __init msm7x27a_otg_gadget(void)
 {
-	if (cpu_is_msm8625()) {
-		msm_otg_pdata.swfi_latency =
-		msm8625_pm_data[MSM_PM_SLEEP_MODE_WAIT_FOR_INTERRUPT].latency;
-		msm8625_device_otg.dev.platform_data = &msm_otg_pdata;
-		msm8625_device_gadget_peripheral.dev.platform_data =
-			&msm_gadget_pdata;
-	} else {
-		msm_otg_pdata.swfi_latency =
-		msm7x27a_pm_data[
+	msm_otg_pdata.swfi_latency =
+	msm7x27a_pm_data[
 		MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].latency;
-		msm_device_otg.dev.platform_data = &msm_otg_pdata;
-		msm_device_gadget_peripheral.dev.platform_data =
-			&msm_gadget_pdata;
-	}
+	msm_device_otg.dev.platform_data = &msm_otg_pdata;
+	msm_device_gadget_peripheral.dev.platform_data = &msm_gadget_pdata;
 }
 
 static void __init msm7x27a_pm_init(void)
 {
-	if (machine_is_msm8625_surf() || machine_is_msm8625_ffa()) {
-		msm_pm_set_platform_data(msm8625_pm_data,
-				ARRAY_SIZE(msm8625_pm_data));
-		BUG_ON(msm_pm_boot_init(&msm_pm_8625_boot_pdata));
-		msm8x25_spm_device_init();
-		msm_pm_register_cpr_ops();
-	} else {
-		msm_pm_set_platform_data(msm7x27a_pm_data,
-				ARRAY_SIZE(msm7x27a_pm_data));
-		BUG_ON(msm_pm_boot_init(&msm_pm_boot_pdata));
-	}
+	msm_pm_set_platform_data(msm7x27a_pm_data,
+			ARRAY_SIZE(msm7x27a_pm_data));
+	BUG_ON(msm_pm_boot_init(&msm_pm_boot_pdata));
 
 	msm_pm_register_irqs();
 }
@@ -904,6 +771,7 @@ static struct platform_device miniabb_regulator_dev = {
 		.platform_data = &miniabb_regulator_data
 	}
 };
+
 static void __init init_miniabb_regulators(void)
 {
 	int rc = platform_device_register(&miniabb_regulator_dev);
@@ -947,7 +815,6 @@ static void __init msm7x2x_init(void)
 	msm7627a_camera_init();
 	msm7627a_add_io_devices();
 	msm7x25a_kgsl_3d0_init();
-	msm8x25_kgsl_3d0_init();
 	lge_add_gpio_i2c_devices();
 #ifdef CONFIG_LGE_POWER_ON_STATUS_PATCH
 	lge_board_pwr_on_status();
@@ -969,6 +836,20 @@ static void __init msm7x2x_init_early(void)
 #endif
 }
 
+#ifdef CONFIG_MACH_MSM7X25A_V3
+MACHINE_START(MSM7X25A_V3, "MSM7225A v3")
+	.atag_offset	= 0x100,
+	.map_io		= msm_common_io_init,
+	.reserve	= msm7x27a_reserve,
+	.init_irq	= msm_init_irq,
+	.init_machine	= msm7x2x_init,
+	.timer		= &msm_timer,
+	.init_early     = msm7x2x_init_early,
+	.handle_irq	= vic_handle_irq,
+MACHINE_END
+#endif
+
+#ifdef CONFIG_MACH_MSM7X25A_V1
 MACHINE_START(MSM7X25A_V1, "MSM7225A v1")
 	.atag_offset	= 0x100,
 	.map_io		= msm_common_io_init,
@@ -979,3 +860,4 @@ MACHINE_START(MSM7X25A_V1, "MSM7225A v1")
 	.init_early     = msm7x2x_init_early,
 	.handle_irq	= vic_handle_irq,
 MACHINE_END
+#endif
