@@ -40,11 +40,10 @@ script:
 # - export ndevicechoice="#"
 
 # ${nbuild}
-# "5" is to disable/enable output when building kernel
 # "6" is "Build Kernel"
 # "7" is "Zip the kernel and Modules"
 # "q" is to Exit of Script
-- nbuild="567q"
+- nbuild="67q"
 
 # Main variables
 # Call of 'build.sh'
