@@ -1,16 +1,8 @@
-sudo: required
 language: c
 script:
 #
 # Travis CI Script by Caio Oliveira aka Caio99BR <caiooliveirafarias0@gmail.com>
 #
-
-#
-# Dependencies
-#
-# The build.sh need LZ4 and ubuntu 12.xx not support 'LZ4' officialy
-- sudo add-apt-repository ppa:nathan-renniewaldock/ppa -y
-- sudo apt-get update
 
 #
 # Toolchain Choice
