@@ -1,4 +1,5 @@
 language: c
+cache: ccache
 script:
 #
 # Travis CI Script by Caio Oliveira aka Caio99BR <caiooliveirafarias0@gmail.com>
