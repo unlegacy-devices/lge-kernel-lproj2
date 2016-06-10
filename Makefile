@@ -590,10 +590,10 @@ ifdef CONFIG_CC_OPTIMIZE_DEFAULT
 KBUILD_CFLAGS += -O2 $(call cc-disable-warning,maybe-uninitialized,)
 endif
 ifdef CONFIG_CC_OPTIMIZE_MORE
-KBUILD_CFLAGS += -O3
+KBUILD_CFLAGS += -O3 -fno-inline-functions
 endif
 ifdef CONFIG_CC_OPTIMIZE_FAST
-KBUILD_CFLAGS += -Ofast
+KBUILD_CFLAGS += -Ofast -fno-inline-functions
 endif
 
 include $(srctree)/arch/$(SRCARCH)/Makefile
