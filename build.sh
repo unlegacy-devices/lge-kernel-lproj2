@@ -1,11 +1,12 @@
 #!/bin/bash
-# Original Live by cybojenix <anthonydking@gmail.com>
-# New Live/Menu by Caio Oliveira aka Caio99BR <caiooliveirafarias0@gmail.com>
-# Colors by Aidas Lukošius aka aidasaidas75 <aidaslukosius75@yahoo.com>
-# Toolchains by Suhail aka skyinfo <sh.skyinfo@gmail.com>
+# Original Live Script by cybojenix <anthonydking@gmail.com>
+# Menu by Caio99BR <caiooliveirafarias0@gmail.com>
+# Colors by aidasaidas75 <aidaslukosius75@yahoo.com>
+# Toolchains by skyinfo <sh.skyinfo@gmail.com>
 # Rashed for the base of zip making
 # And the internet for filling in else where
 
+# Note!
 # You need to download https://github.com/TeamVee/android_prebuilt_toolchains
 # Clone in the same folder as the kernel to choose a toolchain and not specify a location
 
