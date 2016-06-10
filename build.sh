@@ -138,6 +138,8 @@ else
 	if [ $(which ccache) ]
 	then
 		kernel_build_ccache="ccache "
+	else
+		echo "  | CCache not enabled!"
 	fi
 
 	echo "  | ${color_blue}Building ${custom_kernel} with ${build_cpu_usage} jobs at once${ccache_build}${color_stock}"
