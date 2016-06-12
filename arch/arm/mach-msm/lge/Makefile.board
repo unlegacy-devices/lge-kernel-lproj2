@@ -2,6 +2,9 @@
 # Makefile for the LGE board
 #
 
+# LGE Common Model
+obj-$(CONFIG_MACH_LGE) += common/
+
 # LGE M4 Model 
 obj-$(CONFIG_MACH_MSM7X25A_M4) += m4/
 

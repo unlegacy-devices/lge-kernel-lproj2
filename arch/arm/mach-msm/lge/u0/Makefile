@@ -7,6 +7,3 @@ obj-$(CONFIG_MACH_MSM7X27A_U0) += board-msm7627a-display_u0.o
 obj-$(CONFIG_MACH_MSM7X27A_U0) += board-msm7627a-io_u0.o
 obj-$(CONFIG_MACH_MSM7X27A_U0) += board-msm7627a-wlan_u0.o
 obj-$(CONFIG_MACH_MSM7X27A_U0) += board-msm7x27a-sound_u0.o
-
-obj-$(CONFIG_MACH_MSM7X27A_U0) += ../common/board-msm7627a-bt_lge.o
-obj-$(CONFIG_MACH_MSM7X27A_U0) += ../common/board-msm7627a-storage_lge.o
