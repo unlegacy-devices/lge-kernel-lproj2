@@ -1,6 +1,5 @@
-/* LGE_CHANGES LGE_RAPI_COMMANDS  */
-/* Created by khlee@lge.com  
- * lge/factory/LG_rapi_client.c
+/* 
+ * arch/arm/mach-msm/lge/factory/LG_rapi_client.c
  *
  * Copyright (C) 2009 LGE, Inc.
  *
@@ -18,23 +17,14 @@
 #include <linux/kernel.h>
 #include <linux/err.h>
 #include <mach/oem_rapi_client.h>
-#include <lg_diag_testmode.h>
-#include <lg_diag_unifiedmsgtool.h>
+#include <mach/lge/lg_diag_testmode.h>
+#include <mach/lge/lg_diag_unifiedmsgtool.h>
 #include <linux/slab.h>
-#include <lge_diag_eri.h>
-#include <LG_rapi_client.h>
-
-#ifdef CONFIG_LGE_DLOAD_SRD
-#include <userDataBackUpTypeDef.h>
-#include <userDataBackUpDiag.h>
-
-#endif 
-#include <lge_diag_eri.h>
+#include <mach/lge/lge_diag_eri.h>
+#include <mach/lge/LG_rapi_client.h>
 
 #include <linux/kmod.h>
 #include <linux/workqueue.h>
-
-#undef LOCAL_RAPI_DBG
 
 extern uint32_t get_oem_rapi_open_cnt(void);
 
@@ -253,47 +243,31 @@ do_send_to_arm9(void*	pReq, void* pRsp, int flag)
 void wait_for_main_try_finished(void)
 {
 	int local_cnt = 0;
-#ifdef LOCAL_RAPI_DBG
-	printk(KERN_INFO "%s start\n", __func__);
-#endif
-	do
-	{
-		if(GET_COMPLETE_MAIN()==1)
+	do {
+		if (GET_COMPLETE_MAIN()==1)
 			break;
 		
 		msleep(100);
-		if(++local_cnt > 50)
-		{
+		if (++local_cnt > 50) {
 			printk(KERN_ERR "%s wait too long : %d sec\n", __func__, (local_cnt*100/1000));
 			break;
 		}
 	}while(1);
-#ifdef LOCAL_RAPI_DBG
-	printk(KERN_INFO "%s end\n", __func__);
-#endif
 }
 
 void wait_for_sub_try_finished(void)
 {
 	int local_cnt = 0;
-#ifdef LOCAL_RAPI_DBG
-	printk(KERN_INFO "%s start\n", __func__);
-#endif
-	do
-	{
-		if(GET_COMPLETE_SUB()==1)
+	do {
+		if (GET_COMPLETE_SUB()==1)
 			break;
 		
 		msleep(100);
-		if(++local_cnt > 50)
-		{
+		if (++local_cnt > 50) {
 			printk(KERN_ERR "%s wait too long : %d sec\n", __func__, (local_cnt*100/1000));
 			break;
 		}
 	}while(1);
-#ifdef LOCAL_RAPI_DBG
-	printk(KERN_INFO "%s end\n", __func__);
-#endif
 }
 
 static void
@@ -311,8 +285,7 @@ void send_to_arm9(void*	pReq, void* pRsp)
 {
 	msleep(100);
 	
-	if(send_to_arm9_wq == NULL)
-	{
+	if (send_to_arm9_wq == NULL) {
 		printk(KERN_INFO "%s initialize work queue\n", __func__);
 		send_to_arm9_wq = create_singlethread_workqueue("send_to_arm9_wq");
 		INIT_WORK(&send_to_arm9_data.work, send_to_arm9_wq_func);
@@ -322,20 +295,14 @@ void send_to_arm9(void*	pReq, void* pRsp)
 		
 	}
 
-       if(GET_MUTEX_FLAG() == 0)
-       {
-#ifdef LOCAL_RAPI_DBG
-       	printk(KERN_INFO "%s, flag : %d, do normal work\n", __func__, GET_MUTEX_FLAG());
-#endif
+	if (GET_MUTEX_FLAG() == 0) {
        	INCREASE_MUTEX_FLAG();
 		SET_COMPLETE_MAIN(0);
 		wait_for_sub_try_finished();
         	do_send_to_arm9(pReq, pRsp, NORMAL_WORK_FLAG);
 		SET_COMPLETE_MAIN(1);
 		DECREASE_MUTEX_FLAG();
-       }
-	else
-	{
+	} else {
 		printk(KERN_INFO "%s, flag : %d, activate work queue\n", __func__, GET_MUTEX_FLAG());
 		INCREASE_MUTEX_FLAG();
 		SET_COMPLETE_SUB(0);
@@ -378,117 +345,7 @@ void set_operation_mode(boolean info)
 		kfree(ret.output);
 	if (ret.out_len)
 		kfree(ret.out_len);
-
 }
-
-
-
-#ifdef CONFIG_MACH_MSM7X27_THUNDERC
-void battery_info_get(struct batt_info* resp_buf)
-{
-
-	struct oem_rapi_client_streaming_func_arg arg;
-	struct oem_rapi_client_streaming_func_ret ret;
-	uint32_t out_len;
-	int ret_val;
-	struct batt_info rsp_buf;
-
-	Open_check();
-
-	arg.event = LG_FW_A2M_BATT_INFO_GET;
-	arg.cb_func = NULL;
-	arg.handle = (void*) 0;
-	arg.in_len = 0;
-	arg.input = NULL;
-	arg.out_len_valid = 1;
-	arg.output_valid = 1;
-	arg.output_size = sizeof(rsp_buf);
-
-	ret.output = (char*)&rsp_buf;
-	ret.out_len = &out_len;
-
-	ret_val = oem_rapi_client_streaming_function(client, &arg, &ret);
-	if(ret_val == 0) {
-		resp_buf->valid_batt_id = GET_U_INT32(&rsp_buf.valid_batt_id);
-		resp_buf->batt_therm = GET_U_INT32(&rsp_buf.batt_therm);
-		resp_buf->batt_temp = GET_INT32(&rsp_buf.batt_temp);
-	} else {
-		resp_buf->valid_batt_id = 1; /* authenticated battery id */
-		resp_buf->batt_therm = 100;  /* 100 battery therm adc */
-		resp_buf->batt_temp = 30;    /* 30 degree celcius */
-	}
-	return;
-}
-
-
-void pseudo_batt_info_set(struct pseudo_batt_info_type* info)
-{
-	struct oem_rapi_client_streaming_func_arg arg;
-	struct oem_rapi_client_streaming_func_ret ret;
-	int rc= -1;
-
-	Open_check();
-
-	arg.event = LG_FW_A2M_PSEUDO_BATT_INFO_SET;
-	arg.cb_func = NULL;
-	arg.handle = (void*) 0;
-	arg.in_len = sizeof(struct pseudo_batt_info_type);
-	arg.input = (char*)info;
-	arg.out_len_valid = 0;
-	arg.output_valid = 0;
-	arg.output_size = 0;
-
-	ret.output = (char*)NULL;
-	ret.out_len = 0;
-
-	rc = oem_rapi_client_streaming_function(client, &arg, &ret);
-	if (rc < 0)
-	{
-		pr_err("%s, rapi reqeust failed\r\n", __func__);
-	}
-
-	if (ret.output)
-		kfree(ret.output);
-	if (ret.out_len)
-		kfree(ret.out_len);
-	
-	return;
-}
-
-void block_charging_set(int bypass)
-{
-	struct oem_rapi_client_streaming_func_arg arg;
-	struct oem_rapi_client_streaming_func_ret ret;
-	int rc= -1;
-
-	Open_check();
-	arg.event = LG_FW_A2M_BLOCK_CHARGING_SET;
-	arg.cb_func = NULL;
-	arg.handle = (void*) 0;
-	arg.in_len = sizeof(int);
-	arg.input = (char*) &bypass;
-	arg.out_len_valid = 0;
-	arg.output_valid = 0;
-	arg.output_size = 0;
-
-	ret.output = (char*)NULL;
-	ret.out_len = 0;
-
-	rc = oem_rapi_client_streaming_function(client,&arg,&ret);
-	if (rc < 0)
-	{
-		pr_err("%s, rapi reqeust failed\r\n", __func__);
-	}
-
-	if (ret.output)
-		kfree(ret.output);
-	if (ret.out_len)
-		kfree(ret.out_len);
-	
-	return;
-}
-
-#endif
 
 void msm_get_MEID_type(char* sMeid)
 {
@@ -574,69 +431,6 @@ int eri_send_to_arm9(void* pReq, void* pRsp, unsigned int output_length)
 	
 	
 }
-
-#if !defined(CONFIG_MACH_MSM7X27A_U0)
-#define ERI_FILE_PATH 	"/data/eri/eri.bin"
-char eri_data[1400];
-extern int eri_factory_direct_write(const char *path , char* eri_data, int size );
-
-
-void remote_eri_rpc(void)
-{
-	struct oem_rapi_client_streaming_func_arg arg;
-	struct oem_rapi_client_streaming_func_ret ret;
-	int rc= -1;
-	int errCount=0;
-	int file_size=0;
-	char fs_err_buf[20];
-
-	memset(fs_err_buf, 0, sizeof(fs_err_buf));
-	Open_check();
-
-	do
-	{
-		arg.event = LGE_REQUEST_ERI_RPC;
-		arg.cb_func = NULL;
-		arg.handle = (void*) 0;
-		arg.in_len =  sizeof(fs_err_buf);
-		arg.input =fs_err_buf;
-		arg.out_len_valid = 1;
-		arg.output_valid = 1;
-		arg.output_size = sizeof(eri_data);
-
-		ret.output = NULL;
-		ret.out_len = NULL;
-
-		rc = oem_rapi_client_streaming_function(client,&arg,&ret);
-
-		memset(fs_err_buf, 0, sizeof(fs_err_buf));
-		if (rc < 0)
-			pr_err("%s error \r\n", __func__);
-		else
-		{
-			pr_info("%s succeeded, file size : %s\r\n",__func__, fs_err_to_string(GET_INT32(ret.output), fs_err_buf));
-			pr_info("%s succeeded\r\n",__func__);
-		}
-	}while (rc < 0 && errCount++ < 3);
-
-	if(ret.output == NULL || ret.out_len == NULL){ 
-		printk(KERN_ERR "%s, output is NULL\n",__func__);
-		return;
-	}
-	memcpy((void *)eri_data, ret.output, *ret.out_len);
-	file_size=(int)*ret.out_len;
-
-	eri_factory_direct_write(ERI_FILE_PATH, (char *)&eri_data,file_size );
-
-	if (ret.output)
-		kfree(ret.output);
-	if (ret.out_len)
-		kfree(ret.out_len);
-	
-	return;
-}
-
-#endif
 
 unsigned char pbuf_emmc[192];
 unsigned char pbuf_emmc2[192];
@@ -735,29 +529,16 @@ int remote_rpc_request(uint32_t command)
 
 	rc = oem_rapi_client_streaming_function(client,&arg,&ret);
 	if (rc < 0)
-	{
 		pr_err("%s, rapi reqeust failed\r\n", __func__);
-	}
-	else
-	{
+	else {
 		rc = lg_rapi_check_validity_and_copy_result((void*)&ret, (char*)output, arg.output_size);
 		if(rc == LG_RAPI_INVALID_RESPONSE)
 			memset(output,0,sizeof(output));
-		
-		switch(command)
-		{
-#ifdef CONFIG_LGE_SYNC_CMD
-			case LGE_SYNC_REQUEST:
-				pr_info("%s, sync retry count : %d\r\n", __func__, GET_INT32(output));
-				if(rc != LG_RAPI_SUCCESS)
-					rc = -1;
-				break;
-#endif			
-			default :
+		switch(command) {
+			default:
 				break;
 		}
 	}
-	
 	if (ret.output)
 		kfree(ret.output);
 	if (ret.out_len)
@@ -766,178 +547,6 @@ int remote_rpc_request(uint32_t command)
 	return rc;
 }
 #endif
-
-#ifdef CONFIG_LGE_DLOAD_SRD 
-void remote_rpc_srd_cmmand(void*pReq, void* pRsp )  //kabjoo.choi
-{
-	struct oem_rapi_client_streaming_func_arg arg;
-	struct oem_rapi_client_streaming_func_ret ret;
-	//char output[4];
-	int rc= -1;
-	//int request_cmd = command;
-
-	Open_check();
-	arg.event = LG_FW_REQUEST_SRD_RPC;
-	arg.cb_func = NULL;
-	arg.handle = (void*) 0;
-	arg.in_len = sizeof(udbp_req_type);
-	arg.input = (char*)pReq;
-	arg.out_len_valid = 1;
-	arg.output_valid = 1;
-	arg.output_size = sizeof(udbp_rsp_type);
-
-	ret.output = (char*)NULL;
-	ret.out_len = 0;
-
-	rc = oem_rapi_client_streaming_function(client,&arg,&ret);
-	if (rc < 0)
-	{
-		pr_err("%s, rapi reqeust failed\r\n", __func__);
-		((udbp_rsp_type*)pRsp)->header.err_code = UDBU_ERROR_CANNOT_COMPLETE;
-		
-	}
-
-	
-	else
-	{
-		rc = lg_rapi_check_validity_and_copy_result((void*)&ret, (char*)pRsp, arg.output_size);
-		if(rc == LG_RAPI_INVALID_RESPONSE)
-			((udbp_rsp_type*)pRsp)->header.err_code = UDBU_ERROR_CANNOT_COMPLETE;
-	}
-
-
-	if (ret.output)
-		kfree(ret.output);
-	if (ret.out_len)
-		kfree(ret.out_len);
-	
-	return ;
-}
-
-void remote_rpc_with_mdm(uint32 in_len, byte *input, uint32 *out_len, byte *output)
-{
-	struct oem_rapi_client_streaming_func_arg arg;
-	struct oem_rapi_client_streaming_func_ret ret;
-	int rc= -1;
-
-	printk(KERN_ERR "%s, start OEM_RAPI\n",__func__);
-
-	Open_check();
-
-	arg.event = LG_FW_OEM_RAPI_CLIENT_SRD_COMMAND;
-	arg.cb_func = NULL;
-	arg.handle = (void*) 0;
-	arg.in_len =  in_len;
-	arg.input = input;
-	arg.out_len_valid = 1;
-	arg.output_valid = 1;
-	arg.output_size = sizeof(pbuf_emmc);
-
-	ret.output = NULL;
-	ret.out_len = NULL;
-
-	rc = oem_rapi_client_streaming_function(client,&arg,&ret);
-	
-	if(ret.output == NULL || ret.out_len == NULL)
-	{ 
-		printk(KERN_ERR "%s, output is NULL\n",__func__);
-		return;
-	}
-	
-	printk(KERN_ERR "%s, output lenght =%dis\n",__func__,*ret.out_len);
-	*out_len = *ret.out_len;
-	memcpy(output, ret.output, *ret.out_len);
-
-	if (ret.output)
-		kfree(ret.output);
-	if (ret.out_len)
-		kfree(ret.out_len);
-	
-	return;
-}
-
-void remote_rpc_with_mdm_nv_write(uint32 in_len, byte *input, uint32 *out_len, byte *output)
-{
-	struct oem_rapi_client_streaming_func_arg arg;
-	struct oem_rapi_client_streaming_func_ret ret;
-	int rc= -1;
-
-	printk(KERN_ERR "%s, start OEM_RAPI\n",__func__);
-
-	Open_check();
-
-	arg.event = LG_FW_OEM_RAPI_CLIENT_SRD_COMMAND_WRITE;
-	arg.cb_func = NULL;
-	arg.handle = (void*) 0;
-	arg.in_len =  in_len;
-	arg.input = input;
-	arg.out_len_valid = 1;
-	arg.output_valid = 1;
-	arg.output_size = sizeof(pbuf_emmc);
-
-	ret.output = NULL;
-	ret.out_len = NULL;
-
-	rc = oem_rapi_client_streaming_function(client,&arg,&ret);
-	
-	if(ret.output == NULL || ret.out_len == NULL)
-	{ 
-		printk(KERN_ERR "%s, output is NULL\n",__func__);
-		return;
-	}
-	
-	printk(KERN_ERR "%s, output lenght =%dis\n",__func__,*ret.out_len);	
-	memcpy(output, ret.output, *ret.out_len);
-
-	if (ret.output)
-		kfree(ret.output);
-	if (ret.out_len)
-		kfree(ret.out_len);	
-	return;
-}
-
-void remote_rpc_with_mdm_nv_sync(uint32 in_len, byte *input, uint32 *out_len, byte *output)
-{
-	struct oem_rapi_client_streaming_func_arg arg;
-	struct oem_rapi_client_streaming_func_ret ret;
-	int rc= -1;
-
-	printk(KERN_ERR "%s, start OEM_RAPI\n",__func__);
-
-	Open_check();
-
-	arg.event = LG_FW_OEM_RAPI_CLIENT_SRD_COMMAND_SYNC;
-	arg.cb_func = NULL;
-	arg.handle = (void*) 0;
-	arg.in_len =  in_len;
-	arg.input = input;
-	arg.out_len_valid = 1;
-	arg.output_valid = 1;
-	arg.output_size = sizeof(pbuf_emmc);
-
-	ret.output = NULL;
-	ret.out_len = NULL;
-
-	rc = oem_rapi_client_streaming_function(client,&arg,&ret);
-	
-	if(ret.output == NULL || ret.out_len == NULL)
-	{ 
-		printk(KERN_ERR "%s, output is NULL\n",__func__);
-		return;
-	}
-	
-	printk(KERN_ERR "%s, output lenght =%dis\n",__func__,*ret.out_len);	
-	memcpy(output, ret.output, *ret.out_len);
-
-	if (ret.output)
-		kfree(ret.output);
-	if (ret.out_len)
-		kfree(ret.out_len);
-	
-	return;
-}
-
-#endif 
 
 static int remote_large_data_ntcode_read(unsigned int pkt_no, void* data, int* recv_len)
 {

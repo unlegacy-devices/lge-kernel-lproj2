@@ -2532,9 +2532,3 @@ config MSM_USE_USER_ACCESSIBLE_TIMERS
 	  memory page containing the cycle counter.
 
 endif
-
-config MINIABB_REGULATOR
-	tristate "MINIABB Voltage Regulator"
-	help
-	  Enable regulator framework support for regulators managed by MINIABB
-	  on the modem, and controlled through proccomm calls.

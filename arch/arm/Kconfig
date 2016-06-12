@@ -2484,6 +2484,3 @@ source "security/Kconfig"
 source "crypto/Kconfig"
 
 source "lib/Kconfig"
-#LGE Diag Testmode porting [START]
-source "lge/Kconfig"
-#LGE Diag Testmode porting [END]

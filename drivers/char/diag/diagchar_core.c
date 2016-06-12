@@ -37,12 +37,6 @@
 #include "diagfwd_smux.h"
 #endif
 #include <linux/timer.h>
-//2012-09-18 khyun.kim@lge.com LGE Diag interface [START]
-#if defined (CONFIG_LGE_DIAGTEST)
-#include <linux/platform_device.h>
-#include <../../../lge/include/lg_diagcmd.h>
-#endif
-//2012-09-18 khyun.kim@lge.com LGE Diag interface [END]
 
 MODULE_DESCRIPTION("Diag Char Driver");
 MODULE_LICENSE("GPL v2");
@@ -66,23 +60,6 @@ static unsigned int itemsize_write_struct = 20; /*Size of item in the mempool */
 static unsigned int poolsize_write_struct = 8; /* Num of items in the mempool */
 /* This is the max number of user-space clients supported at initialization*/
 
-//2012-09-18 khyun.kim@lge.com LGE Diag interface [START]
-#if defined (CONFIG_LGE_DIAGTEST)
-/* This is the maximum number of user-space clients supported */
-static unsigned int max_clients = 15;
-static unsigned int threshold_client_limit = 30;
-/* Timer variables */
-struct timer_list drain_timer;
-int timer_in_progress;
-
-extern void lgfw_diag_kernel_service_init(struct diagchar_dev *driver_ptr);
-extern int lg_diag_cmd_dev_register(struct lg_diag_cmd_dev *sdev);
-extern 	void lg_diag_cmd_dev_unregister(struct lg_diag_cmd_dev *sdev);
-
-/* This is the maximum number of pkt registrations supported at initialization*/
-unsigned int diag_max_reg = 600;
-unsigned int diag_threshold_reg = 750;
-#else
 static unsigned int max_clients = 15;
 static unsigned int threshold_client_limit = 30;
 /* This is the maximum number of pkt registrations supported at initialization*/
@@ -92,8 +69,6 @@ unsigned int diag_threshold_reg = 750;
 /* Timer variables */
 static struct timer_list drain_timer;
 static int timer_in_progress;
-#endif 
-//2012-09-18 khyun.kim@lge.com LGE Diag interface [END]
 void *buf_hdlc;
 module_param(itemsize, uint, 0);
 module_param(poolsize, uint, 0);
@@ -1229,33 +1204,6 @@ static int diagchar_cleanup(void)
 	return 0;
 }
 
-//2012-09-18 khyun.kim@lge.com LGE Diag interface [START]
-#if defined (CONFIG_LGE_DIAGTEST)
-extern int lg_diag_create_file(struct platform_device *pdev);
-extern int lg_diag_remove_file(struct platform_device *pdev);
-
-static int lg_diag_cmd_probe(struct platform_device *pdev)
-{
-	return lg_diag_create_file(pdev);
-}
-
-static int lg_diag_cmd_remove(struct platform_device *pdev)
-{
-	lg_diag_remove_file(pdev);
-	return 0;
-}
-
-static struct platform_driver lg_diag_cmd_driver = {
-	.probe		= lg_diag_cmd_probe,
-	.remove 	= lg_diag_cmd_remove,
-	.driver 	= {
-		.name = "lg_diag_cmd",
-		.owner	= THIS_MODULE,
-	},
-};
-#endif
-//2012-09-18 khyun.kim@lge.com LGE Diag interface [END]
-
 #ifdef CONFIG_DIAG_SDIO_PIPE
 void diag_sdio_fn(int type)
 {
@@ -1351,12 +1299,6 @@ static int __init diagchar_init(void)
 		goto fail;
 	}
 
-//2012-09-18 khyun.kim@lge.com LGE Diag interface [START]
-#if defined (CONFIG_LGE_DIAGTEST)
-	platform_driver_register(&lg_diag_cmd_driver);
-	lgfw_diag_kernel_service_init(driver);
-#endif
-//2012-09-18 khyun.kim@lge.com LGE Diag interface [END]
 	pr_info("diagchar initialized now");
 	return 0;
 

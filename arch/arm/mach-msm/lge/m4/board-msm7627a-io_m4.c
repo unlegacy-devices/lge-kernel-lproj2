@@ -171,18 +171,6 @@ static struct platform_device *m4_input_devices[] __initdata = {
 	&msm_device_pmic_leds,
 };
 
-#ifdef CONFIG_LGE_DIAGTEST
-static struct platform_device lg_diag_input_device = {
-	.name = "ats_input",
-	.id = -1,
-	.dev = { .platform_data = 0, },
-};
-
-static struct platform_device *m4_ats_input_devices[] __initdata = {
-       &lg_diag_input_device,
-};
-#endif
-
 /* LGE_CHANGE_S [seven.kim@lge.com] 20110922 New Bosch compass+accel Sensor Porting*/ 
 static struct gpio_i2c_pin accel_i2c_pin[] = {
 	[0] = {
@@ -517,11 +505,6 @@ void __init msm7627a_add_io_devices(void)
 #if defined(CONFIG_TOUCHSCREEN_MELFAS_TS)
 	lge_add_gpio_i2c_device(m4_init_i2c_touch);
 #endif
-
-#ifdef CONFIG_LGE_DIAGTEST
-	platform_add_devices(m4_ats_input_devices, ARRAY_SIZE(m4_ats_input_devices));
-#endif
-
 /*LGE_CHANGE_E : seven.kim@lge.com for v3 mms128 touch*/
 
 #if defined (CONFIG_SENSORS_BMM050) ||defined(CONFIG_SENSORS_BMA250)

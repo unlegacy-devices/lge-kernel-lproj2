@@ -50,10 +50,6 @@ static void detection_work(struct work_struct *work);
 static DECLARE_WORK(g_detection_work, detection_work);
 static int ip_dev_reg;
 
-#if 0 //def CONFIG_LGE_DIAGTEST
-extern uint8_t if_condition_is_on_key_buffering;
-extern uint8_t lgf_factor_key_test_rsp(char);
-#endif
 /*Unplug State*/
 #define BIT_NO_DEVICE				0
 /*4Pole Headset - headset with mic*/
@@ -119,10 +115,6 @@ static void button_pressed(void)
 	atomic_set(&hi->btn_state, 1);
 	input_report_key(hi->input, KEY_MEDIA, 1);
 	input_sync(hi->input);
-#if 0 //def CONFIG_LGE_DIAGTEST
-	if(if_condition_is_on_key_buffering == 1)
-		lgf_factor_key_test_rsp((u8)KEY_MEDIA);
-#endif
 }
 
 static void button_released(void)

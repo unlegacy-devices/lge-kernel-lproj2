@@ -31,23 +31,11 @@
 //LGE_CHANGE_S FTM boot mode
 #include <mach/lge/board_v1.h>
 #include <mach/proc_comm.h>
-#include <lg_diag_testmode.h>
+#include <mach/lge/lg_diag_testmode.h>
 #if (defined (CONFIG_MACH_MSM7X25A_V3) && !defined (CONFIG_MACH_MSM7X25A_M4)) || defined (CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
-#include <mach/proc_comm.h>
 #include <mach/lge/lge_proc_comm.h>
-#include <lg_diag_testmode.h>
 #endif
-//LGE_CHANGE_E FTM boot mode
-
-/* BEGIN: 0013860 jihoon.lee@lge.com 20110111 */
-/* ADD 0013860: [FACTORY RESET] ERI file save */
-#ifdef CONFIG_LGE_ERI_DOWNLOAD
-#include <linux/kmod.h>
-#include <linux/workqueue.h>
-#endif
-/* END: 0013860 jihoon.lee@lge.com 20110111 */
-
-#include "lg_backup_items.h"
+#include <mach/lge/lg_backup_items.h>
 
 /* Some useful define used to access the MBR/EBR table */
 //#define BLOCK_SIZE                0x200
@@ -179,47 +167,11 @@ typedef struct {
 #define SILENT_RESET_SIZE 2
 static unsigned char silent_reset_buf[SILENT_RESET_SIZE]={0,};
 #endif /* CONFIG_LGE_SILENCE_RESET */
-// LGE_CHANGE_S, sohyun.nam@lge.com 
 
-/* BEGIN: 0013860 jihoon.lee@lge.com 20110111 */
-/* ADD 0013860: [FACTORY RESET] ERI file save */
-/* make work queue so that rpc for eri does not affect to the factory reset */
-#ifdef CONFIG_LGE_ERI_DOWNLOAD
-extern void remote_eri_rpc(void);
-
-static struct workqueue_struct *eri_dload_wq;
-struct __eri_data {
-    unsigned long flag;
-    struct work_struct work;
-};
-static struct __eri_data eri_dload_data;
-
-static void eri_dload_func(struct work_struct *work);
-#endif
-/* END: 0013860 jihoon.lee@lge.com 20110111 */
-
-
-#ifdef CONFIG_LGE_DID_BACKUP   
-//DID BACKUP
-static struct workqueue_struct *did_dload_wq;
-struct __did_data {
-    unsigned long flag;
-    struct work_struct work;
-};
-static struct __did_data did_dload_data;
-
-static void did_dload_func(struct work_struct *work);
-#endif
-
-#if 1//!defined(CONFIG_MACH_MSM7X27A_U0)
-/*LGE_CHANGE_S 2012-11-28 khyun.kim@lge.com sw_version's value set to property via rapi.*/
-//LG_SW_VERSION
 extern char* remote_get_sw_version(void);
 void swv_get_func(struct work_struct *work);
 static struct workqueue_struct *swv_dload_wq;
 struct work_struct swv_work;
-/*LGE_CHANGE_E 2012-11-28 khyun.kim@lge.com sw_version's value set to property via rapi.*/
-#endif
 
 #ifdef LG_MISC_DATA
 int lge_emmc_misc_write_crc(unsigned int blockNo, unsigned int magickey, const char* buffer, unsigned int size, int pos);
@@ -229,21 +181,15 @@ int lge_erase_block(int secnum, size_t size);
 int lge_write_block(unsigned int secnum, unsigned char *buf, size_t size);
 int lge_read_block(unsigned int secnum, unsigned char *buf, size_t size);
 
-
 static int dummy_arg;
 
 int boot_info = 0;
-//2011.08.09 younghoon.jeung temporary flag for MDM error dump
-//extern char mdm_error_fatal_for_did;
 
-//[START] LGE_BOOTCOMPLETE_INFO
-//2011.07.21 jihoon.lee change module_param to module_param_call to see the log
 static int boot_info_write(const char *val, struct kernel_param *kp)
 {
-	unsigned long flag=0;
+	unsigned long flag = 0;
 
-	if(val == NULL)
-	{
+	if (val == NULL) {
 		printk(KERN_ERR "%s, NULL buf\n", __func__);
 		return -1;
 	}
@@ -252,11 +198,6 @@ static int boot_info_write(const char *val, struct kernel_param *kp)
 	boot_info = (int)flag;
 	printk(KERN_INFO "%s, flag : %d\n", __func__, boot_info);
 
-
-    //2011.08.09 younghoon.jeung temporary flag for MDM error dump
-    //if(!mdm_error_fatal_for_did)
-	  //  queue_work(did_dload_wq, &did_dload_data.work); //DID BACKUP support to DLOD Mode
-//
 	return 0;
 }
 module_param_call(boot_info, boot_info_write, param_get_int, &boot_info, S_IWUSR | S_IRUGO);
@@ -279,25 +220,6 @@ static int get_is_factory(char *buffer, struct kernel_param *kp)
 	return sprintf(buffer, "%s", is_factory ? "yes" : "no");
 }
 module_param_call(is_factory, NULL, get_is_factory, &is_factory, 0444);
-// LGE_CHANGE_E, myunghwan.kim@lge.com
-#if 0
-// LGE_CHANGE_S, myunghwan.kim@lge.com, miniOS controller
-static int is_miniOS = -1;
-unsigned lge_get_is_miniOS(void);
-static int update_is_miniOS(const char *val, struct kernel_param *kp)
-{
-	if (is_miniOS == -1)
-		is_miniOS = lge_get_is_miniOS();
-	return 1;
-}
-static int get_is_miniOS(char *buffer, struct kernel_param *kp)
-{
-
-	return sprintf(buffer, "%s", (is_miniOS==1) ? "yes" : "no");
-}
-module_param_call(is_miniOS, update_is_miniOS, get_is_miniOS, &is_miniOS, 0644);
-// LGE_CHANGE_E, myunghwan.kim@lge.com
-#endif
 
 int db_integrity_ready = 0;
 module_param(db_integrity_ready, int, S_IWUSR | S_IRUGO);
@@ -782,11 +704,7 @@ static int write_SilentReset_flag(const char *val, struct kernel_param *kp)
 	memcpy(silent_reset_buf, val, SILENT_RESET_SIZE);
 	silent_reset_buf[SILENT_RESET_SIZE-1] = '\0';
 	printk("%s val[%s] -> silent_reset_buf[%s] \n", __func__, val, silent_reset_buf);
-#if 0//def LG_MISC_DATA
-	size = lge_emmc_misc_write_crc(LG_MISC_IO_SILENT_RESET,LG_MISC_DATA_MAGIC, silent_reset_buf, SILENT_RESET_SIZE);
-#else
 	size = lge_emmc_misc_write(36, silent_reset_buf, SILENT_RESET_SIZE);
-#endif
 	if (size == SILENT_RESET_SIZE)
 		printk("<6>" "write %d block\n", size);
 	else
@@ -1045,39 +963,6 @@ static int fota_write_block(const char *val, struct kernel_param *kp)
 }
 module_param_call(fota_recovery_reboot, fota_write_block, param_get_bool, &dummy_arg, S_IWUSR | S_IRUGO);
 
-
-// end: 0018768
-
-#ifdef CONFIG_LGE_DID_BACKUP   
-extern void remote_did_rpc(void);
-static void
-did_dload_func(struct work_struct *work)
-{
-	printk(KERN_INFO "%s, flag : %ld\n", __func__, did_dload_data.flag);	
-	//printk("%s [WQ] pressed: %d, keycode: %d\n", __func__, eta_gpio_matrix_data.pressed, eta_gpio_matrix_data.keycode);
-#ifdef CONFIG_LGE_SUPPORT_RAPI 
-	//remote_did_rpc();
-#endif
-	return;
-}
-#endif
-
-/* BEGIN: 0013860 jihoon.lee@lge.com 20110111 */
-/* ADD 0013860: [FACTORY RESET] ERI file save */
-#ifdef CONFIG_LGE_ERI_DOWNLOAD
-static void
-eri_dload_func(struct work_struct *work)
-{
-	printk(KERN_INFO "%s, flag : %ld\n", __func__, eri_dload_data.flag);	
-	//printk("%s [WQ] pressed: %d, keycode: %d\n", __func__, eta_gpio_matrix_data.pressed, eta_gpio_matrix_data.keycode);
-#ifdef CONFIG_LGE_SUPPORT_RAPI
-	//remote_eri_rpc();
-#endif
-	return;
-}
-#endif
-/* END: 0013860 jihoon.lee@lge.com 20110111 */
-
 int lge_emmc_misc_write_pos(unsigned int blockNo, const char* buffer, int size, int pos)
 {
 	struct file *fp_misc = NULL;
@@ -1165,17 +1050,10 @@ EXPORT_SYMBOL(lge_emmc_misc_read);
 int lge_get_frst_flag(void)
 {
 	unsigned char buffer[16]={0,};
-#if 0 //def LG_MISC_DATA
-	if (lge_emmc_misc_read_crc(LG_MISC_IO_FRST_FLAG, buffer, sizeof(buffer)) <= 0) {
-		pr_info(" *** (MISC) FRST Flag read fail\n");
-		return -1;
-	}
-#else
 	if (lge_emmc_misc_read(8, buffer, sizeof(buffer)) <= 0) {
 		pr_info(" *** (MISC) FRST Flag read fail\n");
 		return -1;
 	}
-#endif
 	if (buffer[0] == 0xff || buffer[0] == 0)
 		buffer[0] = '0';
 
@@ -1195,13 +1073,8 @@ int lge_set_frst_flag(int flag)
 		return -1;
 
 	buffer[0] = '0' + flag;
-#if 0 //def LG_MISC_DATA
-	if (lge_emmc_misc_write_crc(LG_MISC_IO_FRST_FLAG, LG_MISC_DATA_MAGIC, buffer, sizeof(buffer),0) <= 0)
-		return -1;
-#else
 	if (lge_emmc_misc_write(8, buffer, sizeof(buffer)) <= 0)
 		return -1;
-#endif
 	pr_info(" *** (MISC) FRST Flag write: %c\n", buffer[0]);
 	return 0;
 }
@@ -1561,8 +1434,6 @@ module_param_call(aat_partial_or_full, write_aat_partial_or_full, read_aat_parti
 #endif
 /* LGE_CHANGE_E  : adiyoung.lee, FTM Mode and ManualModeCkeckComplete on RPC, 2012-12-12 */
 
-#if 1//!defined(CONFIG_MACH_MSM7X27A_U0)
-/*LGE_CHANGE_S 2012-11-28 khyun.kim@lge.com sw_version's value set to property via rapi.*/
 extern unsigned char swv_buff[100];
 void swv_get_func(struct work_struct *work)
 {
@@ -1639,38 +1510,16 @@ int lge_sw_version_read(const char *val, struct kernel_param *kp)
 	return 0;
 }
 module_param_call(lge_swv,lge_sw_version_read, NULL, NULL, S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP | S_IROTH);
-/*LGE_CHANGE_E 2012-11-28 khyun.kim@lge.com sw_version's value set to property via rapi.*/
-#endif
 
 static int __init lge_emmc_direct_access_init(void)
 {
 	printk(KERN_INFO"%s: started\n", __func__);
-
-/* BEGIN: 0013860 jihoon.lee@lge.com 20110111 */
-/* ADD 0013860: [FACTORY RESET] ERI file save */
-#ifdef CONFIG_LGE_ERI_DOWNLOAD
-	eri_dload_wq = create_singlethread_workqueue("eri_dload_wq");
-	INIT_WORK(&eri_dload_data.work, eri_dload_func);
-#endif
-/* END: 0013860 jihoon.lee@lge.com 20110111 */
-
-//kabjoo.choi 20110806
-#ifdef CONFIG_LGE_DID_BACKUP   
-	did_dload_wq = create_singlethread_workqueue("did_dload_wq");
-	INIT_WORK(&did_dload_data.work, did_dload_func);
-#endif
-
-#if 1//!defined(CONFIG_MACH_MSM7X27A_U0)
-/*LGE_CHANGE_S 2012-11-28 khyun.kim@lge.com sw_version's value set to property via rapi.*/
 	swv_dload_wq = create_singlethread_workqueue("swv_dload_wq");
 	if (swv_dload_wq == NULL)
-	{
 		printk(KERN_INFO"%s: swv wq error\n", __func__);
-	}
+
 	INIT_WORK(&swv_work,swv_get_func);
 	printk(KERN_INFO"%s: finished\n", __func__);
-/*LGE_CHANGE_E 2012-11-28 khyun.kim@lge.com sw_version's value set to property via rapi.*/
-#endif
 	return 0;
 }
 
