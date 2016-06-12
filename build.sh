@@ -146,6 +146,11 @@ else
 
 	start_build_time=$(date +"%s")
 	make -j${build_cpu_usage}${kernel_build_output_enable} CROSS_COMPILE="${kernel_build_ccache}${CROSS_COMPILE}"
+	if ! [ "$?" == "0" ]
+	then
+		echo "${color_red}  | Build Failed! Exiting...${color_stock}"
+		break
+	fi
 	sleep 2
 	build_time=$(($(date +"%s") - ${start_build_time}))
 	build_time_minutes=$((${build_time} / 60))
