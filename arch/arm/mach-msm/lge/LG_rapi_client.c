@@ -505,7 +505,6 @@ void remote_did_rpc(void)
 	return;
 }
 
-#ifdef CONFIG_LGE_SUPPORT_RAPI
 int remote_rpc_request(uint32_t command)
 {
 	struct oem_rapi_client_streaming_func_arg arg;
@@ -546,7 +545,6 @@ int remote_rpc_request(uint32_t command)
 	
 	return rc;
 }
-#endif
 
 static int remote_large_data_ntcode_read(unsigned int pkt_no, void* data, int* recv_len)
 {
