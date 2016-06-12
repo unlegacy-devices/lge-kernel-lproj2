@@ -240,7 +240,7 @@ static struct clkctl_acpu_speed pll0_960_pll1_245_pll2_1200_pll4_1008[] = {
 	{ 1, 1113600, ACPU_PLL_4, 6, 0, 139200, 3, 7, 200000 },
 	{ 1, 1228800, ACPU_PLL_4, 6, 0, 153600, 3, 7, 200000 },
 	{ 1, 1300000, ACPU_PLL_4, 6, 0, 162500, 3, 7, 200000 },
-#ifdef CONFIG_MACH_MSM7X25A_V3
+#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
 	{ 1, 1396000, ACPU_PLL_4, 6, 0, 174500, 3, 7, 200000 },
 #endif
 #endif
