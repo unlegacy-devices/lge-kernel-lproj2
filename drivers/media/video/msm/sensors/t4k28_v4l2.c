@@ -20,29 +20,11 @@
 #define PLATFORM_DRIVER_NAME "msm_camera_t4k28"
 #define t4k28_obj t4k28_##obj
 
-
-
 #define SENSOR_REG_PAGE_ADDR 0x03
 #define SENSOR_REG_PAGE_0 0x00
 
-#ifdef CDBG
-#undef CDBG
-#define CDBG printk
-#else
-#define CDBG printk
-#endif
-
-
 DEFINE_MUTEX(t4k28_mut);
 static struct msm_sensor_ctrl_t t4k28_s_ctrl;
-
-#if 0 // #ifdef CONFIG_MACH_LGE
-static int camera_started;
-static int prev_balance_mode;
-static int prev_effect_mode;
-static int prev_brightness_mode;
-static int prev_fps_mode;
-#endif
 
 static int PREV_EFFECT = -1;
 static int PREV_ISO = -1;
@@ -53,41 +35,18 @@ static int DELAY_START = 0;
 
 static struct v4l2_subdev_info t4k28_subdev_info[] = {
 	{
-		.code   = V4L2_MBUS_FMT_YUYV8_2X8, /* For YUV type sensor (YUV422) */
+		.code = V4L2_MBUS_FMT_YUYV8_2X8,
 		.colorspace = V4L2_COLORSPACE_JPEG,
-		.fmt    = 1,
-		.order  = 0,
+		.fmt = 1,
+		.order = 0,
 	},
-	/* more can be supported, to be added later */
 };
 
 static struct msm_camera_i2c_conf_array t4k28_init_conf[] = {
 	{&t4k28_recommend_settings[0],
 	ARRAY_SIZE(t4k28_recommend_settings), 0, MSM_CAMERA_I2C_BYTE_DATA}
 };
-#if 0
-static struct msm_camera_i2c_conf_array t4k28_confs[][4] = {
 
-	{{&t4k28_snap_settings0[0],
-	ARRAY_SIZE(t4k28_snap_settings0), 8, MSM_CAMERA_I2C_BYTE_DATA},
-	 {&t4k28_snap_settings1[0],
-	ARRAY_SIZE(t4k28_snap_settings1), 16, MSM_CAMERA_I2C_BYTE_DATA},
-	 {&t4k28_snap_settings2[0],
-	ARRAY_SIZE(t4k28_snap_settings2), 0, MSM_CAMERA_I2C_BYTE_DATA},
-	 {&t4k28_snap_settings3[0],
-	ARRAY_SIZE(t4k28_snap_settings3), 0, MSM_CAMERA_I2C_BYTE_DATA},},
-
-	{{&t4k28_prev_settings0[0],
-	ARRAY_SIZE(t4k28_prev_settings0), 10, MSM_CAMERA_I2C_BYTE_DATA},
-	 {&t4k28_prev_settings1[0],
-	ARRAY_SIZE(t4k28_prev_settings1), 10, MSM_CAMERA_I2C_BYTE_DATA},
-	 {&t4k28_prev_settings2[0],
-	ARRAY_SIZE(t4k28_prev_settings2), 10, MSM_CAMERA_I2C_BYTE_DATA},
-	 {&t4k28_prev_settings3[0],
-	ARRAY_SIZE(t4k28_prev_settings3), 0, MSM_CAMERA_I2C_BYTE_DATA},},
-
-};
-#else
 static struct msm_camera_i2c_conf_array t4k28_confs[] = {
 	{&t4k28_snap_settings[0],
 	ARRAY_SIZE(t4k28_snap_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
@@ -95,11 +54,10 @@ static struct msm_camera_i2c_conf_array t4k28_confs[] = {
 	ARRAY_SIZE(t4k28_prev_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
 };
 
-#endif
 static struct msm_sensor_output_info_t t4k28_dimensions[] = {
 	{
-		.x_output = 0x640, // 2048
-		.y_output = 0x4B0, // 1536
+		.x_output = 0x640,
+		.y_output = 0x4B0,
 		.line_length_pclk = 0x800,
 		.frame_length_lines = 0x600,
 		.vt_pixel_clk = 45600000,
@@ -107,10 +65,10 @@ static struct msm_sensor_output_info_t t4k28_dimensions[] = {
 		.binning_factor = 1,
 	},
 	{
-		.x_output = 0x320,//1024 	//0x280, // 640
-		.y_output = 0x258,//768	//0x1E0, // 480
-		.line_length_pclk = 0x400,//1024 	//0x280,
-		.frame_length_lines = 0x300,//768	//0x1E0,
+		.x_output = 0x320,
+		.y_output = 0x258,
+		.line_length_pclk = 0x400,
+		.frame_length_lines = 0x300,
 		.vt_pixel_clk = 45600000,
 		.op_pixel_clk = 45600000,
 		.binning_factor = 1,
@@ -118,7 +76,6 @@ static struct msm_sensor_output_info_t t4k28_dimensions[] = {
 };
 
 static struct msm_camera_i2c_conf_array t4k28_exposure_confs[][1] = {
-#if 1
 	{{t4k28_exposure[0], ARRAY_SIZE(t4k28_exposure[0]), 0,
 		MSM_CAMERA_I2C_BYTE_DATA},},
 	{{t4k28_exposure[1], ARRAY_SIZE(t4k28_exposure[1]), 0,
@@ -147,38 +104,22 @@ static struct msm_camera_i2c_conf_array t4k28_exposure_confs[][1] = {
 		MSM_CAMERA_I2C_BYTE_DATA},},
 	{{t4k28_exposure[13], ARRAY_SIZE(t4k28_exposure[13]), 0,
 		MSM_CAMERA_I2C_BYTE_DATA},},
-#else
-	{{t4k28_exposure[0], ARRAY_SIZE(t4k28_exposure[0]), 0,
-		MSM_CAMERA_I2C_BYTE_DATA},},
-	{{t4k28_exposure[1], ARRAY_SIZE(t4k28_exposure[1]), 0,
-		MSM_CAMERA_I2C_BYTE_DATA},},
-	{{t4k28_exposure[2], ARRAY_SIZE(t4k28_exposure[2]), 0,
-		MSM_CAMERA_I2C_BYTE_DATA},},
-	{{t4k28_exposure[3], ARRAY_SIZE(t4k28_exposure[3]), 0,
-		MSM_CAMERA_I2C_BYTE_DATA},},
-	{{t4k28_exposure[4], ARRAY_SIZE(t4k28_exposure[4]), 0,
-		MSM_CAMERA_I2C_BYTE_DATA},},
-#endif
 };
 
 static int t4k28_exposure_enum_map[] = {
-#if 1
 	MSM_V4L2_EXPOSURE_N6,
 	MSM_V4L2_EXPOSURE_N5,
 	MSM_V4L2_EXPOSURE_N4,
 	MSM_V4L2_EXPOSURE_N3,
-#endif
 	MSM_V4L2_EXPOSURE_N2,
 	MSM_V4L2_EXPOSURE_N1,
 	MSM_V4L2_EXPOSURE_D,
 	MSM_V4L2_EXPOSURE_P1,
 	MSM_V4L2_EXPOSURE_P2,
-#if 1
 	MSM_V4L2_EXPOSURE_P3,
 	MSM_V4L2_EXPOSURE_P4,
 	MSM_V4L2_EXPOSURE_P5,
 	MSM_V4L2_EXPOSURE_P6,
-#endif
 };
 
 static struct msm_camera_i2c_enum_conf_array t4k28_exposure_enum_confs = {
@@ -189,23 +130,17 @@ static struct msm_camera_i2c_enum_conf_array t4k28_exposure_enum_confs = {
 	.num_conf = ARRAY_SIZE(t4k28_exposure_confs[0]),
 	.data_type = MSM_CAMERA_I2C_BYTE_DATA,
 };
-/*
-static struct msm_camera_i2c_conf_array t4k28_no_effect_confs[] = {
-	{&t4k28_no_effect[0],
-	ARRAY_SIZE(t4k28_no_effect), 0,
-	MSM_CAMERA_I2C_BYTE_DATA},
-};
-*/
+
 static struct msm_camera_i2c_conf_array t4k28_special_effect_confs[][1] = {
-	{{t4k28_special_effect[0],  ARRAY_SIZE(t4k28_special_effect[0]),  0,
+	{{t4k28_special_effect[0], ARRAY_SIZE(t4k28_special_effect[0]), 0,
 		MSM_CAMERA_I2C_BYTE_DATA},},
-	{{t4k28_special_effect[1],  ARRAY_SIZE(t4k28_special_effect[1]),  0,
+	{{t4k28_special_effect[1], ARRAY_SIZE(t4k28_special_effect[1]), 0,
 		MSM_CAMERA_I2C_BYTE_DATA},},
-	{{t4k28_special_effect[2],  ARRAY_SIZE(t4k28_special_effect[2]),  0,
+	{{t4k28_special_effect[2], ARRAY_SIZE(t4k28_special_effect[2]), 0,
 		MSM_CAMERA_I2C_BYTE_DATA},},
-	{{t4k28_special_effect[3],  ARRAY_SIZE(t4k28_special_effect[3]),  0,
+	{{t4k28_special_effect[3], ARRAY_SIZE(t4k28_special_effect[3]), 0,
 		MSM_CAMERA_I2C_BYTE_DATA},},
-	{{t4k28_special_effect[4],  ARRAY_SIZE(t4k28_special_effect[4]),  0,
+	{{t4k28_special_effect[4], ARRAY_SIZE(t4k28_special_effect[4]), 0,
 		MSM_CAMERA_I2C_BYTE_DATA},},
 };
 
@@ -228,15 +163,15 @@ static struct msm_camera_i2c_enum_conf_array
 };
 
 static struct msm_camera_i2c_conf_array t4k28_wb_oem_confs[][1] = {
-	{{t4k28_wb_oem[0], ARRAY_SIZE(t4k28_wb_oem[0]),  0,			//Auto
+	{{t4k28_wb_oem[0], ARRAY_SIZE(t4k28_wb_oem[0]), 0,	//Auto
 		MSM_CAMERA_I2C_BYTE_DATA},},
-	{{t4k28_wb_oem[1], ARRAY_SIZE(t4k28_wb_oem[1]),  0,			//Incandescent
+	{{t4k28_wb_oem[1], ARRAY_SIZE(t4k28_wb_oem[1]), 0,	//Incandescent
 		MSM_CAMERA_I2C_BYTE_DATA},},
-	{{t4k28_wb_oem[2], ARRAY_SIZE(t4k28_wb_oem[2]),  0,			//fluorescent
+	{{t4k28_wb_oem[2], ARRAY_SIZE(t4k28_wb_oem[2]), 0,	//fluorescent
 		MSM_CAMERA_I2C_BYTE_DATA},},
-	{{t4k28_wb_oem[3], ARRAY_SIZE(t4k28_wb_oem[3]),  0,			//daylight
+	{{t4k28_wb_oem[3], ARRAY_SIZE(t4k28_wb_oem[3]), 0,	//daylight
 		MSM_CAMERA_I2C_BYTE_DATA},},
-	{{t4k28_wb_oem[4], ARRAY_SIZE(t4k28_wb_oem[4]),  0,			//cloudy
+	{{t4k28_wb_oem[4], ARRAY_SIZE(t4k28_wb_oem[4]), 0,	//cloudy
 		MSM_CAMERA_I2C_BYTE_DATA},},
 };
 
@@ -257,20 +192,19 @@ static struct msm_camera_i2c_enum_conf_array t4k28_wb_oem_enum_confs = {
 	.data_type = MSM_CAMERA_I2C_BYTE_DATA,
 };
 
-
 static struct msm_camera_i2c_conf_array t4k28_iso_confs[][1] = {
-	{{t4k28_iso[0], ARRAY_SIZE(t4k28_iso[0]),  0,
-		MSM_CAMERA_I2C_BYTE_DATA},},				//AUTO
-	{{t4k28_iso[1], ARRAY_SIZE(t4k28_iso[1]),  0,
-		MSM_CAMERA_I2C_BYTE_DATA},},				//DEBLUR
-	{{t4k28_iso[2], ARRAY_SIZE(t4k28_iso[2]),  0,
-		MSM_CAMERA_I2C_BYTE_DATA},},				//100
-	{{t4k28_iso[3], ARRAY_SIZE(t4k28_iso[3]),  0,
-		MSM_CAMERA_I2C_BYTE_DATA},},				//200
-	{{t4k28_iso[4], ARRAY_SIZE(t4k28_iso[4]),  0,
-		MSM_CAMERA_I2C_BYTE_DATA},},				//400
-	{{t4k28_iso[5], ARRAY_SIZE(t4k28_iso[5]),  0,
-		MSM_CAMERA_I2C_BYTE_DATA},},				//800
+	{{t4k28_iso[0], ARRAY_SIZE(t4k28_iso[0]), 0,
+		MSM_CAMERA_I2C_BYTE_DATA},},		//AUTO
+	{{t4k28_iso[1], ARRAY_SIZE(t4k28_iso[1]), 0,
+		MSM_CAMERA_I2C_BYTE_DATA},},		//DEBLUR
+	{{t4k28_iso[2], ARRAY_SIZE(t4k28_iso[2]), 0,
+		MSM_CAMERA_I2C_BYTE_DATA},},		//100
+	{{t4k28_iso[3], ARRAY_SIZE(t4k28_iso[3]), 0,
+		MSM_CAMERA_I2C_BYTE_DATA},},		//200
+	{{t4k28_iso[4], ARRAY_SIZE(t4k28_iso[4]), 0,
+		MSM_CAMERA_I2C_BYTE_DATA},},		//400
+	{{t4k28_iso[5], ARRAY_SIZE(t4k28_iso[5]), 0,
+		MSM_CAMERA_I2C_BYTE_DATA},},		//800
 };
 
 static int t4k28_iso_enum_map[] = {
@@ -282,7 +216,6 @@ static int t4k28_iso_enum_map[] = {
 	MSM_V4L2_ISO_800,
 };
 
-
 static struct msm_camera_i2c_enum_conf_array t4k28_iso_enum_confs = {
 	.conf = &t4k28_iso_confs[0][0],
 	.conf_enum = t4k28_iso_enum_map,
@@ -292,32 +225,21 @@ static struct msm_camera_i2c_enum_conf_array t4k28_iso_enum_confs = {
 	.data_type = MSM_CAMERA_I2C_BYTE_DATA,
 };
 
-
 static struct msm_camera_i2c_conf_array t4k28_fps_range_confs[][3] = {
 	{
-		{&t4k28_attached_fps_settings0[0], ARRAY_SIZE(t4k28_attached_fps_settings0),  10,
-	       MSM_CAMERA_I2C_BYTE_DATA},
-	    {&t4k28_attached_fps_settings1[0], ARRAY_SIZE(t4k28_attached_fps_settings1),  10,
-	       MSM_CAMERA_I2C_BYTE_DATA},
-	    {&t4k28_attached_fps_settings2[0], ARRAY_SIZE(t4k28_attached_fps_settings2),  0,
-	       MSM_CAMERA_I2C_BYTE_DATA},
-
+		{&t4k28_attached_fps_settings0[0],
+				ARRAY_SIZE(t4k28_attached_fps_settings0), 10,
+				MSM_CAMERA_I2C_BYTE_DATA},
 	},
 	{
-		{&t4k28_auto_fps_settings0[0], ARRAY_SIZE(t4k28_auto_fps_settings0),  10,
-	       MSM_CAMERA_I2C_BYTE_DATA},
-	    {&t4k28_auto_fps_settings1[0], ARRAY_SIZE(t4k28_auto_fps_settings1),  10,
-	       MSM_CAMERA_I2C_BYTE_DATA},
-	    {&t4k28_auto_fps_settings2[0], ARRAY_SIZE(t4k28_auto_fps_settings2),  0,
-	       MSM_CAMERA_I2C_BYTE_DATA},
+		{&t4k28_auto_fps_settings0[0],
+				ARRAY_SIZE(t4k28_auto_fps_settings0), 10,
+				MSM_CAMERA_I2C_BYTE_DATA},
 	},
 	{
-		{&t4k28_fixed_fps_settings0[0], ARRAY_SIZE(t4k28_fixed_fps_settings0),  10,
-	       MSM_CAMERA_I2C_BYTE_DATA},
-	    {&t4k28_fixed_fps_settings1[0], ARRAY_SIZE(t4k28_fixed_fps_settings1),  10,
-	       MSM_CAMERA_I2C_BYTE_DATA},
-	    {&t4k28_fixed_fps_settings2[0], ARRAY_SIZE(t4k28_fixed_fps_settings2),  0,
-	       MSM_CAMERA_I2C_BYTE_DATA},
+		{&t4k28_fixed_fps_settings0[0],
+				ARRAY_SIZE(t4k28_fixed_fps_settings0), 10,
+				MSM_CAMERA_I2C_BYTE_DATA},
 	},
 };
 
@@ -336,66 +258,66 @@ static struct msm_camera_i2c_enum_conf_array t4k28_fps_range_enum_confs = {
 	.data_type = MSM_CAMERA_I2C_BYTE_DATA,
 };
 
-static struct msm_camera_i2c_conf_array t4k28_bestshot_mode_confs[][2] = {
-	{	//SCENE OFF
-		{&t4k28_scene_normal_settings[0], ARRAY_SIZE(t4k28_scene_normal_settings),
-			10,		MSM_CAMERA_I2C_BYTE_DATA},
-		{&t4k28_scene_active_settings[0], ARRAY_SIZE(t4k28_scene_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
+static struct msm_camera_i2c_conf_array t4k28_bestshot_mode_confs[][1] = {
+	{
+		//SCENE OFF
+		{&t4k28_scene_normal_settings[0],
+				ARRAY_SIZE(t4k28_scene_normal_settings), 10,
+				MSM_CAMERA_I2C_BYTE_DATA},
 	},
-	{	//SCENE AUTO
-		{&t4k28_scene_normal_settings[0], ARRAY_SIZE(t4k28_scene_normal_settings),
-			10,		MSM_CAMERA_I2C_BYTE_DATA},
-		{&t4k28_scene_active_settings[0], ARRAY_SIZE(t4k28_scene_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
+	{
+		//SCENE AUTO
+		{&t4k28_scene_normal_settings[0],
+			ARRAY_SIZE(t4k28_scene_normal_settings), 10,
+			MSM_CAMERA_I2C_BYTE_DATA},
 	},
-	{	//SCENE LANDSCAPE
-		{&t4k28_scene_landscape_settings[0], ARRAY_SIZE(t4k28_scene_landscape_settings),
-			10,		MSM_CAMERA_I2C_BYTE_DATA},
-		{&t4k28_scene_active_settings[0], ARRAY_SIZE(t4k28_scene_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
+	{
+		//SCENE LANDSCAPE
+		{&t4k28_scene_landscape_settings[0],
+				ARRAY_SIZE(t4k28_scene_landscape_settings), 10,
+				MSM_CAMERA_I2C_BYTE_DATA},
 	},
-	{	//SCENE SNOW //NOT USE
-		{&t4k28_no_active_settings[0], ARRAY_SIZE(t4k28_no_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
-		{&t4k28_no_active_settings[0], ARRAY_SIZE(t4k28_no_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
+	{
+		//SCENE SNOW //NOT USE
+		{&t4k28_no_active_settings[0],
+				ARRAY_SIZE(t4k28_no_active_settings), 0,
+				MSM_CAMERA_I2C_BYTE_DATA},
 	},
-	{	//SCENE BEACH //NOT USE
-		{&t4k28_no_active_settings[0], ARRAY_SIZE(t4k28_no_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
-		{&t4k28_no_active_settings[0], ARRAY_SIZE(t4k28_no_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
+	{
+		//SCENE BEACH //NOT USE
+		{&t4k28_no_active_settings[0],
+				ARRAY_SIZE(t4k28_no_active_settings), 0,
+				MSM_CAMERA_I2C_BYTE_DATA},
 	},
-	{	//SCENE SUNSET
-		{&t4k28_scene_sunset_settings[0], ARRAY_SIZE(t4k28_scene_sunset_settings),
-			10,		MSM_CAMERA_I2C_BYTE_DATA},
-		{&t4k28_scene_active_settings[0], ARRAY_SIZE(t4k28_scene_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
+	{
+		//SCENE SUNSET
+		{&t4k28_scene_sunset_settings[0],
+				ARRAY_SIZE(t4k28_scene_sunset_settings), 10,
+				MSM_CAMERA_I2C_BYTE_DATA},
 	},
-	{	//SCENE NIGHT
-		{&t4k28_scene_night_settings[0], ARRAY_SIZE(t4k28_scene_night_settings),
-			10,		MSM_CAMERA_I2C_BYTE_DATA},
-		{&t4k28_scene_active_settings[0], ARRAY_SIZE(t4k28_scene_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
+	{
+		//SCENE NIGHT
+		{&t4k28_scene_night_settings[0],
+				ARRAY_SIZE(t4k28_scene_night_settings), 10,
+				MSM_CAMERA_I2C_BYTE_DATA},
 	},
-	{	//SCENE PORTRAIT
-		{&t4k28_scene_portrait_settings[0], ARRAY_SIZE(t4k28_scene_portrait_settings),
-			10,		MSM_CAMERA_I2C_BYTE_DATA},
-		{&t4k28_scene_active_settings[0], ARRAY_SIZE(t4k28_scene_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
+	{
+		//SCENE PORTRAIT
+		{&t4k28_scene_portrait_settings[0],
+				ARRAY_SIZE(t4k28_scene_portrait_settings), 10,
+				MSM_CAMERA_I2C_BYTE_DATA},
 	},
-	{	//SCENE BACKLIGHT //NOT USE
-		{&t4k28_no_active_settings[0], ARRAY_SIZE(t4k28_no_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
-		{&t4k28_no_active_settings[0], ARRAY_SIZE(t4k28_no_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
+	{
+		//SCENE BACKLIGHT //NOT USE
+		{&t4k28_no_active_settings[0],
+				ARRAY_SIZE(t4k28_no_active_settings), 0,
+				MSM_CAMERA_I2C_BYTE_DATA},
 	},
-	{	//SCENE SPORTS
-		{&t4k28_scene_sport_settings[0], ARRAY_SIZE(t4k28_scene_sport_settings),
-			10,		MSM_CAMERA_I2C_BYTE_DATA},
-		{&t4k28_scene_active_settings[0], ARRAY_SIZE(t4k28_scene_active_settings),
-			0,		MSM_CAMERA_I2C_BYTE_DATA},
+	{
+		//SCENE SPORTS
+		{&t4k28_scene_sport_settings[0],
+				ARRAY_SIZE(t4k28_scene_sport_settings), 10,
+				MSM_CAMERA_I2C_BYTE_DATA},
 	},
 };
 
@@ -421,90 +343,64 @@ static struct msm_camera_i2c_enum_conf_array t4k28_bestshot_mode_enum_confs = {
 	.data_type = MSM_CAMERA_I2C_BYTE_DATA,
 };
 
-/*
-int t4k28_effect_msm_sensor_s_ctrl_by_enum(struct msm_sensor_ctrl_t *s_ctrl,
-		struct msm_sensor_v4l2_ctrl_info_t *ctrl_info, int value)
-{
-	int rc = 0;
-
-	pr_err("%s is called effect=%d\n", __func__, value);
-	if (PREV_EFFECT == value || PREV_EFFECT == -1) {
-		PREV_EFFECT = value;
-		pr_err("%s: SKIP: EFFECT called previous value :%d\n", __func__,value);
-		return rc;
-	}
-	PREV_EFFECT = value;
-	if (PREV_EFFECT == CAMERA_EFFECT_OFF) {
-		rc = msm_sensor_write_conf_array(
-			s_ctrl->sensor_i2c_client,
-			s_ctrl->msm_sensor_reg->no_effect_settings, 0);
-		if (rc < 0) {
-			pr_err("%s: write faield\n", __FUNCTION__);
-			return rc;
-		}
-	} else {
-		rc = msm_sensor_write_enum_conf_array(
-			s_ctrl->sensor_i2c_client,
-			ctrl_info->enum_cfg_settings, value);
-	}
-	return rc;
-}
-*/
 int t4k28_msm_sensor_s_ctrl_by_enum(struct msm_sensor_ctrl_t *s_ctrl,
 		struct msm_sensor_v4l2_ctrl_info_t *ctrl_info, int value)
 {
 	int rc = 0;
 	int retry = 0;
-	return 0; // for bring up -aidan.cho
-	pr_err("%s is called enum num: %d , value = %d\n", __func__, ctrl_info->ctrl_id, value);
-	switch(ctrl_info->ctrl_id) {
-		case V4L2_CID_WHITE_BALANCE_TEMPERATURE:
-			if(PREV_WB == value || PREV_WB == -1) {
-				PREV_WB = value;
-				pr_err("%s SKIP due to duplicate enum num: %d , value = %d\n", __func__, ctrl_info->ctrl_id, value);
-				return rc;
-			}else {
-				PREV_WB = value;
-			}
-			break;
-		case V4L2_CID_SPECIAL_EFFECT:
-			if(PREV_EFFECT == value || PREV_EFFECT == -1) {
-				PREV_EFFECT = value;
-				pr_err("%s SKIP due to duplicate enum num: %d , value = %d\n", __func__, ctrl_info->ctrl_id, value);
-				return rc;
-			}else {
-				PREV_EFFECT = value;
-			}
-			break;
-		case MSM_V4L2_PID_ISO:
-			if(PREV_ISO == value || PREV_ISO == -1) {
-				PREV_ISO = value;
-				pr_err("%s SKIP due to duplicate enum num: %d , value = %d\n", __func__, ctrl_info->ctrl_id, value);
-				return rc;
-			}else {
-				PREV_ISO = value;
-			}
-			break;
-		case V4L2_CID_FPS_RANGE:
-			if(PREV_FPS == value || PREV_FPS == -1) {
-				PREV_FPS = value;
-				pr_err("%s SKIP due to duplicate enum num: %d , value = %d\n", __func__, ctrl_info->ctrl_id, value);
-				return rc;
-			}else {
-				PREV_FPS = value;
-			}
-			break;
-		case V4L2_CID_BESTSHOT_MODE:
-			if(PREV_BESTSHOT == value || PREV_BESTSHOT == -1) {
-				PREV_BESTSHOT = value;
-				pr_err("%s SKIP due to duplicate enum num: %d , value = %d\n", __func__, ctrl_info->ctrl_id, value);
-				return rc;
-			}else {
-				PREV_BESTSHOT = value;
-			}
-			break;
-		default:
-			break;
+	switch (ctrl_info->ctrl_id) {
+	case V4L2_CID_WHITE_BALANCE_TEMPERATURE:
+		if (PREV_WB == value || PREV_WB == -1) {
+			PREV_WB = value;
+			pr_err("%s SKIP due to duplicate enum num: %d,"
+					" value = %d\n", __func__,
+					ctrl_info->ctrl_id, value);
+			return rc;
+		} else
+			PREV_WB = value;
+		break;
+	case V4L2_CID_SPECIAL_EFFECT:
+		if (PREV_EFFECT == value || PREV_EFFECT == -1) {
+			PREV_EFFECT = value;
+			pr_err("%s SKIP due to duplicate enum num: %d,"
+					" value = %d\n", __func__,
+					ctrl_info->ctrl_id, value);
+			return rc;
+		} else
+			PREV_EFFECT = value;
+		break;
+	case MSM_V4L2_PID_ISO:
+		if (PREV_ISO == value || PREV_ISO == -1) {
+			PREV_ISO = value;
+			pr_err("%s SKIP due to duplicate enum num: %d,"
+					" value = %d\n", __func__,
+					ctrl_info->ctrl_id, value);
+			return rc;
+		} else
+			PREV_ISO = value;
+		break;
+	case V4L2_CID_FPS_RANGE:
+		if (PREV_FPS == value || PREV_FPS == -1) {
+			PREV_FPS = value;
+			pr_err("%s SKIP due to duplicate enum num: %d,"
+					"value = %d\n", __func__,
+					ctrl_info->ctrl_id, value);
+			return rc;
+		} else
+			PREV_FPS = value;
+		break;
+	case V4L2_CID_BESTSHOT_MODE:
+		if (PREV_BESTSHOT == value || PREV_BESTSHOT == -1) {
+			PREV_BESTSHOT = value;
+			pr_err("%s SKIP due to duplicate enum num: %d,"
+					" value = %d\n", __func__,
+					ctrl_info->ctrl_id, value);
+			return rc;
+		} else
+			PREV_BESTSHOT = value;
+		break;
+	default:
+		break;
 	}
 
 	for (retry = 0; retry < 3; ++retry) {
@@ -513,13 +409,15 @@ int t4k28_msm_sensor_s_ctrl_by_enum(struct msm_sensor_ctrl_t *s_ctrl,
 		ctrl_info->enum_cfg_settings, value);
 
 		if (rc < 0)
-			printk(KERN_ERR "[ERROR]%s:write failed for enum num: %d, value = %d, retry = %d\n", __func__, ctrl_info->ctrl_id, value, retry);
+			pr_err("%s:write failed for enum num: %d, value = %d,"
+					" retry = %d\n", __func__,
+					ctrl_info->ctrl_id, value, retry);
 		else
 			break;
 	}
-	pr_err("%s: write done for enum num: %d , value = %d\n", __func__, ctrl_info->ctrl_id, value);
+	pr_err("%s: write done for enum num: %d, value = %d\n", __func__,
+			ctrl_info->ctrl_id, value);
 	return rc;
-
 }
 
 struct msm_sensor_v4l2_ctrl_info_t t4k28_v4l2_ctrl_info[] = {
@@ -527,8 +425,6 @@ struct msm_sensor_v4l2_ctrl_info_t t4k28_v4l2_ctrl_info[] = {
 		.ctrl_id = V4L2_CID_EXPOSURE,
 		.min = MSM_V4L2_EXPOSURE_N6,
 		.max = MSM_V4L2_EXPOSURE_P6,
-//		.min = MSM_V4L2_EXPOSURE_N2,
-//		.max = MSM_V4L2_EXPOSURE_P2,
 		.step = 1,
 		.enum_cfg_settings = &t4k28_exposure_enum_confs,
 		.s_v4l2_ctrl = t4k28_msm_sensor_s_ctrl_by_enum,
@@ -539,7 +435,6 @@ struct msm_sensor_v4l2_ctrl_info_t t4k28_v4l2_ctrl_info[] = {
 		.max = MSM_V4L2_EFFECT_NEGATIVE,
 		.step = 1,
 		.enum_cfg_settings = &t4k28_special_effect_enum_confs,
-//		.s_v4l2_ctrl = t4k28_effect_msm_sensor_s_ctrl_by_enum,
 		.s_v4l2_ctrl = t4k28_msm_sensor_s_ctrl_by_enum,
 	},
 	{
@@ -565,8 +460,8 @@ struct msm_sensor_v4l2_ctrl_info_t t4k28_v4l2_ctrl_info[] = {
 		.step = 1,
 		.enum_cfg_settings = &t4k28_fps_range_enum_confs,
 		.s_v4l2_ctrl = t4k28_msm_sensor_s_ctrl_by_enum,
-    },
-    {
+	},
+	{
 		.ctrl_id = V4L2_CID_BESTSHOT_MODE,
 		.min = MSM_V4L2_BESTSHOT_OFF,
 		.max = MSM_V4L2_BESTSHOT_SPORTS,
@@ -577,18 +472,17 @@ struct msm_sensor_v4l2_ctrl_info_t t4k28_v4l2_ctrl_info[] = {
 };
 
 static struct msm_camera_csi_params t4k28_csic_params = {
-	.data_format = CSI_8BIT,
-	.lane_cnt    = 1,
-	.lane_assign = 0xe4,
-	.dpcm_scheme = 0,
-	.settle_cnt  = 0x19, // 0x9, // 0x14,
+	.data_format	= CSI_8BIT,
+	.lane_cnt	= 1,
+	.lane_assign	= 0xe4,
+	.dpcm_scheme	= 0,
+	.settle_cnt	= 0x19,
 };
 
 static struct msm_camera_csi_params *t4k28_csic_params_array[] = {
 	&t4k28_csic_params,
 	&t4k28_csic_params,
 };
-
 
 // not used
 static struct msm_sensor_output_reg_addr_t t4k28_reg_addr = {
@@ -603,7 +497,6 @@ static struct msm_sensor_id_info_t t4k28_id_info = {
 	.sensor_id = 0x0840,
 };
 
-//static struct sensor_calib_data t4k28_calib_data;
 static const struct i2c_device_id t4k28_i2c_id[] = {
 	{SENSOR_NAME, (kernel_ulong_t)&t4k28_s_ctrl},
 	{ }
@@ -642,194 +535,103 @@ static struct msm_cam_clk_info cam_clk_info[] = {
 	{"cam_clk", MSM_SENSOR_MCLK_24HZ},
 };
 
-int8_t t4k28_get_snapshot_data(struct msm_sensor_ctrl_t *s_ctrl, struct snapshot_soc_data_cfg *snapshot_data) {
+int8_t t4k28_get_snapshot_data(struct msm_sensor_ctrl_t *s_ctrl,
+		struct snapshot_soc_data_cfg *snapshot_data)
+{
 	int rc = 0;
-	u16 analogGain = 0;
-	u32 exposureTime = 0;
-	u32 isoSpeed = 0;
-	u16 Exposure1 = 0;
-	u16 Exposure2 = 0;
-	u16 Exposure3 = 0;
-	u16 Exposure4 = 0;
-	int ExposureTotal = 0;
+	unsigned short analogGain1 = 0;
+	unsigned short analogGain2 = 0;
+	unsigned short analogGain = 0;
+	int exposureTime = 0;
+	unsigned int isoSpeed = 0;
+	unsigned short Exposure1 = 0;
+	unsigned short Exposure2 = 0;
+	uint32_t ExposureTotal = 0;
 
 	//ISO Speed
-	rc = msm_camera_i2c_write(s_ctrl->sensor_i2c_client, 0x03, 0x20, MSM_CAMERA_I2C_BYTE_DATA);
-	rc = msm_camera_i2c_read(s_ctrl->sensor_i2c_client, 0x50, &analogGain, MSM_CAMERA_I2C_BYTE_DATA);
+	rc = msm_camera_i2c_read(s_ctrl->sensor_i2c_client, 0x3561,
+			&analogGain1, MSM_CAMERA_I2C_BYTE_DATA);
+	rc = msm_camera_i2c_read(s_ctrl->sensor_i2c_client, 0x3562,
+			&analogGain2, MSM_CAMERA_I2C_BYTE_DATA);
 
 	if (rc < 0) {
 		pr_err("%s: error to get analog & digital gain \n", __func__);
 		return rc;
 	}
 	//Exposure Time
-	rc = msm_camera_i2c_write(s_ctrl->sensor_i2c_client, 0x03, 0x20, MSM_CAMERA_I2C_BYTE_DATA);
-	rc = msm_camera_i2c_read(s_ctrl->sensor_i2c_client, 0x20, &Exposure1, MSM_CAMERA_I2C_BYTE_DATA);
-	rc = msm_camera_i2c_read(s_ctrl->sensor_i2c_client, 0x21, &Exposure2, MSM_CAMERA_I2C_BYTE_DATA);
-	rc = msm_camera_i2c_read(s_ctrl->sensor_i2c_client, 0x22, &Exposure3, MSM_CAMERA_I2C_BYTE_DATA);
-	rc = msm_camera_i2c_read(s_ctrl->sensor_i2c_client, 0x23, &Exposure4, MSM_CAMERA_I2C_BYTE_DATA);
+	rc = msm_camera_i2c_read(s_ctrl->sensor_i2c_client, 0x355f, &Exposure1,
+			MSM_CAMERA_I2C_BYTE_DATA);
+	rc = msm_camera_i2c_read(s_ctrl->sensor_i2c_client, 0x3560, &Exposure2,
+			MSM_CAMERA_I2C_BYTE_DATA);
 
 	if (rc < 0) {
 		pr_err("%s: error to get exposure time \n", __func__);
 		return rc;
 	}
 
-	if( analogGain <= 0x28 ){
-		pr_err("[CHECK]%s : iso speed - analogGain = 0x%x ",  __func__, analogGain);
-		analogGain = 0x28;  		//analogGain cannot move down than 0x28
-	}
 	//ISO speed
+	analogGain = ((analogGain1<<8)|analogGain2);
 	isoSpeed = ((analogGain / 32) * 100);
+
 	//Exposure Time
-	ExposureTotal = ((Exposure1<<24)|(Exposure2<<16)|(Exposure3<<8)|Exposure4);
-	if (ExposureTotal <= 0) {
+	ExposureTotal = ((Exposure1<<8)|Exposure2);
+	if (ExposureTotal <= 0)
 		exposureTime = 600000;
-	}else {
-	exposureTime = ExposureTotal;
-	}
+	else
+		exposureTime = ExposureTotal;
 
 	snapshot_data->iso_speed = isoSpeed;
 	snapshot_data->exposure_time = exposureTime;
-	pr_err("[CHECK]Camera Snapshot Data iso_speed = %d, exposure_time = %d \n", snapshot_data->iso_speed, snapshot_data->exposure_time);
 
 	return 0;
-
 }
 
-static int32_t t4k28_i2c_write_b_sensor(struct msm_camera_i2c_client *client, u8 baddr, u8 bdata)
+static int32_t t4k28_i2c_write_b_sensor(struct msm_camera_i2c_client *client,
+		u8 baddr, u8 bdata)
 {
 	int32_t rc = -EIO;
 	u8 buf[2];
 	memset(buf, 0, sizeof(buf));
 
 	if (DELAY_START == 1) {
-		if (baddr == 0xFE) {
+		if (baddr == 0xFE)
 			msleep(bdata);
-		}
 		DELAY_START = 0;
 		return 0;
-	}
-	else {
+	} else {
 		if (baddr == 0x03 && bdata == 0xFE) {
 			DELAY_START = 1;
 			return 0;
-		}
-		else {
-
+		} else {
 			buf[0] = baddr;
 			buf[1] = bdata;
 
-//			pr_err("t4k28_i2c_write_b_sensor: 0x%x\n", baddr);
 			rc = msm_camera_i2c_txdata(client, buf, 2);
-
-
 			if (rc < 0)
-				pr_err("i2c_write_w failed, addr = 0x%x, val = 0x%x!\n", baddr, bdata);
+				pr_err("i2c_write_w failed, addr = 0x%x,"
+						" val = 0x%x!\n", baddr, bdata);
 		}
 	}
 	return rc;
 }
-
 
 static int32_t t4k28_i2c_write_b_table(struct msm_camera_i2c_client *client,
-								struct msm_camera_i2c_reg_conf *reg_conf_tbl, uint16_t size)
+		struct msm_camera_i2c_reg_conf *reg_conf_tbl, uint16_t size)
 {
 	int i;
 	int32_t rc = 0;
 	for (i = 0; i < size; i++) {
-			rc = t4k28_i2c_write_b_sensor(client, reg_conf_tbl->reg_addr,
-					reg_conf_tbl->reg_data);
-			if (rc < 0) {
-				pr_err("t4k28_i2c_write_b_table fail\n");
-				break;
-			}
-			reg_conf_tbl++;
-		}
-	CDBG("%s: %d	Exit \n",__func__, __LINE__);
-	return rc;
-
-}
-
-
-static int32_t t4k28_sensor_write_init_settings(struct msm_camera_i2c_client *client,
-								struct msm_camera_i2c_reg_conf *conf, uint16_t size)
-{
-	//BURST MODE
-
-	int32_t rc = 0;
-	int i;
-	u8 buf[301];
-	int bufIndex = 0;
-
-	memset(buf, 0, sizeof(buf));
-
-	//for burst mode
-
-	for (i = 0; i < size; i++) {
-
-		if ( conf->dt == MSM_CAMERA_I2C_BURST_DATA && bufIndex < 301 ) {
-			if(bufIndex == 0) {
-				buf[bufIndex] = conf->reg_addr;
-				bufIndex++;
-				buf[bufIndex] = conf->reg_data;
-				bufIndex++;
-			}
-			else {
-				buf[bufIndex] = conf->reg_data;
-				bufIndex++;
-			}
-		}
-		else {
-			if (bufIndex > 0) {
-//				pr_err("t4k28_sensor_write_init_settings: Burst Mode: bufIndex: %d\n", bufIndex);
-				rc = msm_camera_i2c_txdata(client, buf, bufIndex);
-				//pr_err("%s: BurstMODE write bufIndex = %d \n",__func__, bufIndex);
-				bufIndex = 0;
-				memset(buf, 0, sizeof(buf));
-				if (rc < 0) {
-					pr_err("%s: %d  failed Exit \n",__func__, __LINE__);
- 					return rc;
-				}
-			}
-			rc = t4k28_i2c_write_b_sensor(client,
-									conf->reg_addr,
-									conf->reg_data);
-
-			if (rc < 0) {
-				pr_err("%s: %d  failed Exit \n",__func__, __LINE__);
- 				return rc;
-			}
-		}
-		conf++;
-
-	}
-	return rc;
-
-}
-
-static int32_t t4k28_reg_init(struct msm_sensor_ctrl_t *s_ctrl) {
-
-	int32_t rc = 0;
-	int32_t retry;
-	int32_t i;
-
-	for (retry = 0; retry < 3; ++retry) {
-		printk(KERN_ERR "%s:Sensor Init Setting IN\n", __func__);
-		for ( i = 0; i < ARRAY_SIZE(t4k28_init_conf); i++) {
-			rc = t4k28_sensor_write_init_settings(s_ctrl->sensor_i2c_client,
-						(struct msm_camera_i2c_reg_conf *) t4k28_init_conf[i].conf, t4k28_init_conf[i].size);
-
-		}
-		if (rc < 0)
-			printk(KERN_ERR "[ERROR]%s:Sensor Init Setting Fail\n", __func__);
-		else
+		rc = t4k28_i2c_write_b_sensor(client, reg_conf_tbl->reg_addr,
+				reg_conf_tbl->reg_data);
+		if (rc < 0) {
+			pr_err("t4k28_i2c_write_b_table fail\n");
 			break;
+		}
+		reg_conf_tbl++;
 	}
-	printk(KERN_ERR "%s:Sensor Init Setting END\n", __func__);
+	pr_info("%s: %d	Exit \n",__func__, __LINE__);
 	return rc;
-
 }
-
-
 
 int32_t t4k28_sensor_write_conf_array(struct msm_camera_i2c_client *client,
 			struct msm_camera_i2c_conf_array *array, uint16_t index)
@@ -838,16 +640,16 @@ int32_t t4k28_sensor_write_conf_array(struct msm_camera_i2c_client *client,
 	int32_t retry = 0;
 
 	for (retry = 0; retry < 3; ++retry) {
-
 		rc = t4k28_i2c_write_b_table(client,
-		(struct msm_camera_i2c_reg_conf *) array[index].conf, array[index].size);
-
+		(struct msm_camera_i2c_reg_conf *) array[index].conf,
+				array[index].size);
 
 		if (rc < 0)
-			printk(KERN_ERR "[ERROR]%s:Sensor Mode Setting Fail, try again retry = %d\n", __func__, retry);
+			pr_err("%s:Sensor Mode Setting Fail,"
+					" try again retry = %d\n", __func__,
+					retry);
 		else
 			break;
-
 	}
 
 	if (array[index].delay > 20)
@@ -858,7 +660,6 @@ int32_t t4k28_sensor_write_conf_array(struct msm_camera_i2c_client *client,
 	return rc;
 }
 
-
 int32_t t4k28_sensor_setting(struct msm_sensor_ctrl_t *s_ctrl,
 			int update_type, int res)
 {
@@ -866,11 +667,7 @@ int32_t t4k28_sensor_setting(struct msm_sensor_ctrl_t *s_ctrl,
 	static int csi_config;
 
 	if (update_type == MSM_SENSOR_REG_INIT) {
-#if defined (LGE_CAMERA_ANTIBAND_50HZ)	//Flicker 50Hz
-		pr_err("Register INIT with Flicker 50Hz Mode\n");
-#else
 		pr_err("Register INIT with Flicker 60Hz Mode\n");
-#endif
 		s_ctrl->curr_csi_params = NULL;
 		msm_sensor_enable_debugfs(s_ctrl);
 		PREV_EFFECT = -1;
@@ -879,7 +676,7 @@ int32_t t4k28_sensor_setting(struct msm_sensor_ctrl_t *s_ctrl,
 		PREV_FPS = -1;
 		PREV_BESTSHOT = -1;
 		DELAY_START = 0;
-		t4k28_reg_init(s_ctrl);
+		msm_sensor_write_init_settings(s_ctrl);
 		csi_config = 0;
 	} else if (update_type == MSM_SENSOR_UPDATE_PERIODIC) {
 		pr_err("PERIODIC : %d\n", res);
@@ -897,14 +694,15 @@ int32_t t4k28_sensor_setting(struct msm_sensor_ctrl_t *s_ctrl,
 			csi_config = 1;
 			s_ctrl->func_tbl->sensor_start_stream(s_ctrl);
 		}
-		t4k28_sensor_write_conf_array(
+		msm_sensor_write_conf_array(
 			s_ctrl->sensor_i2c_client,
 			s_ctrl->msm_sensor_reg->mode_settings, res);
 
 		v4l2_subdev_notify(&s_ctrl->sensor_v4l2_subdev,
 			NOTIFY_PCLK_CHANGE,
 			&s_ctrl->sensordata->pdata->ioclk.vfe_clk_rate);
-
+		if (res ==0)
+			msleep(120);
 	}
 	return rc;
 }
@@ -913,7 +711,7 @@ int t4k28_sensor_power_up(struct msm_sensor_ctrl_t *s_ctrl)
 {
 	int32_t rc = 0;
 	struct msm_camera_sensor_info *data = s_ctrl->sensordata;
-	printk("%s: E %d\n", __func__, __LINE__);
+	pr_info("%s: E %d\n", __func__, __LINE__);
 	if (data->sensor_platform_info->ext_power_ctrl != NULL)
 		data->sensor_platform_info->ext_power_ctrl(1);
 
@@ -922,24 +720,28 @@ int t4k28_sensor_power_up(struct msm_sensor_ctrl_t *s_ctrl)
 		pr_err("%s: request gpio failed\n", __func__);
 		goto request_gpio_failed;
 	}
-/*LGE_CHANGE_S, V1 Camera Bring UP, 2013.03.04, aidan.cho@lge.com */
+
 	// 1. RESET LOW
 	if (data->sensor_reset_enable) {
-		rc = gpio_request(data->sensor_reset, "t4k28_reset");	//msm_camera_request_gpio_table(reset pin already requested)
+		rc = gpio_request(data->sensor_reset, "t4k28_reset");
 		if (rc < 0)
-			pr_err("%s: gpio_request:CAM_RESET %d failed\n", __func__, data->sensor_reset);
+			pr_err("%s: gpio_request:CAM_RESET %d failed\n",
+					__func__, data->sensor_reset);
 		rc = gpio_direction_output(data->sensor_reset, 0);
 		if (rc < 0)
-			pr_err("%s: gpio:CAM_RESET %d direction can't be set\n", __func__, data->sensor_reset);
+			pr_err("%s: gpio:CAM_RESET %d direction can't be set\n",
+					 __func__, data->sensor_reset);
 	}
 
 	// 2. PWDN LOW
 	rc = gpio_request(data->sensor_pwd, "t4k28_pwdn");
 	if (rc < 0)
-		pr_err("%s: gpio_request:CAM_PWDN %d failed\n", __func__, data->sensor_pwd);
+		pr_err("%s: gpio_request:CAM_PWDN %d failed\n", __func__,
+				data->sensor_pwd);
 	rc = gpio_direction_output(data->sensor_pwd, 0);
 	if (rc < 0)
-		pr_err("%s: gpio:CAM_PWDN %d direction can't be set\n", __func__, data->sensor_pwd);
+		pr_err("%s: gpio:CAM_PWDN %d direction can't be set\n",
+				__func__, data->sensor_pwd);
 	msleep(1);
 
 	// 3. CAM PWR ON
@@ -950,10 +752,9 @@ int t4k28_sensor_power_up(struct msm_sensor_ctrl_t *s_ctrl)
 	}
 	msleep(1);
 
-   // 4. MCLK Enable
+	// 4. MCLK Enable
 	if (s_ctrl->clk_rate != 0)
 		cam_clk_info->clk_rate = s_ctrl->clk_rate;
-
 	pr_err("MCLK set\n");
 
 	rc = msm_cam_clk_enable(&s_ctrl->sensor_i2c_client->client->dev,
@@ -964,22 +765,14 @@ int t4k28_sensor_power_up(struct msm_sensor_ctrl_t *s_ctrl)
 	}
 	msleep(1);
 
-/*	// 4. PWDN HIGH
-	rc = gpio_direction_output(data->sensor_pwd, 1);
-	if (rc < 0) {
-		pr_err("%s: gpio:CAM_PWDN %d direction can't be set\n", __func__, data->sensor_pwd);
-	}
-	msleep(1);
-*/
-
-/*LGE_CHANGE_E, V1 Camera Bring UP, 2013.03.04, aidan.cho@lge.com */
 	// 6. RESET HIGH
 	rc = gpio_direction_output(data->sensor_reset, 1);
 	if (rc < 0)
-		pr_err("%s: gpio:CAM_RESET %d direction can't be set\n", __func__, data->sensor_reset);
+		pr_err("%s: gpio:CAM_RESET %d direction can't be set\n",
+				__func__, data->sensor_reset);
 	msleep(1);
 
-	printk("%s: X %d\n", __func__, __LINE__);
+	pr_info("%s: X %d\n", __func__, __LINE__);
 
 	return rc;
 enable_clk_failed:
@@ -993,21 +786,17 @@ config_gpio_failed:
 
 int t4k28_sensor_power_down(struct msm_sensor_ctrl_t *s_ctrl)
 {
-
-
-/*LGE_CHANGE_S, V1 Camera Bring UP, 2013.03.04, aidan.cho@lge.com */
 	struct msm_camera_sensor_info *data = s_ctrl->sensordata;
 	int32_t rc = 0;
-	printk("%s: E %d\n", __func__, __LINE__);
-//	if (data->sensor_platform_info->ext_power_ctrl != NULL)
-//		data->sensor_platform_info->ext_power_ctrl(0);
+	pr_info("%s: E %d\n", __func__, __LINE__);
 
 	// 1. RESET LOW
 	msleep(1);
 	if (data->sensor_reset_enable) {
 		rc = gpio_direction_output(data->sensor_reset, 0);
 		if (rc < 0)
-			pr_err("%s: gpio:CAM_RESET %d direction can't be set\n", __func__, data->sensor_reset);
+			pr_err("%s: gpio:CAM_RESET %d direction can't be set\n",
+					__func__, data->sensor_reset);
 		gpio_free(data->sensor_reset);
 	}
 	msleep(1);
@@ -1017,14 +806,8 @@ int t4k28_sensor_power_down(struct msm_sensor_ctrl_t *s_ctrl)
 		cam_clk_info, &s_ctrl->cam_clk, ARRAY_SIZE(cam_clk_info), 0);
 	msleep(1);
 
-/*   // 3. PWDN LOW  // V1 Camera Bring UP, 2013.03.04, aidan.cho@lge.com
-	rc = gpio_direction_output(data->sensor_pwd, 0);
-	if (rc < 0)
-		pr_err("%s: gpio:CAM_PWDN %d direction can't be set\n", __func__, data->sensor_pwd);
-*/ // V1 Camera Bring UP, 2013.03.04, aidan.cho@lge.com
 	gpio_free(data->sensor_pwd);
 	msleep(1);
-
 
 	// 4. CAM PWR OFF
 	msm_camera_config_gpio_table(data, 0);
@@ -1034,14 +817,13 @@ int t4k28_sensor_power_down(struct msm_sensor_ctrl_t *s_ctrl)
 		data->sensor_platform_info->ext_power_ctrl(0);
 
 	kfree(s_ctrl->reg_ptr);
-	printk("%s: X %d\n", __func__, __LINE__);
+	pr_info("%s: X %d\n", __func__, __LINE__);
 	return 0;
-/*LGE_CHANGE_E, V1 Camera Bring UP, 2013.03.04, aidan.cho@lge.com */
 }
 
 int32_t t4k28_camera_i2c_write_tbl(struct msm_camera_i2c_client *client,
-                                     struct msm_camera_i2c_reg_conf *reg_conf_tbl, uint16_t size,
-                                     enum msm_camera_i2c_data_type data_type)
+ struct msm_camera_i2c_reg_conf *reg_conf_tbl, uint16_t size,
+ enum msm_camera_i2c_data_type data_type)
 {
 	int i;
 	int32_t rc = -EFAULT;
@@ -1080,19 +862,19 @@ int32_t t4k28_camera_i2c_write_tbl(struct msm_camera_i2c_client *client,
 void t4k28_sensor_start_stream(struct msm_sensor_ctrl_t *s_ctrl)
 {
 	t4k28_camera_i2c_write_tbl(
-	        s_ctrl->sensor_i2c_client,
-	        s_ctrl->msm_sensor_reg->start_stream_conf,
-	        s_ctrl->msm_sensor_reg->start_stream_conf_size,
-	        s_ctrl->msm_sensor_reg->default_data_type);
+		s_ctrl->sensor_i2c_client,
+		s_ctrl->msm_sensor_reg->start_stream_conf,
+		s_ctrl->msm_sensor_reg->start_stream_conf_size,
+		s_ctrl->msm_sensor_reg->default_data_type);
 }
 
 void t4k28_sensor_stop_stream(struct msm_sensor_ctrl_t *s_ctrl)
 {
 	t4k28_camera_i2c_write_tbl(
-	        s_ctrl->sensor_i2c_client,
-	        s_ctrl->msm_sensor_reg->stop_stream_conf,
-	        s_ctrl->msm_sensor_reg->stop_stream_conf_size,
-	        s_ctrl->msm_sensor_reg->default_data_type);
+		s_ctrl->sensor_i2c_client,
+		s_ctrl->msm_sensor_reg->stop_stream_conf,
+		s_ctrl->msm_sensor_reg->stop_stream_conf_size,
+		s_ctrl->msm_sensor_reg->default_data_type);
 }
 
 int32_t t4k28_match_id(struct msm_sensor_ctrl_t *s_ctrl)
@@ -1116,7 +898,6 @@ int32_t t4k28_match_id(struct msm_sensor_ctrl_t *s_ctrl)
 		return rc;
 	}
 
-	CDBG("t4k28_sensor id: %d\n", chipid);
 	if (chipid != s_ctrl->sensor_id_info->sensor_id) {
 		pr_err("t4k28_match chip id doesnot match\n");
 		return -ENODEV;
@@ -1144,14 +925,8 @@ static struct msm_sensor_fn_t t4k28_func_tbl = {
 	.sensor_power_up = t4k28_sensor_power_up,
 	.sensor_power_down = t4k28_sensor_power_down,
 	.sensor_get_csi_params = msm_sensor_get_csi_params,
-#ifdef CONFIG_MACH_LGE
-//	.sensor_set_wb = t4k28_set_wb,
-//	.sensor_set_effect = t4k28_set_effect,
-//	.sensor_set_brightness = t4k28_set_brightness,
-//	.sensor_set_soc_minmax_fps = t4k28_set_fps,
 	.sensor_match_id = t4k28_match_id,
 	.sensor_get_soc_snapshotdata = t4k28_get_snapshot_data,
-#endif
 };
 
 static struct msm_sensor_reg_t t4k28_regs = {
@@ -1163,10 +938,8 @@ static struct msm_sensor_reg_t t4k28_regs = {
 	.init_settings = &t4k28_init_conf[0],
 	.init_size = ARRAY_SIZE(t4k28_init_conf),
 	.mode_settings = &t4k28_confs[0],
-//	.no_effect_settings = &t4k28_no_effect_confs[0],
 	.output_settings = &t4k28_dimensions[0],
 	.num_conf = ARRAY_SIZE(t4k28_confs),
-
 };
 
 static struct msm_sensor_ctrl_t t4k28_s_ctrl = {
@@ -1174,7 +947,7 @@ static struct msm_sensor_ctrl_t t4k28_s_ctrl = {
 	.msm_sensor_v4l2_ctrl_info = t4k28_v4l2_ctrl_info,
 	.num_v4l2_ctrl = ARRAY_SIZE(t4k28_v4l2_ctrl_info),
 	.sensor_i2c_client = &t4k28_sensor_i2c_client,
-	.sensor_i2c_addr = 0x78, // V1 Camera Bring UP, 2013.03.04, aidan.cho@lge.com */
+	.sensor_i2c_addr = 0x78,
 	.sensor_output_reg_addr = &t4k28_reg_addr,
 	.sensor_id_info = &t4k28_id_info,
 	.cam_mode = MSM_SENSOR_MODE_INVALID,
@@ -1189,6 +962,6 @@ static struct msm_sensor_ctrl_t t4k28_s_ctrl = {
 };
 
 module_init(msm_sensor_init_module);
-MODULE_DESCRIPTION("Hynix 3M YUV sensor driver");
+MODULE_DESCRIPTION("Toshiba 2M YUV sensor driver");
 MODULE_LICENSE("GPL v2");
 
