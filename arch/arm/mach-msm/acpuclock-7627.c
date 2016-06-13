@@ -234,14 +234,16 @@ static struct clkctl_acpu_speed pll0_960_pll1_245_pll2_1200_pll4_1008[] = {
 	{ 1, 480000, ACPU_PLL_0, 4, 1, 60000, 3, 5, 122880 },
 	{ 0, 504000, ACPU_PLL_4, 6, 1, 63000, 3, 6, 160000 },
 	{ 1, 600000, ACPU_PLL_2, 2, 1, 75000, 3, 6, 160000 },
+	{ 1, 700000, ACPU_PLL_4, 6, 0, 87500, 3, 6, 200000 },
 	{ 1, 800000, ACPU_PLL_4, 6, 0, 100000, 3, 6, 200000 },
-	{ 1, 1008000, ACPU_PLL_4, 6, 0, 126000, 3, 7, 200000 },
+	{ 1, 900000, ACPU_PLL_4, 6, 0, 112500, 3, 6, 200000 },
+	{ 1, 1000000, ACPU_PLL_4, 6, 0, 125000, 3, 7, 200000 },
 #ifdef CONFIG_MSM7X27A_OVERCLOCK
-	{ 1, 1113600, ACPU_PLL_4, 6, 0, 139200, 3, 7, 200000 },
-	{ 1, 1228800, ACPU_PLL_4, 6, 0, 153600, 3, 7, 200000 },
+	{ 1, 1100000, ACPU_PLL_4, 6, 0, 137500, 3, 7, 200000 },
+	{ 1, 1200000, ACPU_PLL_4, 6, 0, 150000, 3, 7, 200000 },
 	{ 1, 1300000, ACPU_PLL_4, 6, 0, 162500, 3, 7, 200000 },
 #if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
-	{ 1, 1396000, ACPU_PLL_4, 6, 0, 174500, 3, 7, 200000 },
+	{ 1, 1400000, ACPU_PLL_4, 6, 0, 175000, 3, 7, 200000 },
 #endif
 #endif
 	{ 0 }
@@ -642,7 +644,7 @@ static void acpuclk_set_div(const struct clkctl_acpu_speed *hunt_s)
 #ifdef CONFIG_MACH_MSM7X25A_M4
 	if (hunt_s->a11clk_khz>800000) {
 #else
-	if (hunt_s->a11clk_khz>1008000) {
+	if (hunt_s->a11clk_khz>1000000) {
 #endif
 		a11_div = 0;
 		writel(hunt_s->a11clk_khz/19200, MSM_CLK_CTL_BASE+0x33C);
