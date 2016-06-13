@@ -718,7 +718,6 @@ export MODLIB
 #  the default option --strip-debug will be used.  Otherwise,
 #  INSTALL_MOD_STRIP value will be used as the options to the strip command.
 
-INSTALL_MOD_STRIP := 1
 ifdef INSTALL_MOD_STRIP
 ifeq ($(INSTALL_MOD_STRIP),1)
 mod_strip_cmd = $(STRIP) --strip-debug
