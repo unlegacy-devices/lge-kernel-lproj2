@@ -133,22 +133,23 @@ then
 	wrong_choice
 	unset device_name device_defconfig
 else
-	echo "${x} | Building ${builder} ${custom_kernel}"
+	echo "${x} | Building ${builder} ${custom_kernel} ${custom_kernel_branch}"
 
 	if [ $(which ccache) ]
 	then
 		kernel_build_ccache="ccache "
+		echo "  | ${color_blue}Using CCache to build${color_stock}"
 	else
-		echo "  | CCache not enabled!"
+		echo "  | ${color_blue}CCache not enabled${color_stock}"
 	fi
 
-	echo "  | ${color_blue}Building ${custom_kernel} with ${build_cpu_usage} jobs at once${ccache_build}${color_stock}"
+	echo "  | ${color_blue}Using ${build_cpu_usage} jobs at once${color_stock}"
 
 	start_build_time=$(date +"%s")
 	make -j${build_cpu_usage}${kernel_build_output_enable} CROSS_COMPILE="${kernel_build_ccache}${CROSS_COMPILE}"
 	if ! [ "$?" == "0" ]
 	then
-		echo "${color_red}  | Build Failed! Exiting...${color_stock}"
+		echo "  | ${color_red}Build Failed! Exiting...${color_stock}"
 		break
 	fi
 	sleep 2
@@ -163,7 +164,7 @@ if ! [ "${device_defconfig}" == "" ]
 then
 	if [ -f arch/${ARCH}/boot/zImage ]
 	then
-		echo "${x} | Ziping ${builder} ${custom_kernel}"
+		echo "${x} | Ziping ${builder} ${custom_kernel} ${custom_kernel_branch}"
 
 		zip_out="zip-creator_out"
 		rm -rf ${zip_out}
@@ -175,7 +176,7 @@ then
 		cp arch/${ARCH}/boot/zImage ${zip_out}/
 
 		echo "${builder}" >> ${zip_out}/device.prop
-		echo "${custom_kernel}" >> ${zip_out}/device.prop
+		echo "${custom_kernel} ${custom_kernel_branch}" >> ${zip_out}/device.prop
 		echo "${device_name}" >> ${zip_out}/device.prop
 		echo "Release ${release}" >> ${zip_out}/device.prop
 
@@ -224,7 +225,7 @@ fi
 zip_copy_adb() {
 if [ -f zip-creator/${zipfile} ]
 then
-	echo "${x} | Coping ${builder} ${custom_kernel}-"
+	echo "${x} | Coping ${builder} ${custom_kernel} ${custom_kernel_branch}"
 	echo
 	adb shell rm -rf /data/media/0/${zipfile} &> /dev/null
 	adb push zip-creator/${zipfile} /data/media/0/${zipfile} &> /dev/null
@@ -264,6 +265,7 @@ then
 	# Main Variables
 	custom_kernel=LProj-CAFKernel
 	builder=TeamHackLG
+	custom_kernel_branch=KK
 	export ARCH=arm
 
 	while true
@@ -281,9 +283,9 @@ then
 		then
 			if [ "${build_time_minutes}" == "" ]
 			then
-				menu_build_time="(Build Time | ${color_green}$((${build_time} % 60))s${color_stock})"
+				menu_build_time="(${color_green}$((${build_time} % 60))s${color_stock})"
 			else
-				menu_build_time="(Build Time | ${color_green}${build_time_minutes}m$((${build_time} % 60))s${color_stock})"
+				menu_build_time="(${color_green}${build_time_minutes}m$((${build_time} % 60))s${color_stock})"
 			fi
 		fi
 		build_cpu_usage=$(($(grep -c ^processor /proc/cpuinfo) + 1))
@@ -298,18 +300,18 @@ then
 			echo "0" > .version
 		fi
 		build=$(cat .version)
-		export zipfile="${custom_kernel}-${device_name}-${release}-${build}.zip"
+		export zipfile="${custom_kernel}-${custom_kernel_branch}-${device_name}-${release}-${build}.zip"
 		# Check ZIP
 		if [ -f zip-creator/${zipfile} ]
 		then
-			menu_zipfile="(Saved on | ${color_green}zip-creator/${zipfile}${color_stock})"
+			menu_zipfile="(${color_green}zip-creator/${zipfile}${color_stock})"
 		else
 			unset menu_zipfile
 		fi
 		# Menu
 		clear
 		echo "  | Simple Linux Kernel ${kernel_base} Build Script ($(date +%d"/"%m"/"%Y))"
-		echo "  | ${builder} ${custom_kernel} Release $(date +%d"/"%m"/"%Y) Build #${build}"
+		echo "  | ${builder} ${custom_kernel} ${custom_kernel_branch} Release $(date +%d"/"%m"/"%Y) Build #${build}"
 		echo
 		echo "  | ${color_red}Clean Menu${color_stock}"
 		echo "1 | Clean Zip Folder"
