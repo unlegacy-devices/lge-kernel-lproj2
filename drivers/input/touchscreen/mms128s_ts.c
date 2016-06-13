@@ -50,7 +50,6 @@ struct vreg {
 	unsigned refcnt;
 };
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
 #include <linux/earlysuspend.h>
 
 extern void GetManual(void *wParam, void *lParam);
@@ -63,14 +62,10 @@ extern void mms100_download(void);
 static struct early_suspend ts_early_suspend;
 static void mcs8000_early_suspend(struct early_suspend *h);
 static void mcs8000_late_resume(struct early_suspend *h);
-#endif
 
-static int mcs8000_ts_off(void);
-int mcs8000_ts_on(void);
 static void mcs8000_Data_Clear(void);
 static void ResetTS(void);
 
-#define LG_FW_HARDKEY_BLOCK
 #define TOUCH_SEARCH	247
 #define TOUCH_BACK	248
 
@@ -114,7 +109,6 @@ static void ResetTS(void);
 #define I2C_RETRY_CNT	10
 #define PRESS_KEY	1
 #define RELEASE_KEY	0
-#define DEBUG_PRINT	0
 
 #define	SET_DOWNLOAD_BY_GPIO	1
 #define TS_MODULE_A	0
@@ -155,10 +149,8 @@ struct mcs8000_ts_device {
 	struct input_dev *input_dev;
 
 	struct work_struct  work;
-#ifdef LG_FW_HARDKEY_BLOCK
 	struct hrtimer touch_timer;
 	bool hardkey_block;
-#endif
 	int num_irq;
 	int intr_gpio;
 	int scl_gpio;
@@ -177,8 +169,6 @@ struct mcs8000_ts_device {
 
 static struct input_dev *mcs8000_ts_input;
 struct mcs8000_ts_device mcs8000_ts_dev;
-static int is_downloading;
-static int is_touch_suspend;
 int fw_rev;
 int Is_Release_Error[MELFAS_MAX_TOUCH] = {0};
 
@@ -454,17 +444,17 @@ static int firmware_update(struct mcs8000_ts_device *ts)
 
 	GetManual(&iValue, 0);
 	if (iValue == MANUAL_DOWNLOAD_ENABLE) {
-		pr_info("MANUAL_DOWNLOAD_ENABLE: MFS_ISC_update\n");
+		pr_info("%s: MANUAL_DOWNLOAD_ENABLE: MFS_ISC_update\n", __func__);
 		ret = MFS_ISC_update();
 	} else {
 		mcs8000_firmware_info(&fw_ver, &hw_ver, &comp_ver);
-		pr_info("Firmware ver: [%d], HW ver: [%d]\n", fw_ver, hw_ver);
+		pr_info("%s: Firmware ver: [%d], HW ver: [%d]\n", __func__, fw_ver, hw_ver);
 
 		if (((fw_ver < MELFAS_FW_VERSION) && (comp_ver == 2)) || (fw_ver == 0x0) || (fw_ver == 0xFF) || (comp_ver == 0)) {
-			pr_info("MFS_ISC_update\n");
+			pr_info("%s: MFS_ISC_update\n", __func__);
 			ret = MFS_ISC_update();
 		} else
-			pr_info("MFS_ISC_update SKIP!!\n");
+			pr_info("%s: MFS_ISC_update SKIP!!\n", __func__);
 
 	}
 	return ret;
@@ -533,61 +523,42 @@ static long mcs8000_ioctl(struct file *file, unsigned int cmd, unsigned long arg
 		case MCS8000_TS_IOCTL_MAGIC:
 			switch (cmd) {
 				case MCS8000_TS_IOCTL_FW_VER:
-				{
-					if (is_touch_suspend) {
-						if (power_flag == 0) {
-							power_flag++;
-							dev->power(ON);
-							msleep(100);
-						}
+					if (power_flag == 0) {
+						power_flag++;
+						pr_info("%s: power(ON)\n", __func__);
+						dev->power(ON);
 					}
-
 					mcs8000_firmware_info(&fw_ver, &hw_ver, &comp_ver);
-					pr_info("Firmware ver: [%d],HW ver: [%d], Product ver: [%d]\n", fw_ver, hw_ver, comp_ver);
-
-					if (is_touch_suspend) {
-						if (power_flag == 1) {
-							power_flag--;
-							dev->power(OFF);
-							msleep(100);
-						}
+					pr_info("%s: Firmware ver: [%d],HW ver: [%d], Product ver: [%d]\n", __func__, fw_ver, hw_ver, comp_ver);
+					if (power_flag == 1) {
+						power_flag--;
+						pr_info("%s: power(OFF)\n", __func__);
+						dev->power(OFF);
 					}
 					break;
-				}
 				case MCS8000_TS_IOCTL_MAIN_ON:
 				case MCS8000_TS_IOCTL_MAIN_OFF:
 					break;
-
 				case MCS8000_TS_IOCTL_DEBUG:
-					{
 					if (g_touchLogEnable)
 						g_touchLogEnable = 0;
 					else
 						g_touchLogEnable = 1;
-
 					err = g_touchLogEnable;
 					pr_info("<MELFAS>: Touch Log: %s\n", g_touchLogEnable ? "ENABLE" : "DISABLE");
 					break;
-				}
-
 				case MCS8000_TS_IOCTL_KERNEL_DOWN:
-				{
 					pr_info("Normal Touch Firmware Down Load\n");
-
-					if (is_touch_suspend) {
-						if (power_flag == 0) {
-							power_flag++;
-							dev->power(ON);
-							msleep(100);
-						}
+					if (power_flag == 0) {
+						power_flag++;
+						pr_info("%s: power(ON)\n", __func__);
+						dev->power(ON);
 					}
-
 					if (irq_flag == 0) {
 						irq_flag++;
 						pr_info("%s: disable_irq\n", __func__);
 						disable_irq(dev->num_irq);
 					}
-
 					firmware_update(dev);
 
 					dev->power(OFF);
@@ -599,53 +570,48 @@ static long mcs8000_ioctl(struct file *file, unsigned int cmd, unsigned long arg
 						pr_info("%s: enable_irq\n", __func__);
 						enable_irq(dev->num_irq);
 					}
-				break;
-			}
-		case MCS8000_TS_IOCTL_KERNEL_DOWN_MANUAL:
-		{
-			pr_info("Manual Touch Firmware Down Load\n");
-			SetManual();
+					break;
+				case MCS8000_TS_IOCTL_KERNEL_DOWN_MANUAL:
+					pr_info("Manual Touch Firmware Down Load\n");
+					SetManual();
 
-			if (is_touch_suspend) {
-				if (power_flag == 0) {
-					power_flag++;
+					if (power_flag == 0) {
+						power_flag++;
+						pr_info("%s: power(ON)\n", __func__);
+						dev->power(ON);
+					}
+
+					if (irq_flag == 0) {
+						irq_flag++;
+						pr_info("%s: disable_irq\n", __func__);
+						disable_irq(dev->num_irq);
+					}
+					firmware_update(dev);
+
+					pr_info("%s: power(OFF)\n", __func__);
+					dev->power(OFF);
+					msleep(20);
+
+					pr_info("%s: power(ON)\n", __func__);
 					dev->power(ON);
-					msleep(100);
-				}
 
+					if (irq_flag == 1) {
+						irq_flag--;
+						pr_info("%s: enable_irq\n", __func__);
+						enable_irq(dev->num_irq);
+					}
+
+					ResetManual();
+					break;
 			}
-
-			if (irq_flag == 0) {
-				irq_flag++;
-				pr_info("%s: disable_irq\n", __func__);
-				disable_irq(dev->num_irq);
-			}
-			firmware_update(dev);
-
-			dev->power(OFF);
-			msleep(20);
-			dev->power(ON);
-
-			if (irq_flag == 1) {
-				irq_flag--;
-				pr_info("%s: enable_irq\n", __func__);
-				enable_irq(dev->num_irq);
-			}
-
-			ResetManual();
 			break;
-		}
-	}
-	break;
-
-	case MCS8000_TS_DOWN_IOCTL_DELAY:
-		mcs8000_ts_ioctl_delay(cmd);
-	break;
-
-	default:
-		pr_err("mcs8000_ts_ioctl: unknown ioctl\n");
-		err = -EINVAL;
-		break;
+		case MCS8000_TS_DOWN_IOCTL_DELAY:
+			mcs8000_ts_ioctl_delay(cmd);
+			break;
+		default:
+			pr_err("mcs8000_ts_ioctl: unknown ioctl\n");
+			err = -EINVAL;
+			break;
 	}
 	lRet = (long)err;
 
@@ -675,7 +641,6 @@ static int mcs8000_open(struct inode *inode, struct file *file)
 	wake_lock(&ts->wakelock);
 
 	ts->status = MCS8000_DEV_DOWNLOAD;
-	is_downloading = 1;
 
 	return 0;
 }
@@ -696,9 +661,10 @@ static int mcs8000_release(struct inode *inode, struct file *file)
 		if (MCS8000_DM_TRACE_YES & mcs8000_debug_mask)
 			pr_info("touch download done: power off by ioctl\n");
 	} else {
-		enable_irq(ts->num_irq);
 		ts->irq_sync++;
-			pr_info("touch download done: irq enabled by ioctl\n");
+		pr_info("%s: enable_irq\n", __func__);
+		enable_irq(ts->num_irq);
+		pr_info("touch download done: irq enabled by ioctl\n");
 
 		ts->status = MCS8000_DEV_NORMAL;
 	}
@@ -706,7 +672,6 @@ static int mcs8000_release(struct inode *inode, struct file *file)
 	misc_opened = 0;
 
 	wake_unlock(&ts->wakelock);
-	is_downloading = 0;
 
 	return 0;
 }
@@ -739,13 +704,12 @@ void Send_Touch(unsigned int x, unsigned int y)
 }
 EXPORT_SYMBOL(Send_Touch);
 
-#ifdef LG_FW_HARDKEY_BLOCK
 static enum hrtimer_restart timed_touch_timer_func(struct hrtimer *timer)
 {
 	mcs8000_ts_dev.hardkey_block = 0;
 	return HRTIMER_NORESTART;
 }
-#endif
+
 static struct muti_touch_info g_Mtouch_info[MELFAS_MAX_TOUCH];
 
 static void ResetTS(void)
@@ -757,12 +721,17 @@ static void ResetTS(void)
 
 	if (power_flag == 1) {
 		power_flag--;
+		pr_info("%s: power(OFF)\n", __func__);
 		dev->power(OFF);
 	}
 
 	msleep(20);
 
-	mcs8000_ts_on();
+	if (power_flag == 0) {
+		power_flag++;
+		pr_info("%s: power(ON)\n", __func__);
+		dev->power(ON);
+	}
 
 	pr_debug("Reset TS For ESD\n");
 }
@@ -794,22 +763,8 @@ static void mcs8000_work(struct work_struct *work)
 
 	unsigned char fw_ver = 0, hw_ver = 0, comp_ver = 0;
 
-#ifdef DEBUG_PRINT
-	pr_err("melfas_ts_work_func\n");
 	if (ts == NULL)
-		pr_err("melfas_ts_work_func: TS NULL\n");
-#endif
-
-	if (is_touch_suspend == 1) {
-#ifdef DEBUG_PRINT
-		pr_err("mcs8000_work: is_touch_suspend == 1, EXIT!!\n");
-#endif
-
-		msleep(20);
-		enable_irq(ts->client->irq);
-
-		return;
-	}
+		pr_err("%s: TS NULL\n", __func__);
 
 	for (i = 0; i < I2C_RETRY_CNT; i++) {
 		buf[0] = TS_READ_START_ADDR;
@@ -821,24 +776,20 @@ static void mcs8000_work(struct work_struct *work)
 			break;
 	}
 	if (ret < 0 ) {
-#ifdef DEBUG_PRINT
-		pr_err("mcs8000_work: i2c failed\n");
-#endif
+		pr_err("%s: i2c failed\n", __func__);
 		ResetTS();
+		pr_info("%s: enable_irq\n", __func__);
 		enable_irq(ts->client->irq);
 		return;
 	} else {
 		read_num = buf[0];
-#ifdef DEBUG_PRINT
-		pr_info("mcs8000_work: read_num: [%d]\n", read_num);
-#endif
+		pr_debug("%s: read_num: [%d]\n", __func__, read_num);
 	}
 
 	iTouchedCnt = 6*5;
 	if (read_num > iTouchedCnt) {
-#ifdef DEBUG_PRINT
-		pr_info("mcs8000_work: read_num > iTouchedCnt EXIT !!\n");
-#endif
+		pr_info("%s: read_num > iTouchedCnt EXIT !!\n", __func__);
+		pr_info("%s: enable_irq\n", __func__);
 		enable_irq(ts->client->irq);
 		return;
 	}
@@ -857,10 +808,9 @@ static void mcs8000_work(struct work_struct *work)
 		}
 
 		if (ret < 0) {
-#ifdef DEBUG_PRINT
-			pr_err("mcs8000_work: i2c failed\n");
-#endif
+			pr_err("%s: i2c failed\n", __func__);
 			ResetTS();
+			pr_info("%s: enable_irq\n", __func__);
 			enable_irq(ts->client->irq);
 			return;
 
@@ -868,18 +818,15 @@ static void mcs8000_work(struct work_struct *work)
 
 		ucSensedInfo = buf[0];
 		if (CheckTSForESD(ucSensedInfo)) {
-#ifdef DEBUG_PRINT
-			pr_info("mcs8000_work: ESD EXIT !!\n");
-#endif
+			pr_info("%s: ESD EXIT !!\n", __func__);
+			pr_info("%s: enable_irq\n", __func__);
 			enable_irq(ts->client->irq);
 			return;
 		}
 
 		for (i = 0; i < read_num; i = i + 6) {
 			touchType  = (buf[i] >> 5) & 0x03;
-#ifdef DEBUG_PRINT
-			pr_info("TouchType: [%d]\n", touchType);
-#endif
+			pr_info("%s: TouchType: [%d]\n", __func__, touchType);
 
 			/* Touch Type is Screen */
 			if (touchType == TOUCH_SCREEN) {
@@ -901,7 +848,7 @@ static void mcs8000_work(struct work_struct *work)
 				touchState = (buf[i] & 0x80);
 
 				if (g_touchLogEnable)
-					pr_info("keyID: [%d]\n", keyID);
+					pr_info("%s: keyID: [%d]\n", __func__, keyID);
 
 				mcs8000_firmware_info(&fw_ver, &hw_ver, &comp_ver);
 
@@ -955,7 +902,7 @@ static void mcs8000_work(struct work_struct *work)
 					input_mt_sync(ts->input_dev);
 
 				if (g_touchLogEnable) {
-					pr_err("melfas_ts_work_func: Touch ID: %d, State: %d, x: %d, y: %d, z: %d w: %d\n",
+					pr_err("%s: Touch ID: %d, State: %d, x: %d, y: %d, z: %d w: %d\n", __func__,
 							j, (g_Mtouch_info[j].strength > 0), g_Mtouch_info[j].posX, g_Mtouch_info[j].posY, g_Mtouch_info[j].strength, g_Mtouch_info[j].width);
 				}
 
@@ -972,12 +919,11 @@ static void mcs8000_work(struct work_struct *work)
 	if (Is_Touch_Valid)
 		usleep_range(1000, 1000);
 	else {
-#ifdef DEBUG_PRINT
-		pr_info("mcs8000_work: Invalid data INT happen! Added more delay");
-#endif
+		pr_info("%s: Invalid data INT happen! Added more delay", __func__);
 		msleep(20);
 	}
 
+	pr_info("%s: enable_irq\n", __func__);
 	enable_irq(ts->client->irq);
 }
 
@@ -997,60 +943,13 @@ static irqreturn_t mcs8000_ts_irq_handler(int irq, void *handle)
 {
 	struct mcs8000_ts_device *dev = (struct mcs8000_ts_device *)handle;
 
+	pr_info("%s: disable_irq_nosync\n", __func__);
 	disable_irq_nosync(dev->num_irq);
 
 	schedule_work(&dev->work);
-#ifdef DEBUG_PRINT
-	pr_err("melfas_ts_work_func is sending irq");
-#endif
+	pr_info("%s: sending irq", __func__);
 	return IRQ_HANDLED;
 }
-
-static int mcs8000_ts_off(void)
-{
-	struct mcs8000_ts_device *dev = NULL;
-	int ret = 0;
-
-	dev = &mcs8000_ts_dev;
-
-	if (power_flag == 1) {
-		power_flag--;
-		ret = dev->power(OFF);
-	}
-
-	if (ret < 0) {
-		pr_err("mcs8000_ts_on power on failed\n");
-		goto err_power_failed;
-	}
-	msleep(10);
-
-err_power_failed:
-	return ret;
-}
-
-int mcs8000_ts_on(void)
-{
-	struct mcs8000_ts_device *dev = NULL;
-	int ret = 0;
-
-	dev = &mcs8000_ts_dev;
-
-	if (power_flag == 0) {
-		power_flag++;
-		ret = dev->power(ON);
-	}
-
-	if (ret < 0) {
-		pr_err("mcs8000_ts_on power on failed\n");
-		goto err_power_failed;
-	}
-
-	msleep(30);
-
-err_power_failed:
-	return ret;
-}
-EXPORT_SYMBOL(mcs8000_ts_on);
 
 void mcs8000_firmware_info(unsigned char *fw_ver, unsigned char *hw_ver, unsigned char *comp_ver)
 {
@@ -1064,18 +963,14 @@ void mcs8000_firmware_info(unsigned char *fw_ver, unsigned char *hw_ver, unsigne
 
 	iRet = i2c_master_send(dev->client, ucTXBuf, 1);
 	if (iRet < 0) {
-#ifdef DEBUG_PRINT
-		pr_err("mcs8000_firmware_info: i2c failed\n");
+		pr_err("%s: i2c failed\n", __func__);
 		return;
-#endif
 	}
 
 	iRet = i2c_master_recv(dev->client, ucRXBuf, 1);
 	if (iRet < 0) {
-#ifdef DEBUG_PRINT
-		pr_err("mcs8000_firmware_info: i2c failed\n");
+		pr_err("%s: i2c failed\n", __func__);
 		return;
-#endif
 	}
 	*hw_ver = ucRXBuf[0];
 
@@ -1083,18 +978,14 @@ void mcs8000_firmware_info(unsigned char *fw_ver, unsigned char *hw_ver, unsigne
 
 	iRet = i2c_master_send(dev->client, ucTXBuf, 1);
 	if (iRet < 0) {
-#ifdef DEBUG_PRINT
-		pr_err("mcs8000_firmware_info: i2c failed\n");
+		pr_err("%s: i2c failed\n", __func__);
 		return;
-#endif
 	}
 
 	iRet = i2c_master_recv(dev->client, ucRXBuf, 1);
 	if (iRet < 0) {
-#ifdef DEBUG_PRINT
-		pr_err("mcs8000_firmware_info: i2c failed\n");
+		pr_err("%s: i2c failed\n", __func__);
 		return;
-#endif
 	}
 	*fw_ver = ucRXBuf[0];
 
@@ -1102,18 +993,14 @@ void mcs8000_firmware_info(unsigned char *fw_ver, unsigned char *hw_ver, unsigne
 
 	iRet = i2c_master_send(dev->client, ucTXBuf, 1);
 	if (iRet < 0) {
-#ifdef DEBUG_PRINT
-		pr_err("mcs8000_firmware_info: i2c failed\n");
+		pr_err("%s: i2c failed\n", __func__);
 		return;
-#endif
 	}
 
 	iRet = i2c_master_recv(dev->client, ucRXBuf, 10);
 	if (iRet < 0) {
-#ifdef DEBUG_PRINT
-		pr_err("mcs8000_firmware_info: i2c failed\n");
+		pr_err("%s: i2c failed\n", __func__);
 		return;
-#endif
 	}
 
 	if (strncmp(ucRXBuf, "V3_S", 4) == 0)
@@ -1123,26 +1010,32 @@ void mcs8000_firmware_info(unsigned char *fw_ver, unsigned char *hw_ver, unsigne
 	else
 		*comp_ver = 0; /* V3 Unknown */
 
-	pr_debug("Touch PRODUCT = %s, comp_ver = %d\n", ucRXBuf, *comp_ver);
+	pr_debug("%s: Touch PRODUCT = %s, comp_ver = %d\n", __func__, ucRXBuf, *comp_ver);
 }
 
 static ssize_t read_touch_version(struct device *dev, struct device_attribute *attr, char *buf)
 {
+	struct mcs8000_ts_device *ts = NULL;
+
 	int iRet = 0;
 	unsigned char hw_ver, fw_ver, comp_ver;
 
-	if (is_touch_suspend)
-		mcs8000_ts_on();
+	if (power_flag == 0) {
+		power_flag++;
+		ts->power(ON);
+	}
 
-	pr_debug("TOUCHSCREEN FW VERSION Starts\n");
+	pr_debug("%s: TOUCHSCREEN FW VERSION Starts\n", __func__);
 
 	mcs8000_firmware_info(&fw_ver, &hw_ver, &comp_ver);
 
 	iRet = sprintf(buf, "%02x\n", fw_ver);
-	pr_debug("TOUCHSCREEN FW VERSION: %d\n", fw_ver);
+	pr_debug("%s: TOUCHSCREEN FW VERSION: %d\n", __func__, fw_ver);
 
-	if (is_touch_suspend)
-		mcs8000_ts_off();
+	if (power_flag == 1) {
+		power_flag--;
+		ts->power(OFF);
+	}
 
 	return iRet;
 }
@@ -1175,7 +1068,7 @@ static int mcs8000_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	struct touch_platform_data *ts_pdata;
 	struct mcs8000_ts_device *dev;
 
-	pr_info("%s: start...\n", __func__);
+	pr_info("%s: Start!\n", __func__);
 
 	ts_pdata = client->dev.platform_data;
 
@@ -1184,9 +1077,7 @@ static int mcs8000_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	input_set_abs_params(mcs8000_ts_input, ABS_MT_TOUCH_MAJOR, 0, TS_MAX_Z_TOUCH, 0, 0);
 	input_set_abs_params(mcs8000_ts_input, ABS_MT_TRACKING_ID, 0, MELFAS_MAX_TOUCH-1, 0, 0);
 	input_set_abs_params(mcs8000_ts_input, ABS_MT_PRESSURE, 0, 255, 0, 0);
-#ifdef DEBUG_PRINT
-	pr_info("ABS_MT_POSITION_X: [%d] | ABS_MT_POSITION_Y: [%d]\n", ts_pdata->ts_x_max, ts_pdata->ts_y_max);
-#endif
+	pr_info("%s: ABS_MT_POSITION_X: [%d] | ABS_MT_POSITION_Y: [%d]\n", __func__, ts_pdata->ts_x_max, ts_pdata->ts_y_max);
 
 	dev = &mcs8000_ts_dev;
 
@@ -1198,12 +1089,11 @@ static int mcs8000_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	dev->sda_gpio = ts_pdata->sda;
 	dev->scl_gpio  = ts_pdata->scl;
 
-#ifdef LG_FW_HARDKEY_BLOCK
 	hrtimer_init(&dev->touch_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
 	dev->touch_timer.function = timed_touch_timer_func;
-#endif
+
 	dev->input_dev = mcs8000_ts_input;
-	pr_info("mcs8000 dev->num_irq is %d , dev->intr_gpio is %d\n", dev->num_irq, dev->intr_gpio);
+	pr_info("%s: dev->num_irq is %d, dev->intr_gpio is %d\n", __func__, dev->num_irq, dev->intr_gpio);
 
 	dev->client = client;
 	i2c_set_clientdata(client, dev);
@@ -1239,9 +1129,16 @@ static int mcs8000_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	pr_info("%s: disable_irq\n", __func__);
 	disable_irq(dev->num_irq);
 
-	mcs8000_ts_off();
-	msleep(10);
-	mcs8000_ts_on();
+	if (power_flag == 1) {
+		power_flag--;
+		pr_info("%s: power(OFF)\n", __func__);
+		dev->power(OFF);
+	}
+	if (power_flag == 0) {
+		power_flag++;
+		pr_info("%s: power(ON)\n", __func__);
+		dev->power(ON);
+	}
 
 	mcsdl_delay(MCSDL_DELAY_100MS);
 	mcsdl_delay(MCSDL_DELAY_100MS);
@@ -1257,20 +1154,18 @@ static int mcs8000_ts_probe(struct i2c_client *client, const struct i2c_device_i
 		return err;
 	}
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
+	pr_info("%s: enable_irq\n", __func__);
+	enable_irq(dev->num_irq);
+
 	ts_early_suspend.suspend = mcs8000_early_suspend;
 	ts_early_suspend.resume = mcs8000_late_resume;
 	ts_early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1 ;
 	register_early_suspend(&ts_early_suspend);
-#endif
 
 	mcs8000_ext_ts = dev;
 	wake_lock_init(&dev->wakelock, WAKE_LOCK_SUSPEND, "mcs8000");
 
 	mcs8000_create_file(mcs8000_ts_input);
-
-	pr_info("%s: enable_irq\n", __func__);
-	enable_irq(dev->num_irq);
 	return 0;
 }
 
@@ -1284,87 +1179,35 @@ static int mcs8000_ts_remove(struct i2c_client *client)
 	return 0;
 }
 
-#ifndef CONFIG_HAS_EARLYSUSPEND
-static int mcs8000_ts_suspend(struct i2c_client *client, pm_message_t mesg)
-{
-	struct mcs8000_ts_device *dev = i2c_get_clientdata(client);
-
-	if (is_downloading == 0) {
-		pr_info("%s: start!\n", __func__);
-		pr_info("%s: disable_irq\n", __func__);
-		disable_irq(dev->num_irq);
-
-		if (power_flag == 1) {
-			power_flag--;
-			dev->power(OFF);
-		}
-	}
-	is_touch_suspend = 1;
-
-	return 0;
-}
-
-static int mcs8000_ts_resume(struct i2c_client *client)
-{
-	struct mcs8000_ts_device *dev = i2c_get_clientdata(client);
-
-	if (is_downloading == 0) {
-		pr_info("%s: start!\n", __func__);
-
-		if (power_flag == 0) {
-			power_flag++;
-			dev->power(ON);
-		}
-
-		pr_info("%s: enable_irq\n", __func__);
-		enable_irq(dev->num_irq);
-	}
-	is_touch_suspend = 0;
-
-	return 0;
-}
-#endif
-
-#ifdef CONFIG_HAS_EARLYSUSPEND
 static void mcs8000_early_suspend(struct early_suspend *h)
 {
 	struct mcs8000_ts_device *dev = &mcs8000_ts_dev;
 
-	if (is_downloading == 0) {
+	mcs8000_Data_Clear();
 
-		mcs8000_Data_Clear();
+	pr_info("%s: disable_irq\n", __func__);
+	disable_irq(dev->num_irq);
 
-		pr_info"%s: start!\n", __func__);
-		pr_info("%s: disable_irq\n", __func__);
-		disable_irq(dev->num_irq);
-
-		if (power_flag == 1) {
-			power_flag--;
-			dev->power(OFF);
-		}
-
+	if (power_flag == 1) {
+		power_flag--;
+		pr_info("%s: power(OFF)\n", __func__);
+		dev->power(OFF);
 	}
-	is_touch_suspend = 1;
 }
 
 static void mcs8000_late_resume(struct early_suspend *h)
 {
 	struct mcs8000_ts_device *dev = &mcs8000_ts_dev;
 
-	if (is_downloading == 0) {
-		pr_info(KERN_INFO"%s: start!\n", __func__);
-
-		if (power_flag == 0) {
-			power_flag++;
-			dev->power(ON);
-		}
-
-		pr_info("%s: enable_irq\n", __func__);
-		enable_irq(dev->num_irq);
+	if (power_flag == 0) {
+		power_flag++;
+		pr_info("%s: power(ON)\n", __func__);
+		dev->power(ON);
 	}
-	is_touch_suspend = 0;
+
+	pr_info("%s: enable_irq\n", __func__);
+	enable_irq(dev->num_irq);
 }
-#endif
 
 static const struct i2c_device_id mcs8000_ts_id[] = {
 	{"touch_mcs8000", 1},
@@ -1375,10 +1218,6 @@ static const struct i2c_device_id mcs8000_ts_id[] = {
 static struct i2c_driver mcs8000_i2c_ts_driver = {
 	.probe = mcs8000_ts_probe,
 	.remove = mcs8000_ts_remove,
-#ifndef CONFIG_HAS_EARLYSUSPEND
-	.suspend = mcs8000_ts_suspend,
-	.resume  = mcs8000_ts_resume,
-#endif
 	.id_table = mcs8000_ts_id,
 	.driver = {
 		.name = "touch_mcs8000",
@@ -1396,8 +1235,7 @@ static int __devinit mcs8000_ts_init(void)
 
 	mcs8000_ts_input = input_allocate_device();
 	if (mcs8000_ts_input == NULL) {
-		pr_err("%s: input_allocate: not enough memory\n",
-				__func__);
+		pr_err("%s: input_allocate: not enough memory\n", __func__);
 		err = -ENOMEM;
 		goto err_input_allocate;
 	}
