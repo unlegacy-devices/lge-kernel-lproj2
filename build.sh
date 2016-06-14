@@ -62,7 +62,7 @@ case "${x}" in
 		if [ -f .config ]
 		then
 			echo "${x} | Working on ${device_name} defconfig!"
-			make -j${build_cpu_usage}${kernel_build_output_enable} savedefconfig
+			make -j${build_cpu_usage}${kernel_build_output_enable} ARCH="${ARCH}" CROSS_COMPILE="${kernel_build_ccache}${CROSS_COMPILE}" savedefconfig
 			mv defconfig arch/${ARCH}/configs/${device_defconfig}
 		fi;;
 	b)
@@ -74,7 +74,7 @@ esac
 if ! [ "${device_defconfig}" == "" ]
 then
 	echo "${x} | Working on ${device_name} defconfig!"
-	make -j${build_cpu_usage}${kernel_build_output_enable} ${device_defconfig}
+	make -j${build_cpu_usage}${kernel_build_output_enable} ARCH="${ARCH}" CROSS_COMPILE="${kernel_build_ccache}${CROSS_COMPILE}" ${device_defconfig}
 	sleep 2
 fi
 }
@@ -146,7 +146,7 @@ else
 	echo "  | ${color_blue}Using ${build_cpu_usage} jobs at once${color_stock}"
 
 	start_build_time=$(date +"%s")
-	make -j${build_cpu_usage}${kernel_build_output_enable} CROSS_COMPILE="${kernel_build_ccache}${CROSS_COMPILE}"
+	make -j${build_cpu_usage}${kernel_build_output_enable} ARCH="${ARCH}" CROSS_COMPILE="${kernel_build_ccache}${CROSS_COMPILE}"
 	if ! [ "$?" == "0" ]
 	then
 		echo "  | ${color_red}Build Failed! Exiting...${color_stock}"
@@ -266,7 +266,7 @@ then
 	custom_kernel=LProj-CAFKernel
 	builder=TeamHackLG
 	custom_kernel_branch=KK
-	export ARCH=arm
+	ARCH=arm
 
 	while true
 	do
@@ -331,7 +331,7 @@ then
 			1) rm -rf zip-creator/*.zip;;
 			2)
 				echo "${x} | Cleaning Kernel"
-				make -j${build_cpu_usage}${kernel_build_output_enable} clean mrproper
+				make -j${build_cpu_usage}${kernel_build_output_enable} ARCH="${ARCH}" CROSS_COMPILE="${kernel_build_ccache}${CROSS_COMPILE}" clean mrproper
 				unset device_name device_defconfig build_time;;
 			3) device_choice;;
 			4) toolchain_choice;;
