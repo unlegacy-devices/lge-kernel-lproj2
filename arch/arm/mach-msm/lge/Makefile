@@ -7,5 +7,3 @@ obj-$(CONFIG_LGE_HANDLE_PANIC) += lge_handle_panic.o
 obj-$(CONFIG_LGE_PROC_COMM) += lge_proc_comm.o
 obj-$(CONFIG_LGE_BOOT_MODE) += lge_boot_mode.o
 obj-$(CONFIG_LGE_BLOCKING_MONITOR) += lge_blocking_monitor.o
-obj-$(CONFIG_LGE_SUPPORT_RAPI) += LG_rapi_client.o
-obj-$(CONFIG_LGE_EMMC_DIRECT_ACCESS) += lge_emmc_direct_access.o

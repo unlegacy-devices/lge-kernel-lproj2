@@ -155,20 +155,6 @@ config LGE_DETECT_USB_CABLE_TYPE
 	  Check the type of usb cable is connected to handset, like Factory USB or UART, normal
 	  charger and unknown cable.
 
-config LGE_SUPPORT_RAPI
-	bool "LGE Remote communcation api support"
-	depends on MACH_LGE
-	depends on MACH_MSM7X27A_U0
-	help
-	  LGE Remote communcation api support
-
-config LGE_EMMC_DIRECT_ACCESS
-	bool "LGE eMMC direct access driver"
-	depends on MACH_LGE
-	depends on MACH_MSM7X27A_U0
-	help
-	  LGE eMMC direct access driver
-
 config MACH_LGE_NO_DEBUG_INFO
 	depends on MACH_LGE
 	bool "MSM7x27A U0 DEBUG Option"
