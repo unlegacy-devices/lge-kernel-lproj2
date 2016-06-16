@@ -2931,6 +2931,11 @@ CONFIG_ANDROID_LOW_MEMORY_KILLER_AUTODETECT_OOM_ADJ_VALUES=y
 # CONFIG_PRIMA_WLAN_LEGACY is not set
 
 #
+# Qualcomm Atheros volans WLAN module
+#
+CONFIG_VOLANS_WLAN=m
+
+#
 # Qualcomm MSM specific device drivers
 #
 # CONFIG_MSM_SSBI is not set
