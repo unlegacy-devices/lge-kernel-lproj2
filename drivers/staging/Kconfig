@@ -128,4 +128,6 @@ source "drivers/staging/ozwpan/Kconfig"
 
 source "drivers/staging/prima_legacy/Kconfig"
 
+source "drivers/staging/volans/Kconfig"
+
 endif # STAGING

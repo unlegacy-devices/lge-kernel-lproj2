@@ -1,0 +1,10 @@
+comment "Qualcomm Atheros volans WLAN module"
+config VOLANS_WLAN
+	tristate "Qualcomm Atheros volans WLAN module"
+	default n
+	help
+	Add support for the Qualcomm Atheros volans WLAN module
+
+#	depends on WLAN
+#	depends on CFG80211
+#        depends on LIBRA_SDIOIF
