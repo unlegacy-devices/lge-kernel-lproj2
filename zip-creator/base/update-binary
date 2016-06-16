@@ -45,7 +45,6 @@ dd if=/dev/block/mmcblk0p9 of=/tmp/kernel/boot.img
 /tmp/kernel/unpackbootimg /tmp/kernel/boot.img
 /tmp/kernel/mkbootimg --kernel /tmp/kernel/zImage --ramdisk /tmp/kernel/boot.img-ramdisk.gz --cmdline "$(cat /tmp/kernel/boot.img-cmdline)" --base "$(cat /tmp/kernel/boot.img-base)" -o /tmp/kernel/newboot.img
 
-ui_print "Flashing ${builder} ${custom_kernel}!"
 dd if=/tmp/kernel/newboot.img of=/dev/block/mmcblk0p9
 
 umount /system
@@ -55,5 +54,5 @@ BUILDTIME=$((${END} - ${START}))
 
 rm -rf /tmp/kernel/
 
-ui_print "Done in $((${BUILDTIME} % 60)) seconds."
+ui_print "Flash done in $((${BUILDTIME} % 60)) seconds."
 ui_print
