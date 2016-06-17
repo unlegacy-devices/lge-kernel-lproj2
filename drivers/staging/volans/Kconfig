@@ -1,9 +1,9 @@
-comment "Qualcomm Atheros volans WLAN module"
+comment "Qualcomm Atheros Volans WLAN module"
 config VOLANS_WLAN
-	tristate "Qualcomm Atheros volans WLAN module"
+	tristate "Qualcomm Atheros Volans WLAN module"
 	default n
 	help
-	Add support for the Qualcomm Atheros volans WLAN module
+	Add support for the Qualcomm Atheros Volans WLAN module
 
 #	depends on WLAN
 #	depends on CFG80211
