@@ -1,60 +1,113 @@
 #!/bin/bash
 # Writen by Caio Oliveira aka Caio99BR <caiooliveirafarias0@gmail.com>
-# How to Use:
-# . patch link.to.commit
-#
-# This script can apply various commits at once.
-# . patch link.to.first.commit ... link.to.commit.over.8000 this.cant.be.possible
 
-if [ ${#} == "0" ]; then
-	echo
-	echo "    Put the link after '. patch.sh'"
-	echo "    To use this script"
-	echo
-else
-	echo $(tput bold)$(tput setaf 1)"Number of patch's: ${#}"$(tput sgr0)
-	c="0"
-	for link in ${@}; do
+echo "  | Live Git Patcher"
+
+# Check option of user and transform to script
+for _u2t in "${@}"
+do
+	if [[ "${_u2t}" == "-h" || "${_u2t}" == "--help" ]]
+	then
+		echo "  |"
+		echo "  | Put the link after '. patch.sh'"
+		echo "  | To use this script"
+		echo "  |"
+		echo "  | Options:"
+		echo "  | -h    | --help  | To show this message"
+		echo "  | -caf  | --caf   | Bypass addition of '.patch' in links"
+		echo "  | -3    | --3     | Use 'git am -3' to apply patchs"
+	fi
+	if [[ "${_u2t}" == "-caf" || "${_u2t}" == "--caf" ]]
+	then
+		_option_caf="enable"
+	fi
+	if [[ "${_u2t}" == "-3" || "${_u2t}" == "--3" ]]
+	then
+		_option_am3=" -3"
+	fi
+done
+
+echo "  |"
+echo "  | Number of patch's: ${#}"
+
+c="0"
+for link in ${@}
+do
+	if [[ "${link}" == "http"* ]]
+	then
 		c=$[$c+1]
-		echo
-		echo $(tput bold)$(tput setaf 1)"Patch #${c}"$(tput sgr0)
-		if [[ $link == *".patch" ]]; then
-			nl=$link
+		echo "  |"
+		echo "  | Patch #${c}"
+		if [[ "${link}" == *".patch" || "${_option_caf}" == "enable" ]]
+		then
+			nl="${link}"
 		else
-			nl=$link.patch
+			nl="${link}.patch"
 		fi
 		patch_filename="patch.sh-${c}.patch"
-		echo "- Downloading..."
-		curl -# -o $patch_filename $nl
-		if [ -f $patch_filename ]
+		path_patch="/tmp"
+		echo "  |"
+		echo "  | Downloading"
+		curl -# -o ${path_patch}/${patch_filename} ${nl}
+		if [ -f "${path_patch}/${patch_filename}" ]
 		then
-			echo "- Patching..."
-			git am $patch_filename
-			if [ $? == "0" ]; then
-				echo $(tput bold)$(tput setaf 2)"Patch (${c}/${#})"$(tput sgr0)
+			echo "  |"
+			echo "  | Patching"
+			git am${_option_am3} ${path_patch}/${patch_filename}
+			if [ "${?}" == "0" ]
+			then
+				echo "  |"
+				echo "  | Patch (${c}/${#})"
 			else
-				echo $(tput bold)$(tput setaf 1)"Something not worked good in patch #${c}"
-				echo "Aborting 'git am' process"
+				echo "  |"
+				echo "  | Something not worked good in patch #${c}"
+				echo "  | Aborting 'git am' process"
 				if ! [ "${c}" == "${#}" ]
 				then
 					if [ ${#} -gt "1" ]; then
-						echo
-						echo "Passing to next patch"
+						echo "  |"
+						echo "  | Passing to next patch"
 					fi
 				fi
 				echo $(tput sgr0)
 				git am --abort
 			fi
 		else
-			echo "Patch not downloaded, check internet or link"
+			echo "  |"
+			echo "  | Patch not downloaded, check internet or link"
 			if ! [ "${c}" == "${#}" ]
 			then
 				if [ ${#} -gt "1" ]; then
-					echo
-					echo "Passing to next patch"
+					echo "  |"
+					echo "  | Passing to next patch"
 				fi
 			fi
 		fi
-		rm -rf $patch_filename
-	done
-fi
+		rm -rf ${path_patch}/${patch_filename}
+	else
+		if [[ "${link}" == "--caf" || "${_option_caf}" == "-caf" ]]
+		then
+			# WORKAROUND
+			echo > /dev/null
+		elif [[ "${link}" == "--3" || "${_option_caf}" == "-3" ]]
+		then
+			# WORKAROUND
+			echo > /dev/null
+		else
+			echo "  |"
+			echo "  | This link:"
+			echo "  | ${link}"
+			echo "  | not is a 'HTTP' link"
+			echo "  | This script only accept 'HTTP' links for now"
+			if ! [ "${c}" == "${#}" ]
+			then
+				if [ ${#} -gt "1" ]; then
+					echo "  |"
+					echo "  | Passing to next patch"
+				fi
+			fi
+		fi
+	fi
+done
+
+unset _option_caf _option_am3
