@@ -6,6 +6,9 @@ script:
 # Travis CI Script by Caio Oliveira aka Caio99BR <caiooliveirafarias0@gmail.com>
 #
 
+# Cleanup zip folder
+- source build.sh <<< "1q"
+
 #
 # Toolchain Choice
 # This will clone TeamVee Prebuilt Toolchains in directory described in build.sh
@@ -43,49 +46,37 @@ script:
 # Call of 'build.sh'
 # - source build.sh <<< "${ndevice}${ndevicechoice}${ntoolchain}${nbuild}"
 
-# Export of zipfile to deploy
-# - export zipfile#="${zipfile}"
+# TravisCI Custom Patches
+- patch -p1 < ./zip-creator/travis-ci/0001-TravisCI-Custom-Patches.patch
 
 # Build for LG L1 II Single/Dual | E410 E411 E415 E420
 - export ndevicechoice="1"
 - source build.sh <<< "${ndevice}${ndevicechoice}${ntoolchain}${nbuild}"
-- export zipfile1="${zipfile}"
 # Build for LG L3 II Single/Dual | E425 E430 E431 E435"
 - export ndevicechoice="2"
 - source build.sh <<< "${ndevice}${ndevicechoice}${ntoolchain}${nbuild}"
-- export zipfile2="${zipfile}"
 # Build for LG L5 NFC | E610
 - export ndevicechoice="3"
 - source build.sh <<< "${ndevice}${ndevicechoice}${ntoolchain}${nbuild}"
-- export zipfile3="${zipfile}"
 # Build for LG L5 NoNFC | E612 E617
 - export ndevicechoice="4"
 - source build.sh <<< "${ndevice}${ndevicechoice}${ntoolchain}${nbuild}"
-- export zipfile4="${zipfile}"
 # Build for LG L7 NFC | P700
 - export ndevicechoice="5"
 - source build.sh <<< "${ndevice}${ndevicechoice}${ntoolchain}${nbuild}"
-- export zipfile5="${zipfile}"
 # Build for LG L7 NoNFC | P705
 - export ndevicechoice="6"
 - source build.sh <<< "${ndevice}${ndevicechoice}${ntoolchain}${nbuild}"
-- export zipfile6="${zipfile}"
 # Build for LG L7 NFC 8m | P708
 - export ndevicechoice="7"
 - source build.sh <<< "${ndevice}${ndevicechoice}${ntoolchain}${nbuild}"
-- export zipfile7="${zipfile}"
 deploy:
   provider: releases
   skip_cleanup: true
   api_key:
     secure: "nni61sJP8PC5G90TAYKg7Ztmb89VlcrSbh+/I6An+rFsKEJrpuzXtV2qB5TPB1pZHKjqHFMhfGWhTpRVXX+yQPJpHUp/Zde+Gb58N0vnTDCRMm7kiPSgTLKGnPFri3MzeTVFUezdikTYS+htunZu8AWPww1QP8Ww+3oJ2K5+rb8="
+  file_glob: true
   file:
-    - "zip-creator/${zipfile1}"
-    - "zip-creator/${zipfile2}"
-    - "zip-creator/${zipfile3}"
-    - "zip-creator/${zipfile4}"
-    - "zip-creator/${zipfile5}"
-    - "zip-creator/${zipfile6}"
-    - "zip-creator/${zipfile7}"
+    - "zip-creator/*.zip"
   on:
     tags: true
