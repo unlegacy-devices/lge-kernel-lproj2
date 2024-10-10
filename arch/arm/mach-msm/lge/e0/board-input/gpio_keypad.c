@@ -2,6 +2,7 @@
 #include <linux/gpio_event.h>
 #include <mach/rpc_server_handset.h>
 #include <asm/gpio.h>
+#include <linux/init.h>
 
 #include CONFIG_LGE_BOARD_HEADER_FILE
 

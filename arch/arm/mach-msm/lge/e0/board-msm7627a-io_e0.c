@@ -1,4 +1,7 @@
 #include "./board-input/board-input.h"
+#include <linux/init.h>
+
+void __init msm_init_pmic_vibrator(void);
 
 void __init msm7627a_add_io_devices(void)
 {

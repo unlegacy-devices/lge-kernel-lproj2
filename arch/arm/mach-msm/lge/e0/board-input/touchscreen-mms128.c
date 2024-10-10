@@ -2,6 +2,7 @@
 #include <linux/i2c.h>
 #include <asm/gpio.h>
 #include <linux/regulator/consumer.h>
+#include <linux/init.h>
 
 #include CONFIG_LGE_BOARD_HEADER_FILE
 

@@ -2,6 +2,7 @@
 #include <linux/gpio.h>
 #include <linux/input.h>
 #include <linux/delay.h>
+#include <linux/init.h>
 
 #include CONFIG_LGE_BOARD_HEADER_FILE
 

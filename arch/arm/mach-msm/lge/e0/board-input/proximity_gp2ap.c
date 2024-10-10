@@ -1,5 +1,6 @@
 #include <linux/platform_device.h>
 #include <linux/i2c.h>
+#include <linux/init.h>
 
 #include CONFIG_LGE_BOARD_HEADER_FILE
 

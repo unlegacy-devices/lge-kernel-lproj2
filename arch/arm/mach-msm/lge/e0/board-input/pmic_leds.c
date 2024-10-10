@@ -1,4 +1,5 @@
 #include <linux/platform_device.h>
+#include <linux/init.h>
 
 
 #if (defined(CONFIG_LEDS_MSM_PMIC_E0) || defined(CONFIG_LEDS_MSM_PMIC_E0_MODULE))
