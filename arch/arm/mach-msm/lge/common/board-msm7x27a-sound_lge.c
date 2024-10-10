@@ -231,6 +231,7 @@ struct platform_device msm_device_cad = {
 
 #include <linux/input.h>
 
+#ifndef CONFIG_MACH_MSM7X25A_E0EU
 void fsa8008_set_headset_mic_bias(int enable)
 {
 	pr_info("[FSA8008] Set MIC BIAS %d\n", enable);
@@ -261,6 +262,7 @@ static struct platform_device lge_hsd_device = {
 	.platform_data = &fsa8008_platform_data,
    },
 };
+#endif
 
 struct platform_device asoc_msm_pcm = {
 	.name   = "msm-dsp-audio",
@@ -281,7 +283,9 @@ static struct platform_device *u0_sound_devices[] __initdata = {
 	&msm_device_snd,
 	&msm_device_cad,
 	&msm_device_adspdec,
+#ifndef CONFIG_MACH_MSM7X25A_E0EU
 	&lge_hsd_device,
+#endif
 	&asoc_msm_pcm,
 	&asoc_msm_dai0,
 	&asoc_msm_dai1,

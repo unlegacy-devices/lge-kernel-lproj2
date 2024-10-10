@@ -16,3 +16,6 @@ source "arch/arm/mach-msm/lge/vee3/Kconfig"
 
 # LGE V7 Model
 source "arch/arm/mach-msm/lge/vee7/Kconfig"
+
+# LGE E0 Model
+source "arch/arm/mach-msm/lge/e0/Kconfig"

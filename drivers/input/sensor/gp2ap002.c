@@ -1025,7 +1025,7 @@ static const struct i2c_device_id gp2ap_i2c_ids[] = {
 		{ },
 };
 
-MODULE_DEVICE_TABLE(i2c, prox_ids);
+MODULE_DEVICE_TABLE(i2c, gp2ap_i2c_ids);
 
 static struct i2c_driver gp2ap_i2c_driver = {
 	.probe		= gp2ap_i2c_probe,
