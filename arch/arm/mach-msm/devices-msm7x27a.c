@@ -2143,7 +2143,7 @@ void __init msm_common_io_init(void)
 }
 
 /*LGE_CHANGE_S : seven.kim@lge.com for msm7x25ab chipset*/
-#if !defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X27A_U0) && !defined(CONFIG_MACH_MSM7X25A_V1)
+#if !defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X27A_U0) && !defined(CONFIG_MACH_MSM7X25A_V1) && !defined(CONFIG_MACH_MSM7X25A_E0EU)
 void __init msm8625_init_irq(void)
 {
 	msm_gic_irq_extn_init();

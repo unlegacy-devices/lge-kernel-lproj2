@@ -21,3 +21,5 @@ endif
 
 # LGE V7 Model 
 obj-$(CONFIG_MACH_MSM8X25_V7) += vee7/
+
+obj-$(CONFIG_MACH_MSM7X25A_E0EU) += e0/

@@ -812,7 +812,9 @@ static void __init msm7x2x_init(void)
 #ifdef CONFIG_MSM7X27A_AUDIO
 	lge_add_sound_devices();
 #endif
+#ifndef CONFIG_MACH_MSM7X25A_E0EU
 	msm7627a_camera_init();
+#endif
 	msm7627a_add_io_devices();
 	msm7x25a_kgsl_3d0_init();
 	lge_add_gpio_i2c_devices();
