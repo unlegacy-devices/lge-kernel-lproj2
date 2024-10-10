@@ -191,7 +191,7 @@ static int __init rebootmode_setup(char *arg)
 }
 __setup("lge.reboot=", rebootmode_setup);
 
-#if (defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X25A_M4)) || defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if (defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X25A_M4)) || defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU) 
 static enum lge_fboot_mode_type lge_fboot_mode = second_boot;
 int __init lge_fboot_mode_init(char *s)
 {

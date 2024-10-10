@@ -48,7 +48,7 @@
 #include <mach/pmic.h>
 /* LGE_CHANGE_E : U0 Heating and DoU Issue*/
 #endif
-#if defined (CONFIG_LGE_CHARGER_TYPE_DETECTION) || defined (CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined (CONFIG_LGE_CHARGER_TYPE_DETECTION) || defined (CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 #include <mach/msm_hsusb.h>
 #include <mach/lge/lge_boot_mode.h>
 #endif
@@ -1044,7 +1044,7 @@ static void msm_batt_update_psy_status(void)
 	}
 #endif
 
-#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 	/* 2012-11-26, sungchul.jung@lge.com, fixed cut off voltage setting and update level */
 	if(msm_batt_info.batt_capacity == 0 && msm_batt_info.battery_voltage >= 3400)
 	{
@@ -1087,7 +1087,7 @@ static void msm_batt_update_psy_status(void)
 #endif
 }
 
-#if defined (CONFIG_LGE_CHARGER_TYPE_DETECTION) || defined (CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined (CONFIG_LGE_CHARGER_TYPE_DETECTION) || defined (CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 void update_power_supply(int chg_type)
 {
 	struct	power_supply	*supp=NULL;
@@ -1097,7 +1097,7 @@ void update_power_supply(int chg_type)
 		
 	else if(chg_type == USB_CHG_TYPE__WALLCHARGER)
 		supp=&msm_psy_ac;
-#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 	else 
 		supp = &msm_psy_batt;
 #endif //CONFIG_MACH_MSM7X25A_V3	
@@ -2166,7 +2166,7 @@ static int __devinit msm_batt_probe(struct platform_device *pdev)
 		msm_batt_cleanup();
 		return rc;
 	}
-#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 	msm_psy_batt.registered = true;
 #endif //CONFIG_MACH_MSM7X25A_V3
 	rc =  msm_batt_enable_filter(VBATT_FILTER);

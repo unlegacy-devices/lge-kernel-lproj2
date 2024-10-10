@@ -259,7 +259,7 @@ static void flush_endpoint(struct msm_endpoint *ept);
 static void usb_reset(struct usb_info *ui);
 static int usb_ept_set_halt(struct usb_ep *_ep, int value);
 
-#if defined (CONFIG_LGE_CHARGER_TYPE_DETECTION) || defined (CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined (CONFIG_LGE_CHARGER_TYPE_DETECTION) || defined (CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 extern void update_power_supply(int chg_type);
 #endif
 static void msm_hsusb_set_speed(struct usb_info *ui)
@@ -477,7 +477,7 @@ static void usb_chg_stop(struct work_struct *w)
 		usb_phy_set_power(ui->xceiv, 0);
 }
 
-#if defined(CONFIG_LGE_CHARGER_TYPE_DETECTION) || defined(CONFIG_MACH_MSM7X25A_V3) || defined (CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_LGE_CHARGER_TYPE_DETECTION) || defined(CONFIG_MACH_MSM7X25A_V3) || defined (CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 int get_charger_type(void)
 {
 	int chg_type = 0;
@@ -1866,7 +1866,7 @@ static void usb_do_work(struct work_struct *w)
 				pm_runtime_suspend(&ui->pdev->dev);
 				wake_unlock(&ui->wlock);
 // LGE_CHANGE jongjin7.park 20130207 move to msm_hsusb_set_vbus_state()
-#if !defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X27A_U0) && !defined(CONFIG_MACH_MSM8X25_V7) && !defined(CONFIG_MACH_MSM7X25A_V1)
+#if !defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X27A_U0) && !defined(CONFIG_MACH_MSM8X25_V7) && !defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 /*Work around for system wakeup when TA insert*/
 /*Hold wake lock for 2 secs. Let system be in wakeup state So that
 events can reach framework with out delay.*/	
@@ -2014,7 +2014,7 @@ void msm_hsusb_set_vbus_state(int online)
 		ui->proprietary_chg = false;
 		// 2012-11-29 ByungHo-Lee(lbh.lee@lge.com)[td:na] for USB debuging
 /* LGE_CHANGE_S jongjin7.park 20130207 fixed issue.- sometimes wake lately */
-#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 		update_power_supply(USB_CHG_TYPE__INVALID);//remove usb/chg cable powesupply chaged to battery, updating supply changed event  to frame work to make screen on
 		wake_lock_timeout(&ui->TA_wlock,2 * HZ);
 #elif defined(CONFIG_MACH_MSM7X27A_U0)

@@ -103,7 +103,7 @@ static int update_lge_boot_mode(void)
 
 	int test_mode, factory_cable, charger, charging_bypass;
 
-#if (defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X25A_M4)) || defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if (defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X25A_M4)) || defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 	int first_boot_check = 0;
 #endif
 
@@ -120,7 +120,7 @@ static int update_lge_boot_mode(void)
 	/* filter pwr on status byte */
 	boot_reason &= 0xFF;
 
-#if (defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X25A_M4)) || defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if (defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X25A_M4)) || defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 	if (lge_get_fboot_mode() == first_boot) {
 		lge_nv_manual_f(1);
 		first_boot_check = 1;
@@ -150,7 +150,7 @@ static int update_lge_boot_mode(void)
 		printk(KERN_INFO "charger and RESET_REASON_NONE\n");
 		boot_mode = LGE_BOOT_MODE_CHARGER;
 	} else if (test_mode) {
-#if (defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X25A_M4)) || defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if (defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X25A_M4)) || defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 		if (first_boot_check == 1) {
 			printk(KERN_INFO "[FTM] first boot is set --> FTM boot\n");
 			boot_mode = LGE_BOOT_MODE_FIRST;

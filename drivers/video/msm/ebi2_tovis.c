@@ -610,6 +610,12 @@ static int ilitek_qvga_disp_on(struct platform_device *pdev)
 #ifdef CONFIG_MACH_MSM7X25A_V3
 		panel_lgdisplay_init();
 #endif
+
+#ifdef CONFIG_MACH_MSM7X25A_E0EU
+        pr_debug("----------E0EU do_ilitek_init start--------------\n");
+        do_ilitek_init(pdev);
+        pr_debug("----------E0EU do_ilitek_init end--------------\n");
+#endif
 	}
 
 #ifdef CONFIG_MACH_MSM7X25A_V1
@@ -716,7 +722,7 @@ static int __init tovis_qvga_init(void)
 #endif
 		pinfo->lcd.vsync_enable = TRUE;
 		pinfo->lcd.refx100 = 6000;
-#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 		pinfo->lcd.v_back_porch = 150;
 		pinfo->lcd.v_front_porch = 140;
 		pinfo->lcd.v_pulse_width = 40;

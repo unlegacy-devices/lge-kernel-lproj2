@@ -861,3 +861,16 @@ MACHINE_START(MSM7X25A_V1, "MSM7225A v1")
 	.handle_irq	= vic_handle_irq,
 MACHINE_END
 #endif
+
+#ifdef CONFIG_MACH_MSM7X25A_E0EU
+MACHINE_START(MSM7X25A_E0EU, "MSM7225A e0")
+	.atag_offset	= 0x100,
+	.map_io		= msm_common_io_init,
+	.reserve	= msm7x27a_reserve,
+	.init_irq	= msm_init_irq,
+	.init_machine	= msm7x2x_init,
+	.timer		= &msm_timer,
+	.init_early     = msm7x2x_init_early,
+	.handle_irq	= vic_handle_irq,
+MACHINE_END
+#endif

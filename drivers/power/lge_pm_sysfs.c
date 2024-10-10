@@ -24,7 +24,7 @@
 
 #include "../../kernel/power/power.h"
 #include <mach/msm_smsm.h>
-#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 #include <mach/msm_hsusb.h>
 #endif
 #ifdef CONFIG_LGE_LOW_VOLTAGE_BATTERY_CHECK
@@ -38,7 +38,7 @@
 #endif
 /* LGE_CHANGE_E [jongjin7.park@lge.com] 20130122 Added direct read capacity sysfs */
 
-#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 extern int get_charger_type(void); /* defined in msm72k_udc.c */
 #endif
 extern u32 msm_batt_get_vbatt_level(void);
@@ -98,7 +98,7 @@ static ssize_t lge_battery_id_info_show(struct device* dev,struct device_attribu
 #endif
 
 /* LGE_CHANGE_S: [murali.ramaiah@lge.com] 2013-01-07 */
-#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 static ssize_t msm_batt_chgr_status_show(struct device* dev, struct device_attribute* attr, char* buf)
 {
 	int chg_type;
@@ -136,7 +136,7 @@ static DEVICE_ATTR(pm_suspend_state, S_IRUGO, pm_suspend_state_show, NULL);
 #ifdef CONFIG_LGE_PM_BATT_ID_DETECTION
 static DEVICE_ATTR(lge_battery_id_info, S_IRUGO, lge_battery_id_info_show, NULL);
 #endif
-#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 static DEVICE_ATTR(chgr_status, S_IRUGO, msm_batt_chgr_status_show, NULL);
 #endif
 /* LGE_CHANGE_S [jongjin7.park@lge.com] 20130122 Added direct read capacity sysfs */
@@ -164,7 +164,7 @@ static struct attribute* dev_attrs_lge_pm_info[] = {
 #ifdef CONFIG_LGE_PM_BATT_ID_DETECTION
 	&dev_attr_lge_battery_id_info.attr,
 #endif
-#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_MACH_MSM7X25A_V3) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
 	&dev_attr_chgr_status.attr,
 #endif
 /* LGE_CHANGE_S [jongjin7.park@lge.com] 20130122 Added direct read capacity sysfs */

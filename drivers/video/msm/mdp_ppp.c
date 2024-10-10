@@ -1024,7 +1024,7 @@ struct mdp_blit_req *req, struct file *p_src_file, struct file *p_dst_file)
 		if (iBuf->mdpImg.mdpOp & MDPOP_ROT90) {
 			ppp_operation_reg |= PPP_OP_ROT_90;
 		}
-#if (!defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X25A_V1))
+#if (!defined(CONFIG_MACH_MSM7X25A_V3) && !defined(CONFIG_MACH_MSM7X25A_V1) && !defined(CONFIG_MACH_MSM7X25A_E0EU))
 		if((iBuf->mdpImg.mdpOp&MDPOP_ROTATION) == (MDPOP_LR|MDPOP_ROT90))
 		{
             ppp_operation_reg |= PPP_OP_FLIP_LR;

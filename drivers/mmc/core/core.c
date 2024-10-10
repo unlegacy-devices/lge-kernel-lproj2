@@ -687,7 +687,7 @@ int mmc_is_exception_event(struct mmc_card *card, unsigned int value)
 	/* [LGE_CHANGE_S] bohyun.jung@lge.com 
 	 * U0 JB also disable bkops.
 	 * It is confirmd by Hynix that there is no performance gain with bkops */
-#if defined (CONFIG_MACH_MSM7X27A_U0) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined (CONFIG_MACH_MSM7X27A_U0) || defined(CONFIG_MACH_MSM7X25A_V1) || defined(CONFIG_MACH_MSM7X25A_E0EU)
  	return 0;
 #endif
 
