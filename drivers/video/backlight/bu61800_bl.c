@@ -1024,19 +1024,19 @@ static struct i2c_driver bu61800_driver = {
 
 
 /* LGE_CHANGE_S: E0 jiwon.seo@lge.com [2011-11-20] : Factory reset white screen */
-static int bu61800_send_off(struct notifier_block *this,
-				unsigned long event, void *cmd)
-{
+// static int bu61800_send_off(struct notifier_block *this,
+// 				unsigned long event, void *cmd)
+// {
 	
-	if ((event == SYS_RESTART) || (event == SYS_POWER_OFF))
-	    	bu61800_send_intensity(bu61800_ref, 0);
+// 	if ((event == SYS_RESTART) || (event == SYS_POWER_OFF))
+// 	    	bu61800_send_intensity(bu61800_ref, 0);
 	
-	return NOTIFY_DONE;
-}
+// 	return NOTIFY_DONE;
+// }
 
-struct notifier_block lge_chg_reboot_nb = {
-	.notifier_call = bu61800_send_off, 
-};
+// struct notifier_block lge_chg_reboot_nb = {
+// 	.notifier_call = bu61800_send_off, 
+// };
 
 extern int register_reboot_notifier(struct notifier_block *nb);
 /* LGE_CHANGE_E: E0 jiwon.seo@lge.com [2011-11-20] : Factory reset white screen */
@@ -1048,7 +1048,7 @@ static int __init bu61800_init(void)
 	printk("BU61800 init start\n");
 
  /* LGE_CHANGE_S: E0 jiwon.seo@lge.com [2011-11-20] : Factory reset white screen */
-       register_reboot_notifier(&lge_chg_reboot_nb);
+    //    register_reboot_notifier(&lge_chg_reboot_nb);
  /* LGE_CHANGE_E: E0 jiwon.seo@lge.com [2011-11-20] : Factory reset white screen */
  
 	return i2c_add_driver(&bu61800_driver);
