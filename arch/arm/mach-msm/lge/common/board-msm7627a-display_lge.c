@@ -160,6 +160,48 @@ void __init msm7x27a_common_init_backlight(void)
 }
 #endif
 
+#ifdef CONFIG_BACKLIGHT_BU61800
+static struct gpio_i2c_pin bl_i2c_pin = {
+	.sda_pin = 112,
+	.scl_pin = 111,
+	.reset_pin = 124,
+};
+
+static struct i2c_gpio_platform_data bl_i2c_pdata = {
+	.sda_is_open_drain = 0,
+	.scl_is_open_drain = 0,
+	.udelay = 2,
+};
+
+static struct platform_device bl_i2c_device = {
+	.name = "i2c-gpio",
+	.dev.platform_data = &bl_i2c_pdata,
+};
+
+static struct lge_backlight_platform_data bu61800bl_data = {
+	.gpio = 124,
+	.version = 61800,
+};
+
+static struct i2c_board_info bl_i2c_bdinfo[] = {
+	[0] = {
+		I2C_BOARD_INFO("bu61800bl", 0x76),
+		.type = "bu61800bl",
+	},
+};
+
+void __init msm7x27a_e0_init_i2c_backlight(int bus_num)
+{
+	bl_i2c_device.id = bus_num;
+	bl_i2c_bdinfo[0].platform_data = &bu61800bl_data;
+
+	/* workaround for HDK rev_a no pullup */
+	lge_init_gpio_i2c_pin_pullup(&bl_i2c_pdata, bl_i2c_pin, &bl_i2c_bdinfo[0]);
+	i2c_register_board_info(bus_num, &bl_i2c_bdinfo[0], 1);
+	platform_device_register(&bl_i2c_device);
+}
+#endif /*CONFIG_BACKLIGHT_BU61800*/
+
 #ifdef CONFIG_BACKLIGHT_RT9396
 static struct lge_backlight_platform_data rt9396bl_data = {
 	.gpio = 124,
@@ -284,6 +326,10 @@ void __init msm_fb_add_devices(void)
 	msm_fb_register_device("ebi2", 0);
 #endif
 
+
+#ifdef CONFIG_BACKLIGHT_BU61800
+	lge_add_gpio_i2c_device(msm7x27a_e0_init_i2c_backlight);
+#endif
 #ifdef CONFIG_BACKLIGHT_RT9396
 	lge_add_gpio_i2c_device(msm7x27a_common_init_i2c_backlight);
 #endif
